@@ -1,0 +1,48 @@
+add_executable(
+    dr-test 
+    bitwise_tests.cpp
+    container_tests.cpp
+    diagnostics_tests.cpp
+    geometry_tests.cpp
+    hash_grid_tests.cpp
+    jagged_array_tests.cpp
+    linalg_tests.cpp
+    main.cpp
+    math_tests.cpp
+    mesh_tests.cpp
+    mesh_repair_tests.cpp
+    random_tests.cpp
+    span_tests.cpp
+)
+
+include(deps/utest)
+
+target_link_libraries(
+    dr-test 
+    PRIVATE
+        dr::dr
+        utest::utest
+)
+
+target_compile_options(
+    dr-test
+    PRIVATE 
+        -Wall -Wextra -Wpedantic #-Werror
+)
+
+target_compile_definitions(
+    dr-test
+    PRIVATE 
+        # ...
+)
+
+target_link_options(
+    dr-test
+    PRIVATE
+        # ...
+)
+
+add_test(
+    NAME dr-test
+    COMMAND dr-test
+)
