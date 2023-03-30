@@ -1,6 +1,6 @@
 # dr
 
-![](https://github.com/davreev/dr-cpp/actions/workflows/test.yml/badge.svg)
+![](https://github.com/davreev/dr/actions/workflows/test.yml/badge.svg)
 
 Assorted utilities
 
