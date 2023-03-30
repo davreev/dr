@@ -45,7 +45,6 @@ target_link_libraries(
     PUBLIC
         Eigen3::Eigen
         fmt::fmt
-        # Spectra::Spectra
         $<TARGET_NAME_IF_EXISTS:OpenMP::OpenMP_CXX>
 )
 

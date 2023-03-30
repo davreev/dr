@@ -14,10 +14,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - name: Configure CMake
-      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_CXX_COMPILER=g++ -DCMAKE_C_COMPILER=gcc -DDR_TEST=ON
+      run: >
+        cmake -B ${{github.workspace}}/build 
+        -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} 
+        -DCMAKE_CXX_COMPILER=g++ 
+        -DCMAKE_C_COMPILER=gcc 
+        -DDR_TEST=ON
 
     - name: Build
       run: cmake --build ${{github.workspace}}/build
@@ -30,10 +35,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - name: Configure CMake
-      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang -DDR_TEST=ON
+      run: >
+        cmake -B ${{github.workspace}}/build 
+        -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} 
+        -DCMAKE_CXX_COMPILER=clang++ 
+        -DCMAKE_C_COMPILER=clang 
+        -DDR_TEST=ON
 
     - name: Build
       run: cmake --build ${{github.workspace}}/build
@@ -46,10 +56,15 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - name: Configure CMake
-      run: cmake -G "Ninja Multi-Config" -B ${{github.workspace}}/build -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang -DDR_TEST=ON
+      run: >
+        cmake -B ${{github.workspace}}/build 
+        -G "Ninja Multi-Config" 
+        -DCMAKE_CXX_COMPILER=clang++ 
+        -DCMAKE_C_COMPILER=clang 
+        -DDR_TEST=ON
 
     - name: Build
       run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
