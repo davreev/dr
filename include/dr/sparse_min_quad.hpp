@@ -12,8 +12,11 @@ namespace dr
 template <typename Scalar, typename Index = i32>
 struct SparseMinQuadFixed
 {
-    // NOTE: Can assume semidefinite matrix if objective is convex quadratic
+    // NOTE: Objective is convex quadratic so matrix is assumed to be positive definite
     using Solver = Eigen::SimplicialLDLT<SparseMat<Scalar, Index>>;
+
+    template <typename Derived>
+    using MatBase = Eigen::MatrixBase<Derived>;
 
     /// Isolates unknown variables and performs decomposition
     template <typename Predicate>
@@ -74,14 +77,14 @@ struct SparseMinQuadFixed
     Solver const& solver() const { return solver_; }
 
     /// Returns the permutation used to isolate unknown variables
-    VecN<Index> const& perm() const { return perm_; }
+    Vec<Index> const& perm() const { return perm_; }
 
   private:
     Solver solver_{};
     SparseMat<Scalar, Index> A_{};
-    MatN<Scalar> x_{};
-    MatN<Scalar> b_{};
-    VecN<Index> perm_{};
+    Mat<Scalar> x_{};
+    Mat<Scalar> b_{};
+    Vec<Index> perm_{};
     Index n_[2];
     bool is_init_{};
 

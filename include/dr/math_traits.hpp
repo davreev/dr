@@ -118,7 +118,7 @@ struct IsQuaternion<Quat<T>>
 template <typename T>
 struct IsMatrix
 {
-    static constexpr bool value{std::is_base_of_v<MatBase<T>, T>};
+    static constexpr bool value{std::is_base_of_v<Eigen::MatrixBase<T>, T>};
 };
 
 template <typename T>
@@ -163,15 +163,15 @@ inline constexpr bool is_complex = impl::IsComplex<std::decay_t<T>>::value;
 template <typename T>
 inline constexpr bool is_quaternion = impl::IsQuaternion<std::decay_t<T>>::value;
 
-/// True if T derives from MatBase
+/// True if T is a matrix type
 template <typename T>
 inline constexpr bool is_matrix = impl::IsMatrix<std::decay_t<T>>::value;
 
-/// True if T derives from MatBase and has a single column
+/// True if T is a matrix type with a single column
 template <typename T>
 inline constexpr bool is_vector = impl::IsVector<std::decay_t<T>>::value;
 
-/// True if T derives from MatBase and has a single row
+/// True if T is a matrix type with a single row
 template <typename T>
 inline constexpr bool is_covector = impl::IsCovector<std::decay_t<T>>::value;
 

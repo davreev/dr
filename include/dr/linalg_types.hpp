@@ -36,32 +36,24 @@ struct DefaultMatOptions<1, 1>
 template <int rows, int cols>
 inline constexpr int default_mat_options = impl::DefaultMatOptions<rows, cols>::value;
 
-template <typename Scalar, int rows, int cols, int options = default_mat_options<rows, cols>>
+template <
+    typename Scalar,
+    int rows = Eigen::Dynamic,
+    int cols = Eigen::Dynamic,
+    int options = default_mat_options<rows, cols>>
 using Mat = Eigen::Matrix<Scalar, rows, cols, options>;
 
-template <typename Scalar, int options = Eigen::ColMajor>
-using MatN = Mat<Scalar, Eigen::Dynamic, Eigen::Dynamic, options>;
-
-template <typename Scalar, int size>
+template <typename Scalar, int size = Eigen::Dynamic>
 using Vec = Mat<Scalar, size, 1, Eigen::ColMajor>;
 
-template <typename Scalar>
-using VecN = Vec<Scalar, Eigen::Dynamic>;
-
-template <typename Scalar, int stride>
-using VecArray = Mat<Scalar, stride, Eigen::Dynamic, Eigen::ColMajor>;
-
 template <typename Scalar, int size>
+using VecArray = Mat<Scalar, size, Eigen::Dynamic, Eigen::ColMajor>;
+
+template <typename Scalar, int size = Eigen::Dynamic>
 using Covec = Mat<Scalar, 1, size, Eigen::RowMajor>;
 
-template <typename Scalar>
-using CovecN = Covec<Scalar, Eigen::Dynamic>;
-
-template <typename Scalar, int stride>
-using CovecArray = Mat<Scalar, Eigen::Dynamic, stride, Eigen::RowMajor>;
-
-template <typename Derived>
-using MatBase = Eigen::MatrixBase<Derived>;
+template <typename Scalar, int size>
+using CovecArray = Mat<Scalar, Eigen::Dynamic, size, Eigen::RowMajor>;
 
 enum MatHint : u8
 {

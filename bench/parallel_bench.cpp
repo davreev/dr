@@ -47,7 +47,7 @@ void parallel_vec3_reject_norm()
     VecArray<f64, 3> vecs_b{3, n};
     vecs_b.setRandom();
 
-    VecN<f64> result{n};
+    Vec<f64> result{n};
 
     Span<Vec3<f64> const> const src_a = as_span(vecs_a);
     Span<Vec3<f64> const> const src_b = as_span(vecs_b);
