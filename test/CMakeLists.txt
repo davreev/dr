@@ -2,6 +2,7 @@ add_executable(
     dr-test 
     bitwise_tests.cpp
     container_tests.cpp
+    defer_tests.cpp
     diagnostics_tests.cpp
     geometry_tests.cpp
     hash_grid_tests.cpp
@@ -27,7 +28,7 @@ target_link_libraries(
 target_compile_options(
     dr-test
     PRIVATE 
-        -Wall -Wextra -Wpedantic #-Werror
+        -Wall -Wextra -Wpedantic -Werror
 )
 
 target_compile_definitions(
