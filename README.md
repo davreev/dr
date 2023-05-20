@@ -35,7 +35,7 @@ include(FetchContent)
 
 FetchContent_Declare(
     dr
-    GIT_REPOSITORY https://gitlab.com/davreev/dr.git
+    GIT_REPOSITORY https://github.com/davreev/dr.git
     GIT_TAG <revision>
 )
 
