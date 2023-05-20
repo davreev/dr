@@ -51,7 +51,7 @@ struct ParallelFor
     }
 
     /// Loop body is expected to take loop and thread indices as arguments e.g.
-    /// void body(isize loop_index_i, isize loop_index j, isize thread_index)
+    /// void body(isize loop_index_i, isize loop_index j, isize loop_index k, isize thread_index)
     template <typename Body>
     void operator()(
         isize const count_i, 
