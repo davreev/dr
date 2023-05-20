@@ -6,12 +6,11 @@
 namespace dr
 {
 
-template <typename Real, typename _ = Real>
-struct Isometry3;
-
 template <typename Real>
-struct Isometry3<Real, std::enable_if_t<is_real<Real>, Real>>
+struct Isometry3
 {
+    static_assert(is_real<Real>);
+    
     Quat<Real> rotation{Quat<Real>::Identity()}; // Assumed to be unit length
     Vec3<Real> translation{Vec3<Real>::Zero()};
 
