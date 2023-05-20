@@ -17,7 +17,7 @@ target_link_libraries(
 target_compile_options(
     dr-bench
     PRIVATE 
-        -Wall -Wextra -Wpedantic #-Werror
+        -Wall -Wextra -Wpedantic -Werror
 )
 
 target_compile_definitions(
