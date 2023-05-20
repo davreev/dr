@@ -2,7 +2,6 @@
 
 #include <algorithm>
 
-#include <dr/constants.hpp>
 #include <dr/container_utils.hpp>
 #include <dr/linalg_reshape.hpp>
 #include <dr/linalg_types.hpp>
@@ -85,12 +84,12 @@ using IncidenceMap = std::pmr::unordered_map<Vec<Index, size>, Index, ElementHas
 template <typename Index>
 Index opposite_edge(Index const edge)
 {
-    assert(edge != invalid_index);
-    return edge ^ 1; // Oppositely oriented edges are given consecutive indices
+    // Oppositely oriented edges are given consecutive indices
+    return (assert(edge != -1), edge ^ 1);
 }
 
-/// Creates a map from vertex pairs to directed edges. By convention, oppositely oriented edges are given
-/// consecutive indices.
+/// Creates a map from vertex pairs to directed edges. By convention, oppositely oriented edges are
+/// given consecutive indices.
 template <typename Index>
 void make_vertex_edge_map(
     Span<Vec3<Index> const> const& face_vertices,
@@ -152,7 +151,7 @@ void collect_edge_opposite_vertices(
 {
     assert(result.size() == size<isize>(vertex_edge_map));
 
-    as_vec(result).setConstant(invalid_index);
+    as_vec(result).setConstant(-1);
 
     auto try_assign = [&](Vec2<Index> const& e_v, Index const v) -> bool {
         auto const it = vertex_edge_map.find(e_v);
@@ -186,7 +185,7 @@ void collect_edge_faces(
 {
     assert(result.size() == size<isize>(vertex_edge_map));
 
-    as_vec(result).setConstant(invalid_index);
+    as_vec(result).setConstant(-1);
 
     auto try_assign = [&](Vec2<Index> const& e_v, Index const f) -> bool {
         auto const it = vertex_edge_map.find(e_v);

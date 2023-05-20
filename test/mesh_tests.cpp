@@ -2,7 +2,6 @@
 
 #include <vector>
 
-#include <dr/constants.hpp>
 #include <dr/mesh_attributes.hpp>
 #include <dr/mesh_elements.hpp>
 #include <dr/mesh_primitives.hpp>
@@ -262,7 +261,7 @@ UTEST(mesh, make_vertex_edge_map)
 
             i32 const e_op = verts_to_edge[{e_v[1], e_v[0]}];
 
-            if (e_op != invalid_index)
+            if (e_op != -1)
             {
                 ASSERT_EQ(e_v[1], edge_verts[e_op]);
                 ASSERT_EQ(e ^ 1, e_op);
