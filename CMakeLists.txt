@@ -80,7 +80,7 @@ if(DR_EXAMPLE)
     add_subdirectory(example)
 endif()
 
-option(DR_EXAMPLE "Generate test target" OFF)
+option(DR_TEST "Generate test target" OFF)
 if(DR_TEST)
     enable_testing()
     add_subdirectory(test)
