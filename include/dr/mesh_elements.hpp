@@ -81,17 +81,10 @@ struct ElementEqual
 template <typename Index, int size>
 using IncidenceMap = std::pmr::unordered_map<Vec<Index, size>, Index, ElementHash, ElementEqual>;
 
-template <typename Index>
-Index opposite_edge(Index const edge)
-{
-    // Oppositely oriented edges are given consecutive indices
-    return (assert(edge != -1), edge ^ 1);
-}
-
 /// Creates a map from vertex pairs to directed edges. By convention, oppositely oriented edges are
 /// given consecutive indices.
 template <typename Index>
-void make_vertex_edge_map(
+void make_vertex_to_edge(
     Span<Vec3<Index> const> const& face_vertices,
     IncidenceMap<Index, 2>& result)
 {
@@ -133,30 +126,30 @@ void make_vertex_edge_map(
 /// Returns the vertex at the start of each directed edge
 template <typename Index>
 void collect_edge_start_vertices(
-    IncidenceMap<Index, 2> const& vertex_edge_map,
+    IncidenceMap<Index, 2> const& vertex_to_edge,
     Span<Index> const result)
 {
-    assert(result.size() == size<isize>(vertex_edge_map));
+    assert(result.size() == size<isize>(vertex_to_edge));
 
-    for (auto const& [e_v, e] : vertex_edge_map)
+    for (auto const& [e_v, e] : vertex_to_edge)
         result[e] = e_v[0];
 }
 
 /// Returns the vertex opposite to each directed edge
 template <typename Index>
 void collect_edge_opposite_vertices(
-    IncidenceMap<Index, 2> const& vertex_edge_map,
+    IncidenceMap<Index, 2> const& vertex_to_edge,
     Span<Vec3<Index> const> const& face_vertices,
     Span<Index> const result)
 {
-    assert(result.size() == size<isize>(vertex_edge_map));
+    assert(result.size() == size<isize>(vertex_to_edge));
 
     as_vec(result).setConstant(-1);
 
     auto try_assign = [&](Vec2<Index> const& e_v, Index const v) -> bool {
-        auto const it = vertex_edge_map.find(e_v);
+        auto const it = vertex_to_edge.find(e_v);
 
-        if (it != vertex_edge_map.end())
+        if (it != vertex_to_edge.end())
         {
             result[it->second] = v;
             return true;
@@ -179,18 +172,18 @@ void collect_edge_opposite_vertices(
 /// Returns the face incident to each directed edge
 template <typename Index>
 void collect_edge_faces(
-    IncidenceMap<Index, 2> const& vertex_edge_map,
+    IncidenceMap<Index, 2> const& vertex_to_edge,
     Span<Vec3<Index> const> const& face_vertices,
     Span<Index> const result)
 {
-    assert(result.size() == size<isize>(vertex_edge_map));
+    assert(result.size() == size<isize>(vertex_to_edge));
 
     as_vec(result).setConstant(-1);
 
     auto try_assign = [&](Vec2<Index> const& e_v, Index const f) -> bool {
-        auto const it = vertex_edge_map.find(e_v);
+        auto const it = vertex_to_edge.find(e_v);
 
-        if (it != vertex_edge_map.end())
+        if (it != vertex_to_edge.end())
         {
             result[it->second] = f;
             return true;

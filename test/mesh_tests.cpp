@@ -215,7 +215,7 @@ UTEST(mesh, element_count)
     }
 }
 
-UTEST(mesh, make_vertex_edge_map)
+UTEST(mesh, make_vertex_to_edge)
 {
     using namespace dr;
 
@@ -248,7 +248,7 @@ UTEST(mesh, make_vertex_edge_map)
 
     for (auto const& [f_v, result] : test_cases)
     {
-        make_vertex_edge_map(f_v, verts_to_edge);
+        make_vertex_to_edge(f_v, verts_to_edge);
 
         edge_verts.resize(verts_to_edge.size());
         collect_edge_start_vertices(verts_to_edge, as_span(edge_verts));
