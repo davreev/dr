@@ -363,7 +363,7 @@ UTEST(mesh, vertex_normals_area_weighted)
     }
 }
 
-UTEST(mesh, vertex_integral)
+UTEST(mesh, eval_vertex_integral)
 {
     using namespace dr;
 
@@ -410,7 +410,7 @@ UTEST(mesh, vertex_integral)
         std::vector<f32> vertex_values(num_verts, value);
 
         f32 area{};
-        f32 const sum = vertex_integral(
+        f32 const sum = eval_vertex_integral(
             vertex_positions,
             as_span(vertex_values).as_const(),
             face_vertices,

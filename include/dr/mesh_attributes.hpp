@@ -164,7 +164,7 @@ void face_normals(
 
 /// Returns the integral of a function defined on vertices of a discretized volume
 template <typename Real, typename Value, typename Index>
-Value vertex_integral(
+Value eval_vertex_integral(
     Span<Vec3<Real> const> const& vertex_positions,
     Span<Value const> const& vertex_values,
     Span<Vec4<Index> const> const& element_vertices,
@@ -203,7 +203,7 @@ Value vertex_integral(
 
 /// Returns the integral of a function defined on vertices of a discretized surface
 template <typename Real, typename Value, typename Index>
-Value vertex_integral(
+Value eval_vertex_integral(
     Span<Vec3<Real> const> const& vertex_positions,
     Span<Value const> const& vertex_values,
     Span<Vec3<Index> const> const& element_vertices,
@@ -241,7 +241,7 @@ Value vertex_integral(
 
 /// Returns the integral of a function defined on vertices of a discretized curve
 template <typename Real, typename Value, typename Index>
-Value vertex_integral(
+Value eval_vertex_integral(
     Span<Vec3<Real> const> const& vertex_positions,
     Span<Value const> const& vertex_values,
     Span<Vec2<Index> const> const& element_vertices,
@@ -274,7 +274,7 @@ Vec3<Real> area_centroid(
     Span<Vec3<Index> const> const& element_vertices)
 {
     Real area{};
-    Vec3<Real> const sum = vertex_integral(
+    Vec3<Real> const sum = eval_vertex_integral(
         vertex_positions,
         vertex_positions,
         element_vertices,
@@ -290,7 +290,7 @@ Vec3<Real> length_centroid(
     Span<Vec2<Index> const> const& element_vertices)
 {
     Real length{};
-    Vec3<Real> const sum = vertex_integral(
+    Vec3<Real> const sum = eval_vertex_integral(
         vertex_positions,
         vertex_positions,
         element_vertices,

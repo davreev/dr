@@ -9,41 +9,9 @@
 namespace dr
 {
 
-/// Collects the coefficients of the incidence matrix for the given mesh elements
-template <typename Scalar, typename Index, int size>
-void incidence_coeffs(
-    Span<Vec<Index, size> const> const& elements,
-    std::pmr::vector<Triplet<Scalar, Index>>& result)
-{
-    result.clear();
-
-    Index const num_elems = static_cast<Index>(elements.size());
-    result.reserve(num_elems * size);
-
-    for (Index i = 0; i < num_elems; ++i)
-    {
-        auto const& e = elements[i];
-
-        for (int j = 0; j < size; ++j)
-            result.emplace_back(e[j], i, Scalar{1});
-    }
-}
-
-/// Creates the incidence matrix for the given elements
-template <typename Scalar, typename Index, int size>
-void incidence_mat(
-    Span<Vec<Index, size> const> const& elements,
-    Index const rows,
-    std::pmr::vector<Triplet<Scalar, Index>>& coeffs,
-    SparseMat<Scalar, Index>& result)
-{
-    incidence_coeffs(elements, coeffs);
-    result.resize(rows, elements.size());
-    result.setFromTriplets(coeffs.begin(), coeffs.end());
-}
-
-/// Repeats each matrix coefficient a specified number of times along the diagonal. This is equivalent to taking the
-/// right Kronecker product with the identity matrix of the specified size (i.e. A ⊗ I).
+/// Repeats each matrix coefficient a specified number of times along the diagonal. This is
+/// equivalent to taking the right Kronecker product with the identity matrix of the specified size
+/// (i.e. A ⊗ I).
 template <typename Scalar, typename Index>
 void repeat_diagonal_each(std::pmr::vector<Triplet<Scalar, Index>>& coeffs, Index const count)
 {
@@ -59,8 +27,9 @@ void repeat_diagonal_each(std::pmr::vector<Triplet<Scalar, Index>>& coeffs, Inde
     }
 }
 
-/// Repeats all matrix coefficients a specified number of times along the diagonal. This is equivalent to taking the
-/// left Kronecker product with the identity matrix of the specified size (i.e. I ⊗ A).
+/// Repeats all matrix coefficients a specified number of times along the diagonal. This is
+/// equivalent to taking the left Kronecker product with the identity matrix of the specified size
+/// (i.e. I ⊗ A).
 template <typename Scalar, typename Index>
 void repeat_diagonal_all(
     std::pmr::vector<Triplet<Scalar, Index>>& coeffs,
