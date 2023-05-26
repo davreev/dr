@@ -1,10 +1,10 @@
 #pragma once
 
+#include <dr/dynamic_array.hpp>
+#include <dr/math_traits.hpp>
 #include <dr/math_types.hpp>
 #include <dr/span.hpp>
 #include <dr/sparse_linalg_types.hpp>
-
-#include <dr/shim/pmr/vector.hpp>
 
 namespace dr
 {
@@ -13,8 +13,10 @@ namespace dr
 /// equivalent to taking the right Kronecker product with the identity matrix of the specified size
 /// (i.e. A ⊗ I).
 template <typename Scalar, typename Index>
-void repeat_diagonal_each(std::pmr::vector<Triplet<Scalar, Index>>& coeffs, Index const count)
+void repeat_diagonal_each(DynamicArray<Triplet<Scalar, Index>>& coeffs, Index const count)
 {
+    static_assert(is_integer<Index> || is_natural<Index>);
+
     usize const num_coeffs = coeffs.size();
 
     for (usize i = 0; i < num_coeffs; ++i)
@@ -32,11 +34,13 @@ void repeat_diagonal_each(std::pmr::vector<Triplet<Scalar, Index>>& coeffs, Inde
 /// (i.e. I ⊗ A).
 template <typename Scalar, typename Index>
 void repeat_diagonal_all(
-    std::pmr::vector<Triplet<Scalar, Index>>& coeffs,
+    DynamicArray<Triplet<Scalar, Index>>& coeffs,
     Index const rows,
     Index const cols,
     Index const count)
 {
+    static_assert(is_integer<Index> || is_natural<Index>);
+
     for (Index i = 1; i < count; ++i)
     {
         usize const num_coeffs = coeffs.size();
@@ -51,8 +55,11 @@ void repeat_diagonal_all(
 
 /// Symmetrizes a matrix representing a quadratic form by taking the average with its transpose
 template <typename Real, typename Index>
-void symmetrize_quadratic(std::pmr::vector<Triplet<Real, Index>>& coeffs)
+void symmetrize_quadratic(DynamicArray<Triplet<Real, Index>>& coeffs)
 {
+    static_assert(is_real<Real>);
+    static_assert(is_integer<Index> || is_natural<Index>);
+
     usize const num_coeffs = coeffs.size();
 
     for (usize i = 0; i < num_coeffs; ++i)

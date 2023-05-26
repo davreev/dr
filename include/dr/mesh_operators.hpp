@@ -1,11 +1,9 @@
 #pragma once
 
 #include <cassert>
-#include <cmath>
 #include <type_traits>
 
-#include <algorithm>
-
+#include <dr/dynamic_array.hpp>
 #include <dr/geometry.hpp>
 #include <dr/linalg_reshape.hpp>
 #include <dr/linalg_types.hpp>
@@ -13,8 +11,6 @@
 #include <dr/parallel.hpp>
 #include <dr/span.hpp>
 #include <dr/sparse_linalg_types.hpp>
-
-#include <dr/shim/pmr/vector.hpp>
 
 namespace dr
 {
@@ -24,8 +20,11 @@ template <typename Real, typename Index>
 void make_cotan_laplacian(
     Span<Vec3<Real> const> const& vertex_positions,
     Span<Vec3<Index> const> const& face_vertices,
-    std::pmr::vector<Triplet<Real, Index>>& result)
+    DynamicArray<Triplet<Real, Index>>& result)
 {
+    static_assert(is_real<Real>);
+    static_assert(is_integer<Index> || is_natural<Index>);
+
     result.clear();
 
     isize const num_faces = face_vertices.size();
@@ -64,10 +63,15 @@ template <typename Real, typename Index>
 void make_cotan_laplacian(
     Span<Vec3<Real> const> const& vertex_positions,
     Span<Vec3<Index> const> const& face_vertices,
-    std::pmr::vector<Triplet<Real, Index>>& coeffs,
-    SparseMat<Real, Index>& result)
+    SparseMat<Real, Index>& result,
+    Allocator alloc = {})
 {
+    static_assert(is_real<Real>);
+    static_assert(is_integer<Index> || is_natural<Index>);
+
+    DynamicArray<Triplet<Real, Index>> coeffs{alloc};
     cotan_laplace_coeffs(vertex_positions, face_vertices, coeffs);
+
     result.resize(vertex_positions.size(), vertex_positions.size());
     result.setFromTriplets(coeffs.begin(), coeffs.end());
 }
@@ -76,8 +80,10 @@ void make_cotan_laplacian(
 template <typename Scalar, typename Index, int size>
 void make_incidence(
     Span<Vec<Index, size> const> const& elements,
-    std::pmr::vector<Triplet<Scalar, Index>>& result)
+    DynamicArray<Triplet<Scalar, Index>>& result)
 {
+    static_assert(is_integer<Index> || is_natural<Index>);
+
     result.clear();
 
     Index const num_elems = static_cast<Index>(elements.size());
@@ -97,10 +103,14 @@ template <typename Scalar, typename Index, int size>
 void make_incidence(
     Span<Vec<Index, size> const> const& elements,
     Index const rows,
-    std::pmr::vector<Triplet<Scalar, Index>>& coeffs,
-    SparseMat<Scalar, Index>& result)
+    SparseMat<Scalar, Index>& result,
+    Allocator alloc = {})
 {
+    static_assert(is_integer<Index> || is_natural<Index>);
+
+    DynamicArray<Triplet<Scalar, Index>> coeffs{alloc};
     incidence_coeffs(elements, coeffs);
+
     result.resize(rows, elements.size());
     result.setFromTriplets(coeffs.begin(), coeffs.end());
 }
@@ -110,8 +120,11 @@ template <typename Real, typename Index>
 void make_vector_area(
     Span<Vec2<Index> const> const& boundary_edge_vertices,
     Index const num_vertices,
-    std::pmr::vector<Triplet<Real, Index>>& result)
+    DynamicArray<Triplet<Real, Index>>& result)
 {
+    static_assert(is_real<Real>);
+    static_assert(is_integer<Index> || is_natural<Index>);
+
     result.clear();
 
     isize const num_edges = boundary_edge_vertices.size();
@@ -129,10 +142,15 @@ template <typename Real, typename Index>
 void make_vector_area(
     Span<Vec2<Index> const> const& boundary_edge_vertices,
     Index const num_vertices,
-    std::pmr::vector<Triplet<Real, Index>>& coeffs,
-    SparseMat<Real, Index>& result)
+    SparseMat<Real, Index>& result,
+    Allocator alloc = {})
 {
+    static_assert(is_real<Real>);
+    static_assert(is_integer<Index> || is_natural<Index>);
+
+    DynamicArray<Triplet<Real, Index>> coeffs{alloc};
     vector_area_coeffs(boundary_edge_vertices, num_vertices, coeffs);
+
     result.resize(num_vertices * 2, num_vertices * 2);
     result.setFromTriplets(coeffs.begin(), coeffs.end());
 }
@@ -146,6 +164,9 @@ void eval_gradient(
     Span<Vec3<Index> const> const& face_vertices,
     Span<Covec3<Real>> const& result)
 {
+    static_assert(is_real<Real>);
+    static_assert(is_integer<Index> || is_natural<Index>);
+
     assert(result.size() == face_vertices.size());
 
     for (isize i = 0; i < face_vertices.size(); ++i)
@@ -172,6 +193,9 @@ void eval_gradient(
     ParallelFor const& parallel_for,
     Span<Covec3<Real>> const& result)
 {
+    static_assert(is_real<Real>);
+    static_assert(is_integer<Index> || is_natural<Index>);
+
     assert(result.size() == face_vertices.size());
 
     parallel_for(face_vertices.size(), [&](isize const i, isize /*thread_id*/) {
@@ -196,6 +220,9 @@ void eval_jacobian(
     Span<Vec3<Index> const> const& face_vertices,
     Span<Mat3<Real>> const& result)
 {
+    static_assert(is_real<Real>);
+    static_assert(is_integer<Index> || is_natural<Index>);
+
     assert(result.size() == face_vertices.size());
 
     for (isize i = 0; i < face_vertices.size(); ++i)
@@ -222,6 +249,9 @@ void eval_jacobian(
     ParallelFor const& parallel_for,
     Span<Mat3<Real>> const& result)
 {
+    static_assert(is_real<Real>);
+    static_assert(is_integer<Index> || is_natural<Index>);
+
     assert(result.size() == face_vertices.size());
 
     parallel_for(face_vertices.size(), [&](isize const i, isize const /*thread_id*/) {
@@ -246,6 +276,8 @@ void eval_divergence(
     FaceFunc&& face_vectors,
     Span<Real> const& result)
 {
+    static_assert(is_real<Real>);
+    static_assert(is_integer<Index> || is_natural<Index>);
     static_assert(std::is_invocable_r_v<Vec3<Real>, FaceFunc, Index>);
 
     assert(result.size() == vertex_positions.size());
