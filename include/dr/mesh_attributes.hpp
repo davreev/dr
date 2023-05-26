@@ -171,6 +171,7 @@ Value eval_vertex_integral(
     Real& volume)
 {
     Value result{};
+    volume = Real{0.0};
 
     for (isize i = 0; i < element_vertices.size(); ++i)
     {
@@ -210,6 +211,7 @@ Value eval_vertex_integral(
     Real& area)
 {
     Value result{};
+    area = Real{0.0};
 
     for (isize i = 0; i < element_vertices.size(); ++i)
     {
@@ -248,6 +250,7 @@ Value eval_vertex_integral(
     Real& length)
 {
     Value result{};
+    length = Real{0.0};
 
     for (isize i = 0; i < element_vertices.size(); ++i)
     {
