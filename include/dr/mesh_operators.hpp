@@ -40,21 +40,26 @@ void make_cotan_laplacian(
     for (isize i = 0; i < num_faces; ++i)
     {
         auto const& f_v = face_vertices[i];
-        Vec3<Real> const e_d[]{
+        Vec3<Real> const d[]{
             vertex_positions[f_v[1]] - vertex_positions[f_v[0]],
             vertex_positions[f_v[2]] - vertex_positions[f_v[1]],
             vertex_positions[f_v[0]] - vertex_positions[f_v[2]],
         };
 
-        // The cotan weight of an edge is the ratio of its dual to primal length (aka Hodge star).
-        // If t is the angle bw vectors u and v then it's given by:
-        // cot(t) = cos(t) / sin(t) = dot(u, v) / |cross(u, v)|
+        // NOTE: The cotangent weight of an edge is the ratio of its dual to primal length (aka
+        // Hodge star). This can be computed by taking half the cotangent of the angle opposite each
+        // edge in the triangle.
+        //
+        // If t is the angle bw vectors u and v then
+        //
+        // cot(t) = cos(t) / sin(t)
+        //        = (dot(u, v) |u| |v|) / (|cross(u, v)| |u| |v|)
+        //        = dot(u, v) / |cross(u, v)|
 
-        // Assign matrix coeffs
-        Real const inv_sin = Real{-0.5} / e_d[0].cross(e_d[1]).norm();
-        add_coeffs(f_v[0], f_v[1], e_d[1].dot(e_d[2]) * inv_sin);
-        add_coeffs(f_v[1], f_v[2], e_d[2].dot(e_d[0]) * inv_sin);
-        add_coeffs(f_v[2], f_v[0], e_d[0].dot(e_d[1]) * inv_sin);
+        Real const inv_sin = Real{-0.5} / d[0].cross(d[1]).norm();
+        add_coeffs(f_v[0], f_v[1], d[1].dot(d[2]) * inv_sin);
+        add_coeffs(f_v[1], f_v[2], d[2].dot(d[0]) * inv_sin);
+        add_coeffs(f_v[2], f_v[0], d[0].dot(d[1]) * inv_sin);
     }
 }
 
