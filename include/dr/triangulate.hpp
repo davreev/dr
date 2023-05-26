@@ -19,11 +19,14 @@ struct FanTriangulator
     /// Returns the current triangle
     Vec3<Index> current() const { return {polygon_[0], polygon_[curr_ - 1], polygon_[curr_]}; }
 
+    /// Returns true if the current triangle is valid
+    bool is_valid() const { return curr_ < polygon_.size(); }
+
     /// Advances to the next triangle in the polygon
     void advance() { ++curr_; }
 
-    /// Returns true if the current triangle is valid
-    bool is_valid() const { return curr_ < polygon_.size(); }
+    /// Advances to the next triangle in the polygon
+    void operator++() { advance(); }
 
   private:
     Span<Index const> polygon_;
@@ -49,6 +52,9 @@ struct StripTriangulator
             return {polygon_[a_], polygon_[b_], polygon_[c_]};
     }
 
+    /// Returns true if the current triangle is valid
+    bool is_valid() const { return b_ < c_; }
+
     /// Advances to the next triangle in the polygon
     void advance()
     {
@@ -58,8 +64,8 @@ struct StripTriangulator
             a_ = ++b_;
     }
 
-    /// Returns true if the current triangle is valid
-    bool is_valid() const { return b_ < c_; }
+    /// Advances to the next triangle in the polygon
+    void operator++() { advance(); }
 
   private:
     Span<Index const> polygon_;
