@@ -23,6 +23,7 @@ list(
 
 add_library(
     dr STATIC
+    src/halfedge.cpp
     src/memory.cpp
     src/mesh_primitives.cpp
     src/mesh_repair.cpp
