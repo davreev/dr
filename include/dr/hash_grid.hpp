@@ -1,12 +1,11 @@
 #pragma once
 
 #include <dr/container_utils.hpp>
+#include <dr/dynamic_array.hpp>
 #include <dr/geometry_types.hpp>
+#include <dr/hash_map.hpp>
 #include <dr/math_types.hpp>
 #include <dr/memory.hpp>
-
-#include <dr/shim/pmr/unordered_map.hpp>
-#include <dr/shim/pmr/vector.hpp>
 
 namespace dr
 {
@@ -37,7 +36,14 @@ struct HashGrid : AllocatorAware
     }
 
     HashGrid(HashGrid&& other) noexcept = default;
+    HashGrid& operator=(HashGrid const& other) = default;
     HashGrid& operator=(HashGrid&& other) noexcept = default;
+
+    /// Returns the allocator used by this container
+    Allocator allocator() const noexcept
+    {
+        return buckets_.get_allocator();
+    }
 
     /// Number of values in the grid
     isize size() const { return size_; }
@@ -95,7 +101,7 @@ struct HashGrid : AllocatorAware
     }
 
     /// Finds all values over the given interval
-    void find(Interval<Real, dim> const& interval, std::pmr::vector<Index>& result) const
+    void find(Interval<Real, dim> const& interval, DynamicArray<Index>& result) const
     {
         static_assert(dim == 2 || dim == 3);
 
@@ -123,16 +129,10 @@ struct HashGrid : AllocatorAware
         }
     }
 
-    /// Returns the allocator used by this container
-    Allocator allocator() const noexcept
-    {
-        return buckets_.get_allocator();
-    }
-
   private:
     struct Bucket : AllocatorAware
     {
-        std::pmr::vector<Index> values;
+        DynamicArray<Index> values;
         usize version;
 
         Bucket(Allocator const alloc = {}) :
@@ -147,6 +147,7 @@ struct HashGrid : AllocatorAware
         }
 
         Bucket(Bucket&& other) noexcept = default;
+        Bucket& operator=(Bucket const& other) = default;
         Bucket& operator=(Bucket&& other) noexcept = default;
     };
 
@@ -159,17 +160,14 @@ struct HashGrid : AllocatorAware
         {
             // Multiply each coord with a large prime and xor together
             return usize{
-                static_cast<usize>(key[0]) * 73856093 ^
-                static_cast<usize>(key[1]) * 19349663};
+                static_cast<usize>(key[0]) * 73856093 ^ static_cast<usize>(key[1]) * 19349663};
         }
 
         usize operator()(Vec<Index, 3> const& key) const
         {
             // Multiply each coord with a large prime and xor together
             return usize{
-                static_cast<usize>(key[0]) * 73856093 ^
-                static_cast<usize>(key[1]) * 19349663 ^
-                static_cast<usize>(key[2]) * 83492791};
+                static_cast<usize>(key[0]) * 73856093 ^ static_cast<usize>(key[1]) * 19349663 ^ static_cast<usize>(key[2]) * 83492791};
         }
     };
 
@@ -189,7 +187,7 @@ struct HashGrid : AllocatorAware
         return (it != buckets_.end()) ? &it->second : nullptr;
     }
 
-    void find_impl(Vec<Index, dim> const& key, std::pmr::vector<Index>& result) const
+    void find_impl(Vec<Index, dim> const& key, DynamicArray<Index>& result) const
     {
         Bucket const* bucket = get_bucket(key);
 
@@ -200,7 +198,7 @@ struct HashGrid : AllocatorAware
         result.insert(result.end(), bucket->values.begin(), bucket->values.end());
     }
 
-    std::pmr::unordered_map<Vec<Index, dim>, Bucket, KeyHash> buckets_;
+    HashMap<Vec<Index, dim>, Bucket, KeyHash> buckets_;
     Real grid_scale_{1.0};
     Real inv_grid_scale_{1.0};
     isize size_{};

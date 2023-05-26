@@ -4,10 +4,9 @@
 
 #include <dr/basic_types.hpp>
 #include <dr/container_utils.hpp>
+#include <dr/dynamic_array.hpp>
 #include <dr/memory.hpp>
 #include <dr/span.hpp>
-
-#include <dr/shim/pmr/vector.hpp>
 
 namespace dr
 {
@@ -15,8 +14,8 @@ namespace dr
 template <typename T, typename Index = i32>
 struct JaggedArray : AllocatorAware
 {
-    std::pmr::vector<T> items{};
-    std::pmr::vector<Index> block_ends{};
+    DynamicArray<T> items{};
+    DynamicArray<Index> block_ends{};
 
     JaggedArray(Allocator const alloc = {}) :
         items{alloc},
@@ -31,7 +30,14 @@ struct JaggedArray : AllocatorAware
     }
 
     JaggedArray(JaggedArray&& other) noexcept = default;
+    JaggedArray& operator=(JaggedArray const& other) = default;
     JaggedArray& operator=(JaggedArray&& other) noexcept = default;
+
+    /// Returns the allocator used by this container
+    Allocator allocator() const noexcept
+    {
+        return items.get_allocator();
+    }
 
     /// Returns the number of items in the array
     Index num_items() const { return size<Index>(items); }
@@ -92,12 +98,6 @@ struct JaggedArray : AllocatorAware
     {
         items.reserve(items_capacity);
         block_ends.reserve(block_capacity);
-    }
-
-    /// Returns the allocator used by this container
-    Allocator allocator() const noexcept
-    {
-        return items.get_allocator();
     }
 
   private:
