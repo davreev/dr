@@ -15,8 +15,6 @@ namespace dr
 
 struct HalfedgeMesh : AllocatorAware
 {
-    // TODO(dr): Impl allocator awareness
-
     using Index = i32;
 
     struct Element
@@ -150,6 +148,25 @@ struct HalfedgeMesh : AllocatorAware
             _Error_Count
         };
 
+        Builder(Allocator const alloc = {}) :
+            v_to_he_{alloc}
+        {
+        }
+
+        Builder(Builder const& other, Allocator const alloc = {}) :
+            v_to_he_{other.v_to_he_, alloc}
+        {
+        }
+
+        Builder(Builder&& other) noexcept = default;
+        Builder& operator=(Builder&& other) noexcept = default;
+
+        /// Returns the allocator used by this instance
+        Allocator allocator() const noexcept
+        {
+            return v_to_he_.get_allocator();
+        }
+
         static char const* error_message(Error err);
 
         template <typename SrcIndex>
@@ -162,6 +179,40 @@ struct HalfedgeMesh : AllocatorAware
       private:
         IncidenceMap<Index, 2> v_to_he_{};
     };
+
+    HalfedgeMesh(Allocator const alloc = {}) :
+        halfedge_next_{alloc},
+        halfedge_prev_{alloc},
+        halfedge_vertex_{alloc},
+        halfedge_face_{alloc},
+        halfedge_hole_{alloc},
+        vertex_halfedge_{alloc},
+        face_halfedge_{alloc},
+        hole_halfedge_{alloc}
+    {
+    }
+
+    HalfedgeMesh(HalfedgeMesh const& other, Allocator const alloc = {}) :
+        halfedge_next_{other.halfedge_next_, alloc},
+        halfedge_prev_{other.halfedge_prev_, alloc},
+        halfedge_vertex_{other.halfedge_vertex_, alloc},
+        halfedge_face_{other.halfedge_face_, alloc},
+        halfedge_hole_{other.halfedge_hole_, alloc},
+        vertex_halfedge_{other.vertex_halfedge_, alloc},
+        face_halfedge_{other.face_halfedge_, alloc},
+        hole_halfedge_{other.hole_halfedge_, alloc}
+    {
+    }
+
+    HalfedgeMesh(HalfedgeMesh&& other) noexcept = default;
+    HalfedgeMesh& operator=(HalfedgeMesh const& other) = default;
+    HalfedgeMesh& operator=(HalfedgeMesh&& other) noexcept = default;
+
+    /// Returns the allocator used by this data structure
+    Allocator allocator() const noexcept
+    {
+        return halfedge_next_.get_allocator();
+    }
 
     /// Returns the oppositely oriented twin of the given halfedge
     static Halfedge twin(Halfedge const halfedge)
