@@ -5,7 +5,6 @@
 */
 
 #include <cmath>
-#include <type_traits>
 
 #include <dr/math_ctors.hpp>
 #include <dr/math_traits.hpp>

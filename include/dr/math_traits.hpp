@@ -1,5 +1,7 @@
 #pragma once
 
+#include <type_traits>
+
 #include <dr/math_types.hpp>
 
 namespace dr
@@ -137,8 +139,7 @@ template <typename T, typename U>
 struct IsMatrixExpr
 {
     static constexpr bool value{
-        IsMatrix<T>::value &&
-        std::is_same_v<std::decay_t<typename T::EvalReturnType>, U>};
+        IsMatrix<T>::value && std::is_same_v<std::decay_t<typename T::EvalReturnType>, U>};
 };
 
 } // namespace impl
