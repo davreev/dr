@@ -26,7 +26,6 @@ add_library(
     src/halfedge.cpp
     src/memory.cpp
     src/mesh_primitives.cpp
-    src/mesh_repair.cpp
     src/parallel.cpp
 )
 add_library(dr::dr ALIAS dr)

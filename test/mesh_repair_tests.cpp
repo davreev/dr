@@ -1,7 +1,6 @@
 #include <utest.h>
 
-#include <vector>
-
+#include <dr/dynamic_array.hpp>
 #include <dr/mesh_repair.hpp>
 
 #include "test_utils.hpp"
@@ -12,12 +11,12 @@ UTEST(mesh_repair, find_unique_points)
 
     struct TestCase
     {
-        std::vector<Vec2<f64>> points;
+        DynamicArray<Vec2<f64>> points;
         f64 tolerance;
         struct
         {
-            std::vector<i32> to_unique;
-            std::vector<i32> from_unique;
+            DynamicArray<i32> unique_points;
+            DynamicArray<i32> point_to_unique;
         } result;
     };
 
@@ -42,8 +41,8 @@ UTEST(mesh_repair, find_unique_points)
             },
             1.0e-8,
             {
+                {0, 1},
                 {0, 1, 1},
-                {0, 1},
             },
         },
         {
@@ -54,8 +53,8 @@ UTEST(mesh_repair, find_unique_points)
             },
             1.0e-8,
             {
-                {0, 0, 0},
                 {0},
+                {0, 0, 0},
             },
         },
         {
@@ -67,8 +66,8 @@ UTEST(mesh_repair, find_unique_points)
             },
             1.0e-8,
             {
-                {0, 1, 0, 1},
                 {0, 1},
+                {0, 1, 0, 1},
             },
         },
         {
@@ -86,26 +85,37 @@ UTEST(mesh_repair, find_unique_points)
             },
             0.15,
             {
-                {0, 0, 1, 1, 2, 2, 3, 3, 4, 4},
                 {0, 2, 4, 6, 8},
+                {0, 0, 1, 1, 2, 2, 3, 3, 4, 4},
             },
         },
     };
 
+    DynamicArray<i32> unique_pts{};
+    DynamicArray<i32> pt_to_unique{};
+
+    // Deduplication via sort
     for (auto const& [points, tol, result] : test_cases)
     {
-        std::vector<i32> to_unique(points.size(), -1);
-        std::pmr::vector<i32> from_unique{};
-        find_unique_points(as_span(points), tol, as_span(to_unique), from_unique);
+        unique_pts.clear();
+        pt_to_unique.assign(points.size(), -1);
+        find_unique_points(as_span(points), tol, unique_pts, as_span(pt_to_unique));
 
-        ASSERT_TRUE(equal(as_span(to_unique), as_span(result.to_unique)));
-        ASSERT_TRUE(equal(as_span(from_unique), as_span(result.from_unique)));
+        ASSERT_TRUE(equal(as_span(pt_to_unique), as_span(result.point_to_unique)));
+        ASSERT_TRUE(equal(as_span(unique_pts), as_span(result.unique_points)));
+    }
 
-        HashGrid2<f64> grid{};
-        find_unique_points(grid, as_span(points), tol, as_span(to_unique), from_unique);
+    HashGrid2<f64> grid{};
 
-        ASSERT_TRUE(equal(as_span(to_unique), as_span(result.to_unique)));
-        ASSERT_TRUE(equal(as_span(from_unique), as_span(result.from_unique)));
+    // Deduplication via hash grid
+    for (auto const& [points, tol, result] : test_cases)
+    {
+        unique_pts.clear();
+        pt_to_unique.assign(points.size(), -1);
+        find_unique_points(as_span(points), grid, tol, unique_pts, as_span(pt_to_unique));
+
+        ASSERT_TRUE(equal(as_span(pt_to_unique), as_span(result.point_to_unique)));
+        ASSERT_TRUE(equal(as_span(unique_pts), as_span(result.unique_points)));
     }
 }
 
@@ -115,7 +125,7 @@ UTEST(mesh_repair, gather_points)
 
     struct TestCase
     {
-        std::vector<Vec2<f64>> points;
+        DynamicArray<Vec2<f64>> points;
         f64 radius_start;
         f64 radius_end;
         struct
@@ -164,16 +174,22 @@ UTEST(mesh_repair, gather_points)
 
     for (auto const& [points_in, rad_start, rad_end, result] : test_cases)
     {
-        std::vector<Vec2<f64>> points = points_in;
+        DynamicArray<Vec2<f64>> points = points_in;
         f64 const tol = rad_end * rel_tol;
 
         HashGrid2<f64> grid{};
-        std::vector<i32> to_unique(points.size(), -1);
-        std::pmr::vector<i32> from_unique{};
+        DynamicArray<i32> unique_pts{};
+        DynamicArray<i32> pt_to_unique(points.size(), -1);
 
         {
-            find_unique_points(grid, as_span(points).as_const(), tol, as_span(to_unique), from_unique);
-            ASSERT_EQ(size<isize>(from_unique), result.num_unique_before);
+            find_unique_points(
+                as_span(points).as_const(),
+                grid,
+                tol,
+                unique_pts,
+                as_span(pt_to_unique));
+
+            ASSERT_EQ(size<isize>(unique_pts), result.num_unique_before);
         }
 
         points = points_in;
@@ -181,8 +197,14 @@ UTEST(mesh_repair, gather_points)
         ASSERT_TRUE(converged);
 
         {
-            find_unique_points(grid, as_span(points).as_const(), tol, as_span(to_unique), from_unique);
-            ASSERT_EQ(size<isize>(from_unique), result.num_unique_after);
+            find_unique_points(
+                as_span(points).as_const(),
+                grid,
+                tol,
+                unique_pts,
+                as_span(pt_to_unique));
+
+            ASSERT_EQ(size<isize>(unique_pts), result.num_unique_after);
         }
     }
 }
@@ -193,12 +215,12 @@ UTEST(mesh_repair, merge_vertices)
 
     struct TestCase
     {
-        std::vector<Vec2<f64>> vertices;
-        std::vector<Vec3<i32>> faces;
+        DynamicArray<Vec2<f64>> vertices;
+        DynamicArray<Vec3<i32>> faces;
         struct
         {
-            std::vector<Vec3<i32>> faces_merged;
-            std::vector<Vec3<i32>> faces_cleaned;
+            DynamicArray<Vec3<i32>> faces_merged;
+            DynamicArray<Vec3<i32>> faces_cleaned;
         } result;
     };
 
@@ -275,27 +297,30 @@ UTEST(mesh_repair, merge_vertices)
 
     for (auto const& [verts_in, faces_in, result] : test_cases)
     {
-        std::vector<Vec2<f64>> verts = verts_in;
-        std::vector<Vec3<i32>> faces = faces_in;
+        DynamicArray<Vec2<f64>> verts = verts_in;
+        DynamicArray<Vec3<i32>> faces = faces_in;
 
         HashGrid2<f64> grid{};
-        std::vector<i32> to_unique(verts.size(), -1);
-        std::pmr::vector<i32> from_unique{};
-        find_unique_points(grid, as_span(verts).as_const(), eps, as_span(to_unique), from_unique);
+        DynamicArray<i32> unique_verts{};
+        DynamicArray<i32> vert_to_unique(verts.size(), -1);
+        find_unique_points(
+            as_span(verts).as_const(),
+            grid,
+            eps,
+            unique_verts,
+            as_span(vert_to_unique));
 
-        // NOTE: Can use the same buffer for output vertices here since from_unique is monotonic
+        // NOTE: Can merge vertices in place since indices of unique vertices are monotonic
         merge_vertices(
-            as_span(verts).as_const(), 
-            as_span(to_unique), 
-            as_span(from_unique), 
-            as_span(faces), 
-            as_span(verts).front(from_unique.size()));
+            as_span(verts).as_const(),
+            as_span(faces),
+            as_span(unique_verts).as_const(),
+            as_span(vert_to_unique).as_const(),
+            as_span(verts).front(unique_verts.size()));
 
         ASSERT_TRUE(equal(as_span(faces), as_span(result.faces_merged)));
 
-        auto faces_cleaned = as_span(faces);
-        remove_degenerate_faces(faces_cleaned);
-
+        auto faces_cleaned = remove_degenerate_faces(as_span(faces));
         ASSERT_TRUE(equal(faces_cleaned, as_span(result.faces_cleaned)));
     }
 }

@@ -2,11 +2,11 @@
 
 #include <algorithm>
 
+#include <dr/dynamic_array.hpp>
 #include <dr/hash_grid.hpp>
 #include <dr/math.hpp>
+#include <dr/math_traits.hpp>
 #include <dr/span.hpp>
-
-#include <dr/shim/pmr/vector.hpp>
 
 namespace dr
 {
@@ -21,7 +21,9 @@ bool gather_points(
     isize const max_iters = 5,
     Allocator const alloc = {})
 {
-    std::pmr::vector<i32> found{alloc};
+    static_assert(is_real<Real>);
+
+    DynamicArray<i32> found{alloc};
 
     // Returns true if converged
     auto const step = [&](Real const radius) -> bool {
@@ -29,7 +31,7 @@ bool gather_points(
         grid.set_grid_scale(radius * rad_scale);
 
         // Insert points
-        for (i32 i = 0; i < points.size(); ++i)
+        for (isize i = 0; i < points.size(); ++i)
             grid.insert(points[i], i);
 
         Real max_sqr_dist{0.0};
@@ -50,11 +52,11 @@ bool gather_points(
                 if (j != i)
                 {
                     Vec<Real, dim> const p_adj = points[j];
+                    Real const dist = (p - p_adj).norm();
 
                     // TODO(dr): Test different weighting functions
-                    Real const dist = (p - p_adj).norm();
-                    // Real const w = ramp(radius, radius * Real{0.5}, dist);
-                    Real const w = smooth_step(radius, radius* Real{0.5}, dist);
+                    // Real const w = ramp(radius, Real{0.5} * radius, dist);
+                    Real const w = smooth_step(radius, Real{0.5} * radius, dist);
 
                     p_sum += p_adj * w;
                     w_sum += w;
@@ -67,7 +69,7 @@ bool gather_points(
         }
 
         // Converged if largest move was within tolerance
-        constexpr Real rel_tol{1.0e-3}; // TODO(dr): Add this as a separate arg?
+        constexpr Real rel_tol{1.0e-3};
         Real const tol = radius * rel_tol;
         return max_sqr_dist <= tol * tol;
     };
@@ -83,21 +85,24 @@ bool gather_points(
     return false;
 }
 
-template <typename Real, int dim>
+template <typename Real, typename Index, int dim>
 void find_unique_points(
-    HashGrid<Real, dim>& grid,
     Span<Vec<Real, dim> const> const& points,
+    HashGrid<Real, dim>& grid,
     Real const tolerance,
-    Span<i32> const& to_unique,
-    std::pmr::vector<i32>& from_unique,
+    DynamicArray<Index>& unique_points,
+    Span<Index> const& point_to_unique,
     Allocator const alloc = {})
 {
+    static_assert(is_real<Real>);
+    static_assert(is_integer<Index> || is_natural<Index>);
+
     constexpr Real tol_scale{8.0};
     grid.set_grid_scale(tolerance * tol_scale);
 
-    from_unique.clear();
+    unique_points.clear();
 
-    std::pmr::vector<i32> found{alloc};
+    DynamicArray<i32> found{alloc};
     Real const sqr_tol = tolerance * tolerance;
     isize num_unique = 0;
 
@@ -107,120 +112,145 @@ void find_unique_points(
 
         // Search for existing points within range
         grid.find({p.array() - tolerance, p.array() + tolerance}, found);
-        i32 unique_index = -1;
+        Index unique_idx = -1;
 
         for (i32 const j : found)
         {
             if ((points[j] - p).squaredNorm() <= sqr_tol)
             {
-                unique_index = to_unique[j];
+                unique_idx = point_to_unique[j];
                 break;
             }
         }
 
         // If the point is unique, store its index and add it to the grid
-        if (unique_index == -1)
+        if (unique_idx == -1)
         {
-            unique_index = num_unique++;
-            from_unique.push_back(i);
+            unique_idx = num_unique++;
+            unique_points.push_back(i);
             grid.insert(p, i);
         }
 
-        to_unique[i] = unique_index;
+        point_to_unique[i] = unique_idx;
         found.clear();
     }
 }
 
-template <typename Real, int dim>
+template <typename Real, typename Index, int dim>
 void find_unique_points(
     Span<Vec<Real, dim> const> const& points,
     Real const tolerance,
-    Span<i32> const& to_unique,
-    std::pmr::vector<i32>& from_unique)
+    DynamicArray<Index>& unique_points,
+    Span<Index> const& point_to_unique)
 {
-    assert(points.size() == to_unique.size());
+    static_assert(is_real<Real>);
+    static_assert(is_integer<Index> || is_natural<Index>);
 
-    from_unique.resize(points.size());
-    Span<i32> const sorted = as_span(from_unique);
+    assert(points.size() == point_to_unique.size());
 
-    for (isize i = 0; i < to_unique.size(); ++i)
-        sorted[i] = i;
+    unique_points.resize(points.size());
+    auto const sorted_pts = as_span(unique_points);
 
-    auto const compare = [&](i32 const a, i32 const b) {
+    for (isize i = 0; i < points.size(); ++i)
+        sorted_pts[i] = i;
+
+    auto const compare = [&](Index const a, Index const b) {
         auto const& pa = points[a];
         auto const& pb = points[b];
 
         for (int i = 0; i < dim; ++i)
         {
-            if (pa[i] < pb[i]) return true;
-            if (pa[i] > pb[i]) return false;
+            if (pa[i] < pb[i])
+                return true;
+            if (pa[i] > pb[i])
+                return false;
         }
 
         return false;
     };
 
-    std::sort(begin(sorted), end(sorted), compare);
+    std::sort(begin(sorted_pts), end(sorted_pts), compare);
 
-    auto const are_equal = [&](i32 const a, i32 const b) {
+    auto const are_equal = [&](Index const a, Index const b) {
         auto const& pa = points[a];
         auto const& pb = points[b];
 
         for (int i = 0; i < dim; ++i)
         {
-            if (std::abs(pa[i] - pb[i]) > tolerance)
+            if (abs(pa[i] - pb[i]) > tolerance)
                 return false;
         }
 
         return true;
     };
 
-    // Use sorted indices to create maps between original and unique points
+    // Find unique points and create map from original to unique points
     {
-        to_unique[sorted[0]] = 0;
-        from_unique[0] = 0;
-        isize unique_index = 0;
+        isize unique_pt = sorted_pts[0];
+        isize unique_idx = 0;
+        point_to_unique[unique_pt] = 0;
 
-        for (isize i = 1; i < to_unique.size(); ++i)
+        for (isize i = 1; i < points.size(); ++i)
         {
-            isize const index = sorted[i];
+            isize const pt = sorted_pts[i];
 
-            if (!are_equal(from_unique[unique_index], index))
-                from_unique[++unique_index] = index;
+            // If the point is unique, store its index
+            if (!are_equal(unique_pt, pt))
+                unique_points[++unique_idx] = (unique_pt = pt);
 
-            to_unique[index] = unique_index;
+            point_to_unique[pt] = unique_idx;
         }
 
-        isize const num_unique = unique_index + 1;
-        from_unique.erase(from_unique.begin() + num_unique, from_unique.end());
+        isize const num_unique = unique_idx + 1;
+        unique_points.erase(unique_points.begin() + num_unique, unique_points.end());
     }
 }
 
-template <typename Real, int dim>
+template <typename Scalar, typename Index, int dim>
 void merge_vertices(
-    Span<Vec<Real, dim> const> const& vertex_positions,
-    Span<i32 const> const& to_unique,
-    Span<i32 const> const& from_unique,
-    Span<Vec3<i32>> const& face_vertices,
-    Span<Vec<Real, dim>> const& vertex_positions_out)
+    Span<Vec<Scalar, dim> const> const& vertex_positions,
+    Span<Vec3<Index>> const& face_vertices,
+    Span<Index const> const& unique_vertices,
+    Span<Index const> const& vertex_to_unique,
+    Span<Vec<Scalar, dim>> const& vertex_positions_out)
 {
+    static_assert(is_integer<Index> || is_natural<Index>);
+
     // Collect unique vertex positions
     {
-        assert(vertex_positions_out.size() == from_unique.size());
+        assert(vertex_positions_out.size() == unique_vertices.size());
 
-        for (isize i = 0; i < vertex_positions_out.size(); ++i)
-            vertex_positions_out[i] = vertex_positions[from_unique[i]];
+        for (isize i = 0; i < unique_vertices.size(); ++i)
+            vertex_positions_out[i] = vertex_positions[unique_vertices[i]];
     }
 
     // Reindex faces in-place
     for (isize i = 0; i < face_vertices.size(); ++i)
     {
-        Vec3<i32>& f_v = face_vertices[i];
-        f_v[0] = to_unique[f_v[0]];
-        f_v[1] = to_unique[f_v[1]];
-        f_v[2] = to_unique[f_v[2]];
+        Vec3<Index>& f_v = face_vertices[i];
+        f_v[0] = vertex_to_unique[f_v[0]];
+        f_v[1] = vertex_to_unique[f_v[1]];
+        f_v[2] = vertex_to_unique[f_v[2]];
     }
 }
 
-void remove_degenerate_faces(Span<Vec3<i32>>& face_vertices);
+template <typename Index>
+Span<Vec3<Index>> remove_degenerate_faces(Span<Vec3<Index>> const& face_vertices)
+{
+    isize num_valid = 0;
+
+    for (isize i = 0; i < face_vertices.size(); ++i)
+    {
+        Vec3<Index> const f_v = face_vertices[i];
+
+        if (f_v[0] != f_v[1] && f_v[1] != f_v[2] && f_v[2] != f_v[0])
+        {
+            face_vertices[num_valid] = f_v;
+            ++num_valid;
+        }
+    }
+
+    return face_vertices.front(num_valid);
+}
 
 } // namespace dr
