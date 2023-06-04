@@ -26,10 +26,9 @@ struct ParallelFor
     template <typename Body>
     void operator()(isize const count, Body&& body) const
     {
-        set_num_threads(num_threads);
         set_schedule(schedule, chunk_size);
 
-        #pragma omp parallel for schedule(runtime)
+#pragma omp parallel for num_threads(num_threads) schedule(runtime)
         for (isize i = 0; i < count; ++i)
             body(i, thread_index());
     }
@@ -39,13 +38,12 @@ struct ParallelFor
     template <typename Body>
     void operator()(isize const count_i, isize const count_j, Body&& body) const
     {
-        set_num_threads(num_threads);
         set_schedule(schedule, chunk_size);
 
-        #pragma omp parallel for schedule(runtime) collapse(2)
+#pragma omp parallel for num_threads(num_threads) schedule(runtime) collapse(2)
         for (isize i = 0; i < count_i; ++i)
         {
-            for(isize j = 0; j < count_j; ++j)
+            for (isize j = 0; j < count_j; ++j)
                 body(i, j, thread_index());
         }
     }
@@ -54,27 +52,25 @@ struct ParallelFor
     /// void body(isize loop_index_i, isize loop_index j, isize loop_index k, isize thread_index)
     template <typename Body>
     void operator()(
-        isize const count_i, 
-        isize const count_j, 
-        isize const count_k, 
+        isize const count_i,
+        isize const count_j,
+        isize const count_k,
         Body&& body) const
     {
-        set_num_threads(num_threads);
         set_schedule(schedule, chunk_size);
 
-        #pragma omp parallel for schedule(runtime) collapse(3)
+#pragma omp parallel for num_threads(num_threads) schedule(runtime) collapse(3)
         for (isize i = 0; i < count_i; ++i)
         {
-            for(isize j = 0; j < count_j; ++j)
+            for (isize j = 0; j < count_j; ++j)
             {
-                for(isize k = 0; k < count_k; ++k)
+                for (isize k = 0; k < count_k; ++k)
                     body(i, j, k, thread_index());
             }
         }
     }
 
   private:
-    static void set_num_threads(isize num_threads);
     static void set_schedule(Schedule schedule, isize chunk_size);
     static isize thread_index();
 };
