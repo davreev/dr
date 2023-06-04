@@ -1,5 +1,3 @@
-#include "bench.hpp"
-
 #include <nanobench.h>
 
 #include <dr/linalg_reshape.hpp>
@@ -14,18 +12,6 @@ namespace
 {
 
 template <typename Body>
-void bench_parallel_for(
-    char const* const name,
-    ParallelFor const& parallel_for,
-    isize const num_iters,
-    Body&& body)
-{
-    nb::Bench().run(name, [&] {
-        parallel_for(num_iters, body);
-    });
-}
-
-template <typename Body>
 void bench_serial_for(
     char const* const name,
     isize const num_iters,
@@ -37,7 +23,18 @@ void bench_serial_for(
     });
 }
 
-void parallel_vec3_reject_norm()
+template <typename Body>
+void bench_parallel_for(
+    char const* const name,
+    isize const num_iters,
+    Body&& body)
+{
+    nb::Bench().minEpochIterations(10).run(name, [&] {
+        ParallelFor{}(num_iters, body);
+    });
+}
+
+void bench_vec3_reject_norm()
 {
     constexpr i32 n = 1000000;
 
@@ -58,15 +55,15 @@ void parallel_vec3_reject_norm()
     };
 
     bench_serial_for("Vec3<f64> reject norm serial", n, body);
-    bench_parallel_for("Vec3<f64> reject norm parallel", ParallelFor{}, n, body);
+    bench_parallel_for("Vec3<f64> reject norm parallel", n, body);
 }
 
 } // namespace
 
-void parallel_bench()
-{
-    parallel_vec3_reject_norm();
-    // ...
-}
-
 } // namespace dr
+
+int main()
+{
+    dr::bench_vec3_reject_norm();
+    return 0;
+}

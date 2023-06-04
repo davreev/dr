@@ -1,5 +1,3 @@
-#include "bench.hpp"
-
 #include <nanobench.h>
 
 #include <dr/linalg_reshape.hpp>
@@ -12,37 +10,13 @@ namespace dr
 namespace
 {
 
-void mapped_mat3_mult_bench()
-{
-    Vec3<f64> const a_cols[]{
-        {1.0, 1.0, 1.0},
-        {2.0, 2.0, 2.0},
-    };
-
-    Covec3<f64> const b_rows[]{
-        {1.0, 1.0, 1.0},
-        {2.0, 2.0, 2.0},
-    };
-
-    Mat3<f64> AB{};
-    nb::doNotOptimizeAway(AB);
-
-    nb::Bench().run("Map<Mat3<f64>> mult", [&] {
-        AB = as_mat<2>(a_cols) * as_mat<2>(b_rows);
-    });
-
-    nb::Bench().run("Mat3<f64> mult", [&] {
-        AB = mat(a_cols[0], a_cols[1]) * mat(b_rows[0], b_rows[1]);
-    });
-}
-
-void mat4_solve_bench()
+void bench_mat4_solve()
 {
     Mat4<f64> const A = mat(
         vec(1.0, 0.0, 0.0, 0.0),
         vec(1.0, 2.0, 0.0, 0.0),
-        vec(0.0, 0.0, 3.0, 0.0),
-        vec(0.0, 0.0, 0.0, 4.0));
+        vec(1.0, 0.0, 3.0, 0.0),
+        vec(1.0, 0.0, 0.0, 4.0));
 
     Vec4<f64> const b{1.0, 0.0, 0.0, 0.0};
 
@@ -95,44 +69,12 @@ void mat4_solve_bench()
     });
 }
 
-void mod_bench()
-{
-    {
-        f32 x = -1.0f;
-        nb::Bench().run("mod f32", [&] {
-            mod(x, 1.0f);
-            x += 0.1;
-            nb::doNotOptimizeAway(x);
-        });
-    }
-
-    {
-        i32 x = -100;
-        nb::Bench().run("mod i32", [&] {
-            mod(x, 10);
-            ++x;
-            nb::doNotOptimizeAway(x);
-        });
-    }
-
-    {
-        u32 x = 0;
-        nb::Bench().run("mod u32", [&] {
-            mod(x, 10u);
-            ++x;
-            nb::doNotOptimizeAway(x);
-        });
-    }
-}
-
 } // namespace
 
-void math_bench()
-{
-    mat4_solve_bench();
-    mapped_mat3_mult_bench();
-    mod_bench();
-    // ...
-}
-
 } // namespace dr
+
+int main()
+{
+    dr::bench_mat4_solve();
+    return 0;
+}

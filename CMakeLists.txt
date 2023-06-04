@@ -70,7 +70,7 @@ target_link_options(
 # Optional targets
 #
 
-option(DR_BENCH "Generate bench target" OFF)
+option(DR_BENCH "Generate benchmark targets" OFF)
 if(DR_BENCH)
     add_subdirectory(bench)
 endif()

@@ -1,33 +1,28 @@
-add_executable(
-    dr-bench
-    main.cpp
-    math_bench.cpp
-    parallel_bench.cpp
-)
+function(make_bench_target TARGET_NAME TARGET_SRC)
+
+    add_executable(
+        ${TARGET_NAME}
+        ${TARGET_SRC}
+    )
+
+    target_link_libraries(
+        ${TARGET_NAME}
+        PRIVATE
+            dr::dr
+            nanobench::nanobench
+    )
+    
+    target_compile_options(
+        ${TARGET_NAME}
+        PRIVATE 
+            -Wall -Wextra -Wpedantic -Werror
+    )
+
+endfunction()
 
 include(deps/nanobench)
 
-target_link_libraries(
-    dr-bench
-    PRIVATE
-        dr::dr
-        nanobench::nanobench
-)
-
-target_compile_options(
-    dr-bench
-    PRIVATE 
-        -Wall -Wextra -Wpedantic -Werror
-)
-
-target_compile_definitions(
-    dr-bench
-    PRIVATE 
-        # ...
-)
-
-target_link_options(
-    dr-bench
-    PRIVATE
-        # ...
-)
+make_bench_target(mat3-multiply mat3_multiply.cpp)
+make_bench_target(mat4-solve mat4_solve.cpp)
+make_bench_target(mod mod.cpp)
+make_bench_target(parallel-for parallel_for.cpp)
