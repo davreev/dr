@@ -159,6 +159,7 @@ struct HalfedgeMesh : AllocatorAware
         }
 
         Builder(Builder&& other) noexcept = default;
+        Builder& operator=(Builder const& other) = default;
         Builder& operator=(Builder&& other) noexcept = default;
 
         /// Returns the allocator used by this instance
