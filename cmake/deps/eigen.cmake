@@ -7,10 +7,8 @@ set(FETCHCONTENT_QUIET FALSE) # Show download progress
 
 FetchContent_Declare(
     eigen
-    GIT_REPOSITORY https://gitlab.com/libeigen/eigen.git
-    GIT_TAG 3147391d946bb4b6c68edd901f2add6ac1f31f8c # 3.4.0
-    GIT_SHALLOW TRUE
-    GIT_PROGRESS TRUE
+    URL https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.zip
+    URL_HASH SHA256=1ccaabbfe870f60af3d6a519c53e09f3dcf630207321dffa553564a8e75c4fc8
 )
 
 FetchContent_GetProperties(eigen)
