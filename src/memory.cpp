@@ -44,7 +44,9 @@ void DebugMemoryResource::do_deallocate(
     std::size_t const bytes,
     std::size_t const alignment)
 {
+    assert(ptr != nullptr);
     assert(bytes_allocated >= bytes);
+
     ++num_deallocs;
     bytes_allocated -= bytes;
     upstream->deallocate(ptr, bytes, alignment);

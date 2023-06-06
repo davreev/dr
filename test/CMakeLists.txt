@@ -17,6 +17,7 @@ add_executable(
     mesh_repair_tests.cpp
     meta_tests.cpp
     random_tests.cpp
+    slot_map_tests.cpp
     span_tests.cpp
 )
 

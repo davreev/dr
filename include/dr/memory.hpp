@@ -150,6 +150,10 @@ struct AllocatorAware
     using allocator_type = Allocator;
 };
 
+/// Returns true if T is allocator-aware
+template <typename T>
+inline constexpr bool is_allocator_aware = std::uses_allocator_v<std::decay_t<T>, Allocator>;
+
 /// Simple RAII-style heap allocation
 template <usize alignment>
 struct ScopedAlloc
@@ -222,7 +226,11 @@ UniquePtr<T> make_unique(Allocator const alloc, Args&&... args)
 {
     static_assert(!std::is_array_v<T>);
     T* const ptr = alloc.allocate<T>(1);
-    return {new (ptr) T{std::forward<Args>(args)...}, DeleteUnique{alloc}};
+
+    if constexpr (is_allocator_aware<T>)
+        return {new (ptr) T{std::forward<Args>(args)..., alloc}, DeleteUnique{alloc}};
+    else
+        return {new (ptr) T{std::forward<Args>(args)...}, DeleteUnique{alloc}};
 }
 
 /// Memory resource for tracking allocation frequency and memory footprint
