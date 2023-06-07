@@ -149,12 +149,12 @@ struct HalfedgeMesh : AllocatorAware
         };
 
         Builder(Allocator const alloc = {}) :
-            v_to_he_{alloc}
+            v_to_he_(alloc)
         {
         }
 
         Builder(Builder const& other, Allocator const alloc = {}) :
-            v_to_he_{other.v_to_he_, alloc}
+            v_to_he_(other.v_to_he_, alloc)
         {
         }
 
@@ -178,30 +178,30 @@ struct HalfedgeMesh : AllocatorAware
             bool include_holes = true);
 
       private:
-        IncidenceMap<Index, 2> v_to_he_{};
+        IncidenceMap<Index, 2> v_to_he_;
     };
 
     HalfedgeMesh(Allocator const alloc = {}) :
-        halfedge_next_{alloc},
-        halfedge_prev_{alloc},
-        halfedge_vertex_{alloc},
-        halfedge_face_{alloc},
-        halfedge_hole_{alloc},
-        vertex_halfedge_{alloc},
-        face_halfedge_{alloc},
-        hole_halfedge_{alloc}
+        halfedge_next_(alloc),
+        halfedge_prev_(alloc),
+        halfedge_vertex_(alloc),
+        halfedge_face_(alloc),
+        halfedge_hole_(alloc),
+        vertex_halfedge_(alloc),
+        face_halfedge_(alloc),
+        hole_halfedge_(alloc)
     {
     }
 
     HalfedgeMesh(HalfedgeMesh const& other, Allocator const alloc = {}) :
-        halfedge_next_{other.halfedge_next_, alloc},
-        halfedge_prev_{other.halfedge_prev_, alloc},
-        halfedge_vertex_{other.halfedge_vertex_, alloc},
-        halfedge_face_{other.halfedge_face_, alloc},
-        halfedge_hole_{other.halfedge_hole_, alloc},
-        vertex_halfedge_{other.vertex_halfedge_, alloc},
-        face_halfedge_{other.face_halfedge_, alloc},
-        hole_halfedge_{other.hole_halfedge_, alloc}
+        halfedge_next_(other.halfedge_next_, alloc),
+        halfedge_prev_(other.halfedge_prev_, alloc),
+        halfedge_vertex_(other.halfedge_vertex_, alloc),
+        halfedge_face_(other.halfedge_face_, alloc),
+        halfedge_hole_(other.halfedge_hole_, alloc),
+        vertex_halfedge_(other.vertex_halfedge_, alloc),
+        face_halfedge_(other.face_halfedge_, alloc),
+        hole_halfedge_(other.hole_halfedge_, alloc)
     {
     }
 
@@ -458,15 +458,15 @@ struct HalfedgeMesh : AllocatorAware
   private:
     static constexpr Index invalid_index_{-1};
 
-    DynamicArray<Index> halfedge_next_{};
-    DynamicArray<Index> halfedge_prev_{};
-    DynamicArray<Index> halfedge_vertex_{};
-    DynamicArray<Index> halfedge_face_{};
-    DynamicArray<Index> halfedge_hole_{};
+    DynamicArray<Index> halfedge_next_;
+    DynamicArray<Index> halfedge_prev_;
+    DynamicArray<Index> halfedge_vertex_;
+    DynamicArray<Index> halfedge_face_;
+    DynamicArray<Index> halfedge_hole_;
 
-    DynamicArray<Index> vertex_halfedge_{};
-    DynamicArray<Index> face_halfedge_{};
-    DynamicArray<Index> hole_halfedge_{};
+    DynamicArray<Index> vertex_halfedge_;
+    DynamicArray<Index> face_halfedge_;
+    DynamicArray<Index> hole_halfedge_;
 };
 
 } // namespace dr

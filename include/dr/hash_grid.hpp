@@ -16,18 +16,18 @@ struct HashGrid : AllocatorAware
     using Index = i32;
 
     HashGrid(Allocator const alloc = {}) :
-        buckets_{alloc}
+        buckets_(alloc)
     {
     }
 
     HashGrid(Real const grid_scale, Allocator const alloc = {}) :
-        buckets_{alloc}
+        buckets_(alloc)
     {
         set_grid_scale(grid_scale);
     }
 
     HashGrid(HashGrid const& other, Allocator const alloc = {}) :
-        buckets_{other.buckets_, alloc},
+        buckets_(other.buckets_, alloc),
         grid_scale_{other.grid_scale_},
         inv_grid_scale_{other.inv_grid_scale_},
         size_{other.size_},
@@ -66,9 +66,12 @@ struct HashGrid : AllocatorAware
         constexpr usize max_version = 0xFFFFFFFFFFFFFFFF;
 
         // NOTE: Buckets are cleared lazily on insertion
-        if (version_ == max_version)
+        if (version_ < max_version)
         {
-            size_ = 0;
+            ++version_;
+        }
+        else
+        {
             version_ = 0;
 
             for (auto& [key, bucket] : buckets_)
@@ -77,11 +80,8 @@ struct HashGrid : AllocatorAware
                 bucket.version = 0;
             }
         }
-        else
-        {
-            size_ = 0;
-            ++version_;
-        }
+
+        size_ = 0;
     }
 
     /// Inserts a value at the given point
@@ -136,12 +136,12 @@ struct HashGrid : AllocatorAware
         usize version;
 
         Bucket(Allocator const alloc = {}) :
-            values{alloc}
+            values(alloc)
         {
         }
 
         Bucket(Bucket const& other, Allocator const alloc = {}) :
-            values{other.values, alloc},
+            values(other.values, alloc),
             version{other.version}
         {
         }
