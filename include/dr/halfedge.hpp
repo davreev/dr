@@ -5,9 +5,9 @@
 #include <dr/basic_types.hpp>
 #include <dr/container_utils.hpp>
 #include <dr/dynamic_array.hpp>
-#include <dr/jagged_array.hpp>
 #include <dr/memory.hpp>
 #include <dr/mesh_elements.hpp>
+#include <dr/sliced_array.hpp>
 #include <dr/span.hpp>
 
 namespace dr
@@ -172,7 +172,7 @@ struct HalfedgeMesh : AllocatorAware
 
         template <typename SrcIndex>
         Error make_from_face_vertex(
-            JaggedArray<SrcIndex> const& face_vertices,
+            SlicedArray<SrcIndex> const& face_vertices,
             HalfedgeMesh& result,
             bool include_previous = true,
             bool include_holes = true);

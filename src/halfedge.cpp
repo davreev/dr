@@ -30,7 +30,7 @@ char const* Builder::error_message(Builder::Error const err)
 
 template <typename SrcIndex>
 Builder::Error Builder::make_from_face_vertex(
-    JaggedArray<SrcIndex> const& face_vertices,
+    SlicedArray<SrcIndex> const& face_vertices,
     HalfedgeMesh& result,
     bool const include_previous,
     bool const include_holes)
@@ -38,7 +38,7 @@ Builder::Error Builder::make_from_face_vertex(
     static_assert(is_integer<SrcIndex> || is_natural<SrcIndex>);
 
     v_to_he_.clear();
-    Index const num_faces = face_vertices.num_blocks();
+    Index const num_faces = face_vertices.num_slices();
     Index num_hedges = 0;
     Index num_verts = 0;
 
@@ -262,7 +262,7 @@ static_assert(false);
 #else
 #define MAKE_FROM_FACE_VERTEX(SrcIndex)                     \
     template Builder::Error Builder::make_from_face_vertex( \
-        JaggedArray<SrcIndex> const& face_vertices,         \
+        SlicedArray<SrcIndex> const& face_vertices,         \
         HalfedgeMesh& result,                               \
         bool include_previous,                              \
         bool include_holes);
