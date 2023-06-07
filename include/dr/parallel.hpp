@@ -21,8 +21,8 @@ struct ParallelFor
     /// The maximum number of threads that can be used within a loop
     static isize max_num_threads();
 
-    /// Loop body is expected to take loop and thread indices as arguments e.g.
-    /// void body(isize loop_index, isize thread_index)
+    /// Executes the given loop body in parallel. The loop body is expected to take a loop index and
+    /// a thread index as arguments e.g. void body(isize i, isize thread_idx).
     template <typename Body>
     void operator()(isize const count, Body&& body) const
     {
@@ -33,8 +33,8 @@ struct ParallelFor
             body(i, thread_index());
     }
 
-    /// Loop body is expected to take loop and thread indices as arguments e.g.
-    /// void body(isize loop_index_i, isize loop_index j, isize thread_index)
+    /// Executes the given loop body in parallel. The loop body is expected to take two loop indices
+    /// and a thread index as arguments e.g. void body(isize i, isize j, isize thread_idx).
     template <typename Body>
     void operator()(isize const count_i, isize const count_j, Body&& body) const
     {
@@ -48,8 +48,9 @@ struct ParallelFor
         }
     }
 
-    /// Loop body is expected to take loop and thread indices as arguments e.g.
-    /// void body(isize loop_index_i, isize loop_index j, isize loop_index k, isize thread_index)
+    /// Executes the given loop body in parallel. The loop body is expected to take three loop
+    /// indices and a thread index as arguments e.g. void body(isize i, isize j, isize k, isize
+    /// thread_idx).
     template <typename Body>
     void operator()(
         isize const count_i,
