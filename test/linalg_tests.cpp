@@ -7,7 +7,7 @@
 UTEST(linalg, default_mat_options)
 {
     using namespace dr;
-    
+
     {
         constexpr int options = default_mat_options<3, 3>;
         ASSERT_EQ(Eigen::ColMajor, options);
@@ -41,7 +41,7 @@ UTEST(linalg_reshape, alignment)
     }
 
     {
-        alignas(16) f64 const arr[] = {0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0};
+        alignas(Vec4<f64>) f64 const arr[] = {0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0};
         ASSERT_TRUE(is_aligned<Vec4<f64>>(arr));
         ASSERT_FALSE(is_aligned<Vec4<f64>>(arr + 1));
         ASSERT_TRUE(is_aligned<Vec4<f64>>(arr + 4));
@@ -51,7 +51,7 @@ UTEST(linalg_reshape, alignment)
 UTEST(linalg_reshape, scals_to_vecs)
 {
     using namespace dr;
-    
+
     f64 const scals[] = {0.0, 1.0, 2.0, 3.0, 4.0, 5.0};
 
     {
@@ -75,7 +75,7 @@ UTEST(linalg_reshape, scals_to_vecs)
 UTEST(linalg_reshape, vecs_to_scals)
 {
     using namespace dr;
-    
+
     {
         Vec2<f64> const vecs[] = {
             {0.0, 0.1},
@@ -108,12 +108,15 @@ UTEST(linalg_reshape, vecs_to_scals)
 UTEST(linalg_reshape, scals_to_mat)
 {
     using namespace dr;
-    
+
+    // clang-format off
     f64 const scals[] = {
-        0.0, 0.1, 0.2,
-        1.1, 1.1, 1.2,
+        0.0, 0.1, 0.2, 
+        1.1, 1.1, 1.2, 
         2.0, 2.1, 2.2,
-        3.0, 3.1, 3.2};
+        3.0, 3.1, 3.2,
+    };
+    // clang-format on
 
     {
         auto mat = as_mat(as_span(scals), 3);
@@ -133,7 +136,7 @@ UTEST(linalg_reshape, scals_to_mat)
 UTEST(linalg_reshape, vecs_to_mat)
 {
     using namespace dr;
-    
+
     {
         Vec2<f64> const vecs[] = {
             {0.0, 0.1},
