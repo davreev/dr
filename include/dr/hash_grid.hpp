@@ -159,15 +159,16 @@ struct HashGrid : AllocatorAware
         usize operator()(Vec<Index, 2> const& key) const
         {
             // Multiply each coord with a large prime and xor together
-            return usize{
-                static_cast<usize>(key[0]) * 73856093 ^ static_cast<usize>(key[1]) * 19349663};
+            return static_cast<usize>(key[0]) * 73856093
+                ^ static_cast<usize>(key[1]) * 19349663;
         }
 
         usize operator()(Vec<Index, 3> const& key) const
         {
             // Multiply each coord with a large prime and xor together
-            return usize{
-                static_cast<usize>(key[0]) * 73856093 ^ static_cast<usize>(key[1]) * 19349663 ^ static_cast<usize>(key[2]) * 83492791};
+            return static_cast<usize>(key[0]) * 73856093
+                ^ static_cast<usize>(key[1]) * 19349663
+                ^ static_cast<usize>(key[2]) * 83492791;
         }
     };
 
