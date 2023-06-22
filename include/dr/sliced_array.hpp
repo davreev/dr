@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cassert>
+#include <initializer_list>
 
 #include <dr/basic_types.hpp>
 #include <dr/container_utils.hpp>
@@ -26,6 +27,15 @@ struct SlicedArray : AllocatorAware
     SlicedArray(SlicedArray const& other, Allocator const alloc = {}) :
         items{other.items, alloc},
         slice_ends{other.slice_ends, alloc}
+    {
+    }
+
+    SlicedArray(
+        std::initializer_list<T> const items,
+        std::initializer_list<Index> const slice_ends,
+        Allocator const alloc = {}) :
+        items(items, alloc),
+        slice_ends(slice_ends, alloc)
     {
     }
 

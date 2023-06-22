@@ -5,6 +5,7 @@ add_executable(
     defer_tests.cpp
     diagnostics_tests.cpp
     geometry_tests.cpp
+    halfedge_tests.cpp
     hash_grid_tests.cpp
     sliced_array_tests.cpp
     linalg_tests.cpp
