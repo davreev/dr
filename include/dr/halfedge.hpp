@@ -22,7 +22,8 @@ struct HalfedgeMesh : AllocatorAware
         Index index{invalid_index_};
 
         constexpr Element() = default;
-        constexpr Element(Index const index) :
+
+        constexpr explicit Element(Index const index) :
             index{index} {}
 
         constexpr operator Index() const { return index; }
@@ -68,7 +69,7 @@ struct HalfedgeMesh : AllocatorAware
         // Returns the current halfedge
         Halfedge current() const
         {
-            return {current_};
+            return Halfedge{current_};
         }
 
         // Returns true if the current halfedge is valid
@@ -106,7 +107,7 @@ struct HalfedgeMesh : AllocatorAware
         // Returns the current halfedge
         Halfedge current() const
         {
-            return {current_};
+            return Halfedge{current_};
         }
 
         // Returns true if the current halfedge is valid
@@ -218,85 +219,85 @@ struct HalfedgeMesh : AllocatorAware
     /// Returns the oppositely oriented twin of the given halfedge
     static Halfedge twin(Halfedge const halfedge)
     {
-        return {(assert(halfedge.is_valid()), halfedge.index ^ 1)};
+        return Halfedge{(assert(halfedge.is_valid()), halfedge.index ^ 1)};
     }
 
     /// Returns the halfedge after the given halfedge
     Halfedge next(Halfedge const halfedge) const
     {
-        return {halfedge_next_[halfedge]};
+        return Halfedge{halfedge_next_[halfedge]};
     }
 
     /// Returns the halfedge before the given halfedge
     Halfedge previous(Halfedge const halfedge) const
     {
-        return {halfedge_prev_[halfedge]};
+        return Halfedge{halfedge_prev_[halfedge]};
     }
 
     /// Returns the halfedge at the given index
-    static Halfedge halfedge(Index const index) { return {index}; }
+    static Halfedge halfedge(Index const index) { return Halfedge{index}; }
 
     /// Returns the first outgoing halfedge at the given vertex. If the vertex is on the mesh
     /// boundary, then the returned halfedge will be as well.
     Halfedge halfedge(Vertex const vertex) const
     {
-        return {vertex_halfedge_[vertex]};
+        return Halfedge{vertex_halfedge_[vertex]};
     }
 
     /// Returns the first halfedge of the given edge
     static Halfedge halfedge(Edge const edge)
     {
-        return {(assert(edge.is_valid()), edge << 1)};
+        return Halfedge{(assert(edge.is_valid()), edge << 1)};
     }
 
     /// Returns the first halfedge in the given face
     Halfedge halfedge(Face const face) const
     {
-        return {face_halfedge_[face]};
+        return Halfedge{face_halfedge_[face]};
     }
 
     /// Returns the first halfedge in the given hole
     Halfedge halfedge(Hole const hole) const
     {
-        return {hole_halfedge_[hole]};
+        return Halfedge{hole_halfedge_[hole]};
     }
 
     /// Returns the vertex at the given index
-    static Vertex vertex(Index const index) { return {index}; }
+    static Vertex vertex(Index const index) { return Vertex{index}; }
 
     /// Returns the vertex at the start of the given halfegde
     Vertex vertex(Halfedge const halfedge) const
     {
-        return {halfedge_vertex_[halfedge]};
+        return Vertex{halfedge_vertex_[halfedge]};
     }
 
     /// Returns the edge at the given index
-    static Edge edge(Index const index) { return {index}; }
+    static Edge edge(Index const index) { return Edge{index}; }
 
     /// Returns the edge incident to the given halfedge
     static Edge edge(Halfedge const halfedge)
     {
-        return {(assert(halfedge.is_valid()), halfedge >> 1)};
+        return Edge{(assert(halfedge.is_valid()), halfedge >> 1)};
     }
 
     /// Returns the face at the given index
-    static Face face(Index const index) { return {index}; }
+    static Face face(Index const index) { return Face{index}; }
 
     /// Returns the face incident to the given halfedge. If the halfedge is on the mesh boundary,
     /// the returned face will be invalid.
     Face face(Halfedge const halfedge) const
     {
-        return {halfedge_face_[halfedge]};
+        return Face{halfedge_face_[halfedge]};
     }
 
     /// Returns the hole at the given index
-    static Hole hole(Index const index) { return {index}; }
+    static Hole hole(Index const index) { return Hole{index}; }
 
     /// Returns the hole incident to the given halfedge. If the halfedge isn't on the mesh boundary,
     /// the returned hole will be invalid.
     Hole hole(Halfedge const halfedge) const
     {
-        return {halfedge_hole_[halfedge]};
+        return Hole{halfedge_hole_[halfedge]};
     }
 
     /// Returns the number of edges incident to the given vertex
