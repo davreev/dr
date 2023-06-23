@@ -145,8 +145,8 @@ template <typename Scalar, int size>
 auto as_mat(Span<Covec<Scalar, size> const> const& covecs)
 {
     return Eigen::Map<CovecArray<Scalar, size> const>{
-        as<Scalar>(covecs.data()), 
-        covecs.size(), 
+        as<Scalar>(covecs.data()),
+        covecs.size(),
         size};
 }
 
@@ -169,39 +169,39 @@ template <typename Scalar, int rows, int cols, int options>
 Span<Scalar const> as_span(Mat<Scalar, rows, cols, options> const&& mat) = delete;
 
 /// Creates a span of vectors from the given matrix
-template <typename Scalar, int stride>
-Span<Vec<Scalar, stride>> as_span(VecArray<Scalar, stride>& mat)
+template <typename Scalar, int size>
+Span<Vec<Scalar, size>> as_span(VecArray<Scalar, size>& mat)
 {
-    return {as<Vec<Scalar, stride>>(mat.data()), mat.cols()};
+    return {as<Vec<Scalar, size>>(mat.data()), mat.cols()};
 }
 
 /// Creates a span of vectors from the given matrix
-template <typename Scalar, int stride>
-Span<Vec<Scalar, stride> const> as_span(VecArray<Scalar, stride> const& mat)
+template <typename Scalar, int size>
+Span<Vec<Scalar, size> const> as_span(VecArray<Scalar, size> const& mat)
 {
-    return {as<Vec<Scalar, stride>>(mat.data()), mat.cols()};
+    return {as<Vec<Scalar, size>>(mat.data()), mat.cols()};
 }
 
 /// Deleted to avoid creating a span over a temporary
-template <typename Scalar, int stride>
-Span<Vec<Scalar, stride> const> as_span(VecArray<Scalar, stride> const&& mat) = delete;
+template <typename Scalar, int size>
+Span<Vec<Scalar, size> const> as_span(VecArray<Scalar, size> const&& mat) = delete;
 
 /// Creates a span of covectors from the given matrix
-template <typename Scalar, int stride>
-Span<Covec<Scalar, stride>> as_span(CovecArray<Scalar, stride>& mat)
+template <typename Scalar, int size>
+Span<Covec<Scalar, size>> as_span(CovecArray<Scalar, size>& mat)
 {
-    return {as<Covec<Scalar, stride>>(mat.data()), mat.rows()};
+    return {as<Covec<Scalar, size>>(mat.data()), mat.rows()};
 }
 
 /// Creates a span of covectors from the given matrix
-template <typename Scalar, int stride>
-Span<Covec<Scalar, stride> const> as_span(CovecArray<Scalar, stride> const& mat)
+template <typename Scalar, int size>
+Span<Covec<Scalar, size> const> as_span(CovecArray<Scalar, size> const& mat)
 {
-    return {as<Covec<Scalar, stride>>(mat.data()), mat.rows()};
+    return {as<Covec<Scalar, size>>(mat.data()), mat.rows()};
 }
 
 /// Deleted to avoid creating a span over a temporary
-template <typename Scalar, int stride>
-Span<Covec<Scalar, stride> const> as_span(CovecArray<Scalar, stride> const&& mat) = delete;
+template <typename Scalar, int size>
+Span<Covec<Scalar, size> const> as_span(CovecArray<Scalar, size> const&& mat) = delete;
 
 } // namespace dr
