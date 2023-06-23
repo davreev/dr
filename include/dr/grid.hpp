@@ -1,5 +1,6 @@
 #pragma once
 
+#include <dr/geometry_types.hpp>
 #include <dr/math_types.hpp>
 
 namespace dr
@@ -10,9 +11,9 @@ struct Grid
 {
     using Index = isize;
 
-    Vec<Scalar, dim> scale;
-    Vec<Scalar, dim> translate;
     Vec<Index, dim> count;
+    Vec<Scalar, dim> scale{1, 1, 1};
+    Vec<Scalar, dim> translate{};
 
     Vec<Index, dim> stride() const
     {
@@ -58,6 +59,14 @@ struct Grid
     Vec<Scalar, dim> to_world(Vec<Index, dim> const& grid_pt) const
     {
         return to_world(grid_pt.template cast<Scalar>().eval());
+    }
+
+    Interval<Scalar, dim> bounds() const
+    {
+        return {
+            translate,
+            translate.array() + scale.array() * (count.array() - 1).template cast<Scalar>(),
+        };
     }
 };
 
