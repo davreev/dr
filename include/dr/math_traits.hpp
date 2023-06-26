@@ -16,6 +16,12 @@ struct IsNatural
 };
 
 template <>
+struct IsNatural<unsigned char>
+{
+    static constexpr bool value{true};
+};
+
+template <>
 struct IsNatural<unsigned short int>
 {
     static constexpr bool value{true};
@@ -43,6 +49,12 @@ template <typename T>
 struct IsInteger
 {
     static constexpr bool value{false};
+};
+
+template <>
+struct IsInteger<signed char>
+{
+    static constexpr bool value{true};
 };
 
 template <>
@@ -135,13 +147,6 @@ struct IsCovector
     static constexpr bool value{IsMatrix<T>::value && T::RowsAtCompileTime == 1};
 };
 
-template <typename T, typename U>
-struct IsMatrixExpr
-{
-    static constexpr bool value{
-        IsMatrix<T>::value && std::is_same_v<std::decay_t<typename T::EvalReturnType>, U>};
-};
-
 } // namespace impl
 
 /// True if T models the set of natural numbers (N) (including zero)
@@ -175,9 +180,5 @@ inline constexpr bool is_vector = impl::IsVector<std::decay_t<T>>::value;
 /// True if T is a matrix type with a single row
 template <typename T>
 inline constexpr bool is_covector = impl::IsCovector<std::decay_t<T>>::value;
-
-/// True if T is a matrix expression which evaluates to U (ignoring cv qualifiers)
-template <typename T, typename U>
-inline constexpr bool is_matrix_expr = impl::IsMatrixExpr<std::decay_t<T>, std::decay_t<U>>::value;
 
 } // namespace dr
