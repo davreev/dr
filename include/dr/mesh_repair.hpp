@@ -209,43 +209,55 @@ void find_unique_points(
 template <typename Scalar, typename Index, int dim>
 void merge_vertices(
     Span<Vec<Scalar, dim> const> const& vertex_positions,
-    Span<Vec3<Index>> const& face_vertices,
     Span<Index const> const& unique_vertices,
-    Span<Index const> const& vertex_to_unique,
     Span<Vec<Scalar, dim>> const& vertex_positions_out)
 {
     static_assert(is_integer<Index> || is_natural<Index>);
+    assert(vertex_positions_out.size() == unique_vertices.size());
 
-    // Collect unique vertex positions
-    {
-        assert(vertex_positions_out.size() == unique_vertices.size());
+    for (isize i = 0; i < unique_vertices.size(); ++i)
+        vertex_positions_out[i] = vertex_positions[unique_vertices[i]];
+}
 
-        for (isize i = 0; i < unique_vertices.size(); ++i)
-            vertex_positions_out[i] = vertex_positions[unique_vertices[i]];
-    }
+template <typename Scalar, typename Index, int dim>
+Span<Vec<Scalar, dim>> merge_vertices(
+    Span<Vec<Scalar, dim>> const& vertex_positions,
+    Span<Index const> const& unique_vertices)
+{
+    static_assert(is_integer<Index> || is_natural<Index>);
 
-    // Reindex faces in-place
-    for (isize i = 0; i < face_vertices.size(); ++i)
-    {
-        Vec3<Index>& f_v = face_vertices[i];
-        f_v[0] = vertex_to_unique[f_v[0]];
-        f_v[1] = vertex_to_unique[f_v[1]];
-        f_v[2] = vertex_to_unique[f_v[2]];
-    }
+    for (isize i = 0; i < unique_vertices.size(); ++i)
+        vertex_positions[i] = vertex_positions[unique_vertices[i]];
+
+    return vertex_positions.front(unique_vertices.size());
 }
 
 template <typename Index>
-Span<Vec3<Index>> remove_degenerate_faces(Span<Vec3<Index>> const& face_vertices)
+Span<Vec3<Index>> reindex_faces(
+    Span<Vec3<Index>> const& face_vertices,
+    Span<Index const> const& vertex_new_indices,
+    bool const remove_degenerate = true)
 {
+    static_assert(is_integer<Index> || is_natural<Index>);
     isize num_valid = 0;
 
     for (isize i = 0; i < face_vertices.size(); ++i)
     {
-        Vec3<Index> const f_v = face_vertices[i];
+        Vec3<Index>& f_v = face_vertices[i];
+        f_v[0] = vertex_new_indices[f_v[0]];
+        f_v[1] = vertex_new_indices[f_v[1]];
+        f_v[2] = vertex_new_indices[f_v[2]];
 
-        if (f_v[0] != f_v[1] && f_v[1] != f_v[2] && f_v[2] != f_v[0])
+        if (remove_degenerate)
         {
-            face_vertices[num_valid] = f_v;
+            if (f_v[0] != f_v[1] && f_v[1] != f_v[2] && f_v[2] != f_v[0])
+            {
+                face_vertices[num_valid] = f_v;
+                ++num_valid;
+            }
+        }
+        else
+        {
             ++num_valid;
         }
     }

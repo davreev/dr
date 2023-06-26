@@ -219,8 +219,7 @@ UTEST(mesh_repair, merge_vertices)
         DynamicArray<Vec3<i32>> faces;
         struct
         {
-            DynamicArray<Vec3<i32>> faces_merged;
-            DynamicArray<Vec3<i32>> faces_cleaned;
+            DynamicArray<Vec3<i32>> merged_faces;
         } result;
     };
 
@@ -235,9 +234,6 @@ UTEST(mesh_repair, merge_vertices)
                 {0, 1, 2},
             },
             {
-                {
-                    {0, 1, 0},
-                },
                 {},
             },
         },
@@ -253,10 +249,6 @@ UTEST(mesh_repair, merge_vertices)
                 {3, 2, 1},
             },
             {
-                {
-                    {0, 1, 0},
-                    {2, 0, 1},
-                },
                 {
                     {2, 0, 1},
                 },
@@ -278,12 +270,6 @@ UTEST(mesh_repair, merge_vertices)
                 {5, 4, 3},
             },
             {
-                {
-                    {0, 1, 0},
-                    {2, 0, 1},
-                    {0, 2, 3},
-                    {4, 3, 2},
-                },
                 {
                     {2, 0, 1},
                     {0, 2, 3},
@@ -310,17 +296,7 @@ UTEST(mesh_repair, merge_vertices)
             unique_verts,
             as_span(vert_to_unique));
 
-        // NOTE: Can merge vertices in place since indices of unique vertices are monotonic
-        merge_vertices(
-            as_span(verts).as_const(),
-            as_span(faces),
-            as_span(unique_verts).as_const(),
-            as_span(vert_to_unique).as_const(),
-            as_span(verts).front(unique_verts.size()));
-
-        ASSERT_TRUE(equal(as_span(faces), as_span(result.faces_merged)));
-
-        auto faces_cleaned = remove_degenerate_faces(as_span(faces));
-        ASSERT_TRUE(equal(faces_cleaned, as_span(result.faces_cleaned)));
+        auto merged_faces = reindex_faces(as_span(faces), as_span(vert_to_unique).as_const(), true);
+        ASSERT_TRUE(equal(merged_faces, as_span(result.merged_faces)));
     }
 }
