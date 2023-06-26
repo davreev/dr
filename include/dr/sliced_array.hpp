@@ -44,7 +44,7 @@ struct SlicedArray : AllocatorAware
     SlicedArray& operator=(SlicedArray&& other) noexcept = default;
 
     /// Returns the allocator used by this container
-    Allocator allocator() const noexcept
+    Allocator allocator() const
     {
         return items.get_allocator();
     }

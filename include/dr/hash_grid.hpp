@@ -40,7 +40,7 @@ struct HashGrid : AllocatorAware
     HashGrid& operator=(HashGrid&& other) noexcept = default;
 
     /// Returns the allocator used by this container
-    Allocator allocator() const noexcept
+    Allocator allocator() const
     {
         return buckets_.get_allocator();
     }
