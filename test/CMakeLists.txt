@@ -13,6 +13,7 @@ add_executable(
     math_tests.cpp
     mesh_tests.cpp
     mesh_repair_tests.cpp
+    meta_tests.cpp
     random_tests.cpp
     span_tests.cpp
 )

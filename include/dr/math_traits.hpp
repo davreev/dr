@@ -3,107 +3,34 @@
 #include <type_traits>
 
 #include <dr/math_types.hpp>
+#include <dr/meta.hpp>
 
 namespace dr
 {
 namespace impl
 {
 
-template <typename T>
-struct IsNatural
-{
-    static constexpr bool value{false};
-};
+inline constexpr TypePack<
+    unsigned char,
+    unsigned short int,
+    unsigned int,
+    unsigned long int,
+    unsigned long long int>
+    natural_types{};
 
-template <>
-struct IsNatural<unsigned char>
-{
-    static constexpr bool value{true};
-};
+inline constexpr TypePack<
+    signed char,
+    short int,
+    int,
+    long int,
+    long long int>
+    integer_types{};
 
-template <>
-struct IsNatural<unsigned short int>
-{
-    static constexpr bool value{true};
-};
-
-template <>
-struct IsNatural<unsigned int>
-{
-    static constexpr bool value{true};
-};
-
-template <>
-struct IsNatural<unsigned long int>
-{
-    static constexpr bool value{true};
-};
-
-template <>
-struct IsNatural<unsigned long long int>
-{
-    static constexpr bool value{true};
-};
-
-template <typename T>
-struct IsInteger
-{
-    static constexpr bool value{false};
-};
-
-template <>
-struct IsInteger<signed char>
-{
-    static constexpr bool value{true};
-};
-
-template <>
-struct IsInteger<short int>
-{
-    static constexpr bool value{true};
-};
-
-template <>
-struct IsInteger<int>
-{
-    static constexpr bool value{true};
-};
-
-template <>
-struct IsInteger<long int>
-{
-    static constexpr bool value{true};
-};
-
-template <>
-struct IsInteger<long long int>
-{
-    static constexpr bool value{true};
-};
-
-template <typename T>
-struct IsReal
-{
-    static constexpr bool value{false};
-};
-
-template <>
-struct IsReal<float>
-{
-    static constexpr bool value{true};
-};
-
-template <>
-struct IsReal<double>
-{
-    static constexpr bool value{true};
-};
-
-template <>
-struct IsReal<long double>
-{
-    static constexpr bool value{true};
-};
+inline constexpr TypePack<
+    float,
+    double,
+    long double>
+    real_types{};
 
 template <typename T>
 struct IsComplex
@@ -151,15 +78,15 @@ struct IsCovector
 
 /// True if T models the set of natural numbers (N) (including zero)
 template <typename T>
-inline constexpr bool is_natural = impl::IsNatural<std::decay_t<T>>::value;
+inline constexpr bool is_natural = impl::natural_types.includes<std::decay_t<T>>();
 
 /// True if T models the set of integers (Z)
 template <typename T>
-inline constexpr bool is_integer = impl::IsInteger<std::decay_t<T>>::value;
+inline constexpr bool is_integer = impl::integer_types.includes<std::decay_t<T>>();
 
 /// True if T models the set of real numbers (R)
 template <typename T>
-inline constexpr bool is_real = impl::IsReal<std::decay_t<T>>::value;
+inline constexpr bool is_real = impl::real_types.includes<std::decay_t<T>>();
 
 /// True if T models the set of complex numbers (C)
 template <typename T>
