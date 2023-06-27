@@ -23,44 +23,78 @@ bool is_aligned(void const* const ptr)
     return (addr & (alignof(T) - 1)) == 0;
 }
 
-/// Reinterprets an opaque pointer as a pointer to a specified type
+/*
+    NOTE: When type punning via as<T>(), care must be taken to avoid violating the strict
+    aliasing rule which states that two objects of different types cannot occupy the same location
+    in memory. When strict aliasing is enabled (e.g. in Release builds), the compiler assumes this
+    rule to be true and optimizes accordingly.
+
+    Refs
+    - https://cellperformance.beyond3d.com/articles/2006/06/understanding-strict-aliasing.html
+    - https://gist.github.com/shafik/848ae25ee209f698763cffee272a58f8
+*/
+
+/// Interprets an opaque pointer as a pointer to T if it meets T's alignment requirements.
+/// Otherwise, returns a nullptr.
 template <typename T>
 T* as(void* const ptr)
 {
-    assert(is_aligned<T>(ptr));
-    return static_cast<T*>(ptr);
+    if (is_aligned<T>(ptr))
+        return static_cast<T*>(ptr);
+    else
+        return nullptr;
 }
 
-/// Reinterprets an opaque pointer as a pointer to a specified type
+/// Interprets an opaque pointer as a pointer to T if it meets T's alignment requirements.
+/// Otherwise, returns a nullptr.
 template <typename T>
 T const* as(void const* const ptr)
 {
-    assert(is_aligned<T>(ptr));
-    return static_cast<T const*>(ptr);
+    if (is_aligned<T>(ptr))
+        return static_cast<T const*>(ptr);
+    else
+        return nullptr;
 }
 
 /// Reinterprets a pointer to one type as a pointer to another
-template <typename Dst, typename Src>
+template <typename Dst, typename Src, std::enable_if_t<(alignof(Dst) <= alignof(Src))>* = nullptr>
+constexpr Dst* as(Src* const ptr)
+{
+    return reinterpret_cast<Dst*>(ptr);
+}
+
+/// Reinterprets a pointer to one type as a pointer to another
+template <typename Dst, typename Src, std::enable_if_t<(alignof(Dst) > alignof(Src))>* = nullptr>
 Dst* as(Src* const ptr)
 {
-    if constexpr (alignof(Src) >= alignof(Dst))
-        return reinterpret_cast<Dst*>(ptr);
-    else
-        return as<Dst>(static_cast<void*>(ptr));
+    return as<Dst>(static_cast<void*>(ptr));
 }
 
 /// Reinterprets a pointer to one type as a pointer to another
-template <typename Dst, typename Src>
+template <typename Dst, typename Src, std::enable_if_t<(alignof(Dst) <= alignof(Src))>* = nullptr>
+constexpr Dst const* as(Src const* const ptr)
+{
+    return reinterpret_cast<Dst const*>(ptr);
+}
+
+/// Reinterprets a pointer to one type as a pointer to another
+template <typename Dst, typename Src, std::enable_if_t<(alignof(Dst) > alignof(Src))>* = nullptr>
 Dst const* as(Src const* const ptr)
 {
-    if constexpr (alignof(Src) >= alignof(Dst))
-        return reinterpret_cast<Dst const*>(ptr);
-    else
-        return as<Dst>(static_cast<void const*>(ptr));
+    return as<Dst>(static_cast<void const*>(ptr));
 }
 
 /// Reinterprets a span of one type as a span of another
-template <typename Dst, typename Src>
+template <typename Dst, typename Src, std::enable_if_t<(alignof(Dst) <= alignof(Src))>* = nullptr>
+constexpr Span<Dst> as(Span<Src> const& src)
+{
+    return {
+        as<Dst>(src.data()),
+        static_cast<isize>((src.size() * sizeof(Src)) / sizeof(Dst))};
+}
+
+/// Reinterprets a span of one type as a span of another
+template <typename Dst, typename Src, std::enable_if_t<(alignof(Dst) > alignof(Src))>* = nullptr>
 Span<Dst> as(Span<Src> const& src)
 {
     return {
@@ -69,7 +103,16 @@ Span<Dst> as(Span<Src> const& src)
 }
 
 /// Reinterprets a span of one type as a span of another
-template <typename Dst, typename Src>
+template <typename Dst, typename Src, std::enable_if_t<(alignof(Dst) <= alignof(Src))>* = nullptr>
+constexpr Span<Dst const> as(Span<Src const> const& src)
+{
+    return {
+        as<Dst>(src.data()),
+        static_cast<isize>((src.size() * sizeof(Src)) / sizeof(Dst))};
+}
+
+/// Reinterprets a span of one type as a span of another
+template <typename Dst, typename Src, std::enable_if_t<(alignof(Dst) > alignof(Src))>* = nullptr>
 Span<Dst const> as(Span<Src const> const& src)
 {
     return {
@@ -81,7 +124,7 @@ using AllocatorBase = std::pmr::polymorphic_allocator<std::byte>;
 
 struct Allocator : AllocatorBase
 {
-    // Inherit all constructors of base type
+    // Expose constructors of base type for compatibility with pmr containers
     using AllocatorBase::AllocatorBase;
 
     void* allocate(usize size, usize alignment) const;
