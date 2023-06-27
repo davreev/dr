@@ -3,12 +3,11 @@
 #include <algorithm>
 
 #include <dr/container_utils.hpp>
+#include <dr/hash_map.hpp>
 #include <dr/linalg_reshape.hpp>
 #include <dr/linalg_types.hpp>
 #include <dr/math_types.hpp>
 #include <dr/span.hpp>
-
-#include <dr/shim/pmr/unordered_map.hpp>
 
 namespace dr
 {
@@ -79,7 +78,7 @@ struct ElementEqual
 };
 
 template <typename Index, int size>
-using IncidenceMap = std::pmr::unordered_map<Vec<Index, size>, Index, ElementHash, ElementEqual>;
+using IncidenceMap = HashMap<Vec<Index, size>, Index, ElementHash, ElementEqual>;
 
 /// Creates a map from vertex pairs to directed edges. By convention, oppositely oriented edges are
 /// given consecutive indices.
