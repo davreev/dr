@@ -50,6 +50,8 @@ target_link_libraries(
 
 target_compile_options(
     dr
+    PUBLIC
+        -fstrict-aliasing
     PRIVATE
         -Wall -Wextra -Wpedantic -Werror
 )
