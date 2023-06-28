@@ -11,7 +11,7 @@ namespace impl
 {
 
 template <typename Real>
-constexpr void eval_catmull_rom_basis(Real const t, Real* const result)
+constexpr void eval_catmull_rom_basis(Real const t, Real const result[4])
 {
     static_assert(is_real<Real>);
 
@@ -34,14 +34,14 @@ constexpr void eval_catmull_rom_basis(Real const t, Real* const result)
 }
 
 template <typename Real>
-constexpr void eval_hat_basis(Real const t, Real* const result)
+constexpr void eval_hat_basis(Real const t, Real const result[2])
 {
     result[0] = Real{1.0} - t;
     result[1] = t;
 }
 
 template <typename Real>
-constexpr void eval_bernstein_basis_deg2(Real const t, Real* const result)
+constexpr void eval_bernstein_basis_deg2(Real const t, Real const result[3])
 {
     static_assert(is_real<Real>);
 
@@ -61,7 +61,7 @@ constexpr void eval_bernstein_basis_deg2(Real const t, Real* const result)
 }
 
 template <typename Real>
-constexpr void eval_bernstein_basis_deg3(Real const t, Real* const result)
+constexpr void eval_bernstein_basis_deg3(Real const t, Real const result[4])
 {
     static_assert(is_real<Real>);
 
@@ -84,21 +84,22 @@ constexpr void eval_bernstein_basis_deg3(Real const t, Real* const result)
 }
 
 template <typename Value, typename Real>
-constexpr Value mix4(Value const* const x, Real const* const f)
+constexpr Value mix4(Value const x[4], Real const f[4])
 {
     static_assert(is_real<Real>);
     return f[0] * x[0] + f[1] * x[1] + f[2] * x[2] + f[3] * x[3];
 }
 
 template <typename Value, typename Real>
-constexpr Value mix3(Value const* const x, Real const* const f)
+constexpr Value mix3(Value const x[3], Real const f[3])
+
 {
     static_assert(is_real<Real>);
     return f[0] * x[0] + f[1] * x[1] + f[2] * x[2];
 }
 
 template <typename Value, typename Real>
-constexpr Value mix2(Value const* const x, Real const* const f)
+constexpr Value mix2(Value const x[2], Real const f[2])
 {
     static_assert(is_real<Real>);
     return f[0] * x[0] + f[1] * x[1];
@@ -107,7 +108,7 @@ constexpr Value mix2(Value const* const x, Real const* const f)
 } // namespace impl
 
 template <typename Value, typename Real>
-constexpr Value interp_linear(Value const* const x, Real const t)
+constexpr Value interp_linear(Value const x[2], Real const t)
 {
     static_assert(is_real<Real>);
     Real const f[2]{t, Real{1.0} - t};
@@ -115,7 +116,7 @@ constexpr Value interp_linear(Value const* const x, Real const t)
 }
 
 template <typename Value, typename Real>
-constexpr Value interp_bilinear(Value const* const x, Real const u, Real const v)
+constexpr Value interp_bilinear(Value const x[4], Real const u, Real const v)
 {
     static_assert(is_real<Real>);
 
@@ -134,7 +135,7 @@ constexpr Value interp_bilinear(Value const* const x, Real const u, Real const v
 }
 
 template <typename Value, typename Real>
-constexpr Value interp_trilinear(Value const* const x, Real const u, Real const v, Real const w)
+constexpr Value interp_trilinear(Value const x[8], Real const u, Real const v, Real const w)
 {
     static_assert(is_real<Real>);
 
@@ -166,7 +167,7 @@ constexpr Value interp_trilinear(Value const* const x, Real const u, Real const 
 }
 
 template <typename Value, typename Real>
-constexpr Value interp_cubic(Value const* const x, Real const t)
+constexpr Value interp_cubic(Value const x[4], Real const t)
 {
     static_assert(is_real<Real>);
 
@@ -177,7 +178,7 @@ constexpr Value interp_cubic(Value const* const x, Real const t)
 }
 
 template <typename Value, typename Real>
-constexpr Value interp_bicubic(Value const* const x, Real const u, Real const v)
+constexpr Value interp_bicubic(Value const x[16], Real const u, Real const v)
 {
     static_assert(is_real<Real>);
 
@@ -191,14 +192,14 @@ constexpr Value interp_bicubic(Value const* const x, Real const u, Real const v)
         impl::mix4(x, f_u),
         impl::mix4(x + 4, f_u),
         impl::mix4(x + 8, f_u),
-        impl::mix4(x + 16, f_u),
+        impl::mix4(x + 12, f_u),
     };
 
     return impl::mix4(x_v, f_v);
 }
 
 template <typename Value, typename Real>
-constexpr Value interp_tricubic(Value const* const x, Real const u, Real const v, Real const w)
+constexpr Value interp_tricubic(Value const x[64], Real const u, Real const v, Real const w)
 {
     static_assert(is_real<Real>);
 
@@ -230,7 +231,7 @@ constexpr Value interp_tricubic(Value const* const x, Real const u, Real const v
 }
 
 template <typename Value, typename Real>
-constexpr Value bezier_quadratic(Value const* const x, Real const t)
+constexpr Value bezier_quadratic(Value const x[3], Real const t)
 {
     static_assert(is_real<Real>);
     Real f[3]{};
@@ -239,7 +240,7 @@ constexpr Value bezier_quadratic(Value const* const x, Real const t)
 }
 
 template <typename Value, typename Real>
-constexpr Value bezier_cubic(Value const* const x, Real const t)
+constexpr Value bezier_cubic(Value const x[4], Real const t)
 {
     static_assert(is_real<Real>);
     Real f[4]{};
