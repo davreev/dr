@@ -77,6 +77,7 @@ struct Span
 
     /// True if this span refers to a valid memory address
     constexpr bool is_valid() const { return data_ != nullptr; }
+    constexpr explicit operator bool() const { return is_valid(); }
 
   private:
     T* data_{};
