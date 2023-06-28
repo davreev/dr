@@ -53,28 +53,28 @@ auto as_mat(Scalar const* const coeffs)
 template <int cols, typename Scalar, int size>
 auto as_mat(Vec<Scalar, size>* const vecs)
 {
-    return Eigen::Map<Mat<Scalar, size, cols>>{as<Scalar>(vecs)};
+    return Eigen::Map<Mat<Scalar, size, cols>>{vecs->data()};
 }
 
 /// Creates a fixed-size matrix view of the given vectors
 template <int cols, typename Scalar, int size>
 auto as_mat(Vec<Scalar, size> const* const vecs)
 {
-    return Eigen::Map<Mat<Scalar, size, cols> const>{as<Scalar>(vecs)};
+    return Eigen::Map<Mat<Scalar, size, cols> const>{vecs->data()};
 }
 
 /// Creates a fixed-size matrix view of the given covectors
 template <int rows, typename Scalar, int size>
 auto as_mat(Covec<Scalar, size>* const covecs)
 {
-    return Eigen::Map<Mat<Scalar, rows, size, Eigen::RowMajor>>{as<Scalar>(covecs)};
+    return Eigen::Map<Mat<Scalar, rows, size, Eigen::RowMajor>>{covecs->data()};
 }
 
 /// Creates a fixed-size matrix view of the given covectors
 template <int rows, typename Scalar, int size>
 auto as_mat(Covec<Scalar, size> const* const covecs)
 {
-    return Eigen::Map<Mat<Scalar, rows, size, Eigen::RowMajor> const>{as<Scalar>(covecs)};
+    return Eigen::Map<Mat<Scalar, rows, size, Eigen::RowMajor> const>{covecs->data()};
 }
 
 /// Creates a vector view of the given scalars
@@ -123,21 +123,21 @@ auto as_mat(Span<Scalar const> const& coeffs, isize const rows)
 template <typename Scalar, int size>
 auto as_mat(Span<Vec<Scalar, size>> const& vecs)
 {
-    return Eigen::Map<VecArray<Scalar, size>>{as<Scalar>(vecs.data()), size, vecs.size()};
+    return Eigen::Map<VecArray<Scalar, size>>{vecs.data()->data(), size, vecs.size()};
 }
 
 /// Creates a matrix view of the given vectors
 template <typename Scalar, int size>
 auto as_mat(Span<Vec<Scalar, size> const> const& vecs)
 {
-    return Eigen::Map<VecArray<Scalar, size> const>{as<Scalar>(vecs.data()), size, vecs.size()};
+    return Eigen::Map<VecArray<Scalar, size> const>{vecs.data()->data(), size, vecs.size()};
 }
 
 /// Creates a matrix view of the given covectors
 template <typename Scalar, int size>
 auto as_mat(Span<Covec<Scalar, size>> const& covecs)
 {
-    return Eigen::Map<CovecArray<Scalar, size>>{as<Scalar>(covecs.data()), covecs.size(), size};
+    return Eigen::Map<CovecArray<Scalar, size>>{covecs.data()->data(), covecs.size(), size};
 }
 
 /// Creates a matrix view of the given covectors
@@ -145,7 +145,7 @@ template <typename Scalar, int size>
 auto as_mat(Span<Covec<Scalar, size> const> const& covecs)
 {
     return Eigen::Map<CovecArray<Scalar, size> const>{
-        as<Scalar>(covecs.data()),
+        covecs.data()->data(),
         covecs.size(),
         size};
 }
