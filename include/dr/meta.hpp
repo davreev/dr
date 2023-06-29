@@ -3,6 +3,8 @@
 #include <array>
 #include <type_traits>
 
+#include <dr/basic_types.hpp>
+
 namespace dr
 {
 
@@ -20,6 +22,8 @@ struct TypePack
     {
         return {};
     }
+
+    static constexpr usize size() { return sizeof...(T); }
 };
 
 template <typename T, T... vals>
@@ -41,6 +45,8 @@ struct ValuePack
     {
         return {vals...};
     }
+
+    static constexpr usize size() { return sizeof...(vals); }
 };
 
 } // namespace dr
