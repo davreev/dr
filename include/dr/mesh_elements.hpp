@@ -128,7 +128,11 @@ void collect_edge_start_vertices(
     IncidenceMap<Index, 2> const& vertex_to_edge,
     Span<Index> const result)
 {
-    assert(result.size() == size<isize>(vertex_to_edge));
+    // NOTE: For some reason, calling size() here without namespace qualification results in a
+    // compilation error on Windows (comparison of integers of different signs).
+
+    // assert(result.size() == size(vertex_to_edge));
+    assert(result.size() == dr::size(vertex_to_edge));
 
     for (auto const& [e_v, e] : vertex_to_edge)
         result[e] = e_v[0];
@@ -141,7 +145,7 @@ void collect_edge_opposite_vertices(
     Span<Vec3<Index> const> const& face_vertices,
     Span<Index> const result)
 {
-    assert(result.size() == size<isize>(vertex_to_edge));
+    assert(result.size() == size(vertex_to_edge));
 
     as_vec(result).setConstant(-1);
 
@@ -175,7 +179,7 @@ void collect_edge_faces(
     Span<Vec3<Index> const> const& face_vertices,
     Span<Index> const result)
 {
-    assert(result.size() == size<isize>(vertex_to_edge));
+    assert(result.size() == size(vertex_to_edge));
 
     as_vec(result).setConstant(-1);
 

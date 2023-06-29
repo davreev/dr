@@ -1,6 +1,7 @@
 #include <utest.h>
 
 #include <dr/halfedge.hpp>
+#include <dr/memory.hpp>
 
 #include "test_utils.hpp"
 

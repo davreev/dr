@@ -1,15 +1,13 @@
 #include <utest.h>
 
+#include <dr/memory.hpp>
 #include <dr/sliced_array.hpp>
-
-#include <dr/shim/pmr/memory_resource.hpp>
 
 UTEST(sliced_array, push_pop_back)
 {
     using namespace dr;
 
-    std::pmr::memory_resource* mem = std::pmr::get_default_resource();
-    SlicedArray<f64> arr{mem};
+    SlicedArray<f64> arr{};
 
     f64 const a[] = {0.0, 1.0, 2.0};
     f64 const b[] = {0.0, 1.0, 2.0, 3.0};
@@ -44,8 +42,7 @@ UTEST(sliced_array, indexer)
 {
     using namespace dr;
 
-    std::pmr::memory_resource* mem = std::pmr::get_default_resource();
-    SlicedArray<f64> arr{mem};
+    SlicedArray<f64> arr{};
 
     f64 const a[] = {0.0, 1.0, 2.0};
     f64 const b[] = {0.0, 1.0, 2.0, 3.0};

@@ -10,7 +10,7 @@
 UTEST(container_utils, carray_to_span)
 {
     using namespace dr;
-    
+
     {
         f64 arr[] = {0.0, 1.0, 2.0, 3.0, 4.0};
         Span<f64> span = as_span(arr);
@@ -29,11 +29,11 @@ UTEST(container_utils, carray_to_span)
 UTEST(container_traits, is_contiguous)
 {
     using namespace dr;
-    
+
     ASSERT_TRUE(is_contiguous<std::vector<int>>);
     ASSERT_TRUE(is_contiguous<std::vector<float>>);
     ASSERT_FALSE(is_contiguous<std::vector<bool>>);
-    
+
     {
         using Array = std::array<int, 100>;
         ASSERT_TRUE(is_contiguous<Array>);

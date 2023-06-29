@@ -1,5 +1,8 @@
 #include <utest.h>
 
+#include <optional>
+
+#include <dr/dynamic_array.hpp>
 #include <dr/geometry.hpp>
 
 UTEST(geometry, eval_gradient)
@@ -132,7 +135,7 @@ UTEST(geometry, eval_divergence)
 
                v2
                |\          |\
-               | \      e2 | \ e1 
+               | \      e2 | \ e1
                |  \        |  \
                -----       -----
              v0     v1      e0
@@ -140,7 +143,7 @@ UTEST(geometry, eval_divergence)
         Cotan weights
 
             w[e0] = w[e2] = cos(pi/4) / sin(pi/4) = 1
-            w[e1] = cos(pi/2) / sin(pi/2) = 0 
+            w[e1] = cos(pi/2) / sin(pi/2) = 0
     */
 
     TestCase const test_cases[] = {
@@ -757,7 +760,7 @@ UTEST(geometry, signed_area)
 
     struct TestCase
     {
-        std::vector<Vec2<f64>> polygon;
+        DynamicArray<Vec2<f64>> polygon;
         f64 result;
     };
 
@@ -818,7 +821,7 @@ UTEST(geometry, signed_area)
         },
     };
 
-    for(auto const& [poly, result] : test_cases)
+    for (auto const& [poly, result] : test_cases)
     {
         auto const a = signed_area(as_span(poly));
         ASSERT_NEAR(result, a, eps);
@@ -833,7 +836,7 @@ UTEST(geometry, vector_area)
 
     struct TestCase
     {
-        std::vector<Vec3<f64>> polygon;
+        DynamicArray<Vec3<f64>> polygon;
         Vec3<f64> result;
     };
 
@@ -912,7 +915,7 @@ UTEST(geometry, vector_area)
         },
     };
 
-    for(auto const& [poly, result] : test_cases)
+    for (auto const& [poly, result] : test_cases)
     {
         auto const v = vector_area(as_span(poly));
         ASSERT_NEAR(result[0], v[0], eps);

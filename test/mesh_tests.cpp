@@ -1,7 +1,6 @@
 #include <utest.h>
 
-#include <vector>
-
+#include <dr/dynamic_array.hpp>
 #include <dr/mesh_attributes.hpp>
 #include <dr/mesh_elements.hpp>
 #include <dr/mesh_primitives.hpp>
@@ -17,9 +16,8 @@ UTEST(mesh, append)
     auto const src_verts = MeshCube::vertex_positions();
     auto const src_faces = MeshCube::face_vertices();
 
-    std::pmr::memory_resource* mem = std::pmr::get_default_resource();
-    std::pmr::vector<Vec3<f32>> dst_verts{mem};
-    std::pmr::vector<Vec3<i32>> dst_faces{mem};
+    DynamicArray<Vec3<f32>> dst_verts{};
+    DynamicArray<Vec3<i32>> dst_faces{};
 
     append_elements<i32>(src_faces, dst_verts.size(), dst_faces);
     append_attributes(src_verts, dst_verts);
@@ -27,7 +25,7 @@ UTEST(mesh, append)
     append_elements<i32>(src_faces, dst_verts.size(), dst_faces);
     append_attributes(src_verts, dst_verts);
 
-    ASSERT_EQ(size<isize>(dst_verts), src_verts.size() * 2);
+    ASSERT_EQ(dr::size(dst_verts), src_verts.size() * 2);
     for (isize i = 0, j = src_verts.size(); i < src_verts.size(); ++i, ++j)
     {
         Vec3<f32> const& v0 = dst_verts[i];
@@ -38,7 +36,7 @@ UTEST(mesh, append)
         ASSERT_EQ(v0[2], v1[2]);
     }
 
-    ASSERT_EQ(size<isize>(dst_faces), src_faces.size() * 2);
+    ASSERT_EQ(dr::size(dst_faces), src_faces.size() * 2);
     for (isize i = 0, j = src_faces.size(); i < src_faces.size(); ++i, ++j)
     {
         Vec3<i32> const& f0 = dst_faces[i];
@@ -98,7 +96,7 @@ UTEST(mesh, fan_triangulator)
 
     for (auto const& [num_indices, result] : test_cases)
     {
-        std::vector<i32> poly(num_indices);
+        DynamicArray<i32> poly(num_indices);
 
         for (i32 i = 0; i < num_indices; ++i)
             poly[i] = i;
@@ -166,7 +164,7 @@ UTEST(mesh, strip_triangulator)
 
     for (auto const& [num_indices, result] : test_cases)
     {
-        std::vector<i32> poly(num_indices);
+        DynamicArray<i32> poly(num_indices);
 
         for (i32 i = 0; i < num_indices; ++i)
             poly[i] = i;
@@ -244,7 +242,7 @@ UTEST(mesh, make_vertex_to_edge)
     };
 
     IncidenceMap<i32, 2> verts_to_edge{};
-    std::pmr::vector<i32> edge_verts{};
+    DynamicArray<i32> edge_verts{};
 
     for (auto const& [f_v, result] : test_cases)
     {
@@ -253,7 +251,7 @@ UTEST(mesh, make_vertex_to_edge)
         edge_verts.resize(verts_to_edge.size());
         collect_edge_start_vertices(verts_to_edge, as_span(edge_verts));
 
-        ASSERT_EQ(result.num_edges * 2, size<i32>(edge_verts));
+        ASSERT_EQ(result.num_edges * 2, size_as<i32>(edge_verts));
 
         for (auto const& [e_v, e] : verts_to_edge)
         {
@@ -345,7 +343,7 @@ UTEST(mesh, vertex_normals_area_weighted)
     for (auto const& [vertex_positions, face_vertices] : test_cases)
     {
         isize const num_verts = vertex_positions.size();
-        std::vector<Vec3<f32>> vertex_normals(num_verts);
+        DynamicArray<Vec3<f32>> vertex_normals(num_verts);
 
         vertex_normals_area_weighted(
             vertex_positions,
@@ -407,7 +405,7 @@ UTEST(mesh, eval_vertex_integral)
     for (auto const& [vertex_positions, face_vertices, value, result] : test_cases)
     {
         isize const num_verts = vertex_positions.size();
-        std::vector<f32> vertex_values(num_verts, value);
+        DynamicArray<f32> vertex_values(num_verts, value);
 
         f32 area{};
         f32 const sum = eval_vertex_integral(

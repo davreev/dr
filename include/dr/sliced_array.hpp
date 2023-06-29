@@ -50,10 +50,10 @@ struct SlicedArray : AllocatorAware
     }
 
     /// Returns the total number of items
-    Index num_items() const { return size<Index>(items); }
+    Index num_items() const { return size_as<Index>(items); }
 
     /// Returns the number of slices
-    Index num_slices() const { return size<Index>(slice_ends); }
+    Index num_slices() const { return size_as<Index>(slice_ends); }
 
     /// Returns the slice at the given index
     Span<T const> operator[](Index const index) const

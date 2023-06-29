@@ -2,12 +2,11 @@
 
 #include <algorithm>
 
+#include <dr/dynamic_array.hpp>
 #include <dr/geometry_types.hpp>
 #include <dr/hash_grid.hpp>
 #include <dr/math_types.hpp>
 #include <dr/memory.hpp>
-
-#include <dr/shim/pmr/memory_resource.hpp>
 
 #include "test_utils.hpp"
 
@@ -46,9 +45,9 @@ UTEST(hash_grid, insert_find)
 
     struct TestCase
     {
-        std::vector<Vec3<f64>> points;
+        DynamicArray<Vec3<f64>> points;
         Interval3<f64> interval;
-        std::vector<i32> result;
+        DynamicArray<i32> result;
     };
 
     TestCase const test_cases[] = {
@@ -97,9 +96,9 @@ UTEST(hash_grid, insert_find)
         for (auto const& p : points)
             grid.insert(p, index++);
 
-        ASSERT_EQ(grid.size(), size<isize>(points));
+        ASSERT_EQ(grid.size(), dr::size(points));
 
-        std::pmr::vector<i32> found_indices{};
+        DynamicArray<i32> found_indices{};
         grid.find(interval, found_indices);
 
         std::sort(found_indices.begin(), found_indices.end());

@@ -39,7 +39,7 @@ struct StripTriangulator
 {
     StripTriangulator(Span<Index const> const& polygon) :
         polygon_{(assert(polygon.size() > 2), polygon)},
-        c_{size<Index>(polygon) - 1}
+        c_{size_as<Index>(polygon) - 1}
     {
     }
 

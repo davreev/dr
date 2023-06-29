@@ -14,7 +14,7 @@ UTEST(span, is_valid)
 
     {
         i32 const arr[] = {0, 1, 2, 3, 4};
-        Span<i32 const> span{arr, size<isize>(arr)};
+        Span<i32 const> span{arr, dr::size(arr)};
         ASSERT_TRUE(span.is_valid());
     }
 }

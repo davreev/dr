@@ -10,50 +10,64 @@
 namespace dr
 {
 
-/// Returns the size of the given c array as the specified type
-template <typename Size, typename T, Size n>
-constexpr Size size(T const (& /*array*/)[n])
+/// Returns the number of elements in the given array
+template <typename T, isize n>
+constexpr isize size(T const (& /*array*/)[n])
 {
     return n;
 }
 
-/// Returns the size of the given container as the specified type
+/// Returns the number of elements in the given container
+template <typename Container>
+constexpr isize size(Container&& container)
+{
+    return static_cast<isize>(container.size());
+}
+
+/// Returns the number of elements in the given array using a specified size type
+template <typename Size, typename T, Size n>
+constexpr Size size_as(T const (& /*array*/)[n])
+{
+    return n;
+}
+
+/// Returns the number of elements in the given container using a specified size type
 template <typename Size, typename Container>
-Size size(Container const& container)
+constexpr Size size_as(Container&& container)
 {
     return static_cast<Size>(container.size());
 }
 
 /// Creates a span from the given pointer and size
 template <typename T>
-Span<T> as_span(T* const begin, isize const size)
+constexpr Span<T> as_span(T* const begin, isize const size)
 {
     return {begin, size};
 }
 
 /// Creates a span over the given c array
 template <typename T, isize n>
-Span<T> as_span(T (&array)[n])
+constexpr Span<T> as_span(T (&array)[n])
 {
     return {array, n};
 }
 
 /// Creates a span from another contiguous container type
 template <typename Container, std::enable_if_t<is_contiguous<Container>>* = nullptr>
-Span<typename Container::value_type> as_span(Container& container)
+constexpr Span<typename Container::value_type> as_span(Container& container)
 {
     return {container.data(), static_cast<isize>(container.size())};
 }
 
 /// Creates a span from another contiguous container type
 template <typename Container, std::enable_if_t<is_contiguous<Container>>* = nullptr>
-Span<const typename Container::value_type> as_span(Container const& container)
+constexpr Span<const typename Container::value_type> as_span(Container const& container)
 {
     return {container.data(), static_cast<isize>(container.size())};
 }
 
 /// Deleted to avoid creating a span from a temporary
 template <typename Container, std::enable_if_t<is_contiguous<Container>>* = nullptr>
-Span<const typename Container::value_type> as_span(Container const&& container) = delete;
+constexpr Span<const typename Container::value_type> as_span(Container const&& container) = delete;
 
 } // namespace dr

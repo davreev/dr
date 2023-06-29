@@ -353,13 +353,13 @@ struct HalfedgeMesh : AllocatorAware
     /// Returns the number of vertices in the mesh
     Index num_vertices() const
     {
-        return size<Index>(vertex_halfedge_);
+        return size_as<Index>(vertex_halfedge_);
     }
 
     /// Returns the number of halfedges in the mesh
     Index num_halfedges() const
     {
-        return size<Index>(halfedge_next_);
+        return size_as<Index>(halfedge_next_);
     }
 
     /// Returns the number of edges in the mesh
@@ -371,13 +371,13 @@ struct HalfedgeMesh : AllocatorAware
     /// Returns the number of faces in the mesh
     Index num_faces() const
     {
-        return size<Index>(face_halfedge_);
+        return size_as<Index>(face_halfedge_);
     }
 
     /// Returns the number of holes in the mesh
     Index num_holes() const
     {
-        return size<Index>(hole_halfedge_);
+        return size_as<Index>(hole_halfedge_);
     }
 
     /// Returns true if the given halfedge is on the mesh boundary
