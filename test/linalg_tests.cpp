@@ -52,7 +52,8 @@ UTEST(linalg_reshape, scals_to_vecs)
 {
     using namespace dr;
 
-    f64 const scals[] = {0.0, 1.0, 2.0, 3.0, 4.0, 5.0};
+    alignas(Vec2<f64>) f64 const scals[] = {0.0, 1.0, 2.0, 3.0, 4.0, 5.0};
+    static_assert(alignof(Covec3<f64>) < alignof(Vec2<f64>));
 
     {
         Span<Vec2<f64> const> const vecs = as<Vec2<f64>>(as_span(scals));
