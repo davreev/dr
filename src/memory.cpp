@@ -13,24 +13,6 @@ void Allocator::deallocate(void* const ptr, usize const size, usize const alignm
     return resource()->deallocate(ptr, size, alignment);
 }
 
-ScopedAlloc::ScopedAlloc(usize const size, usize const alignment, Allocator const alloc) :
-    data_{alloc.allocate(size, alignment)},
-    size_{size},
-    alignment_{alignment},
-    alloc_{alloc}
-{
-}
-
-ScopedAlloc::~ScopedAlloc()
-{
-    alloc_.deallocate(data_, size_, alignment_);
-}
-
-Span<u8> ScopedAlloc::data() const
-{
-    return {static_cast<u8*>(data_), static_cast<isize>(size_)};
-}
-
 DebugMemoryResource::DebugMemoryResource() :
     upstream{std::pmr::get_default_resource()}
 {

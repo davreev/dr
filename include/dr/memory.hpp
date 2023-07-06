@@ -151,20 +151,51 @@ struct AllocatorAware
 };
 
 /// Simple RAII-style heap allocation
+template <usize alignment>
 struct ScopedAlloc
 {
-    ScopedAlloc(usize size, usize alignment, Allocator alloc = {});
-    ~ScopedAlloc();
+    ScopedAlloc(usize size, Allocator alloc = {}) :
+        data_{alloc.allocate(size, alignment)},
+        size_{size},
+        alloc_{alloc}
+    {
+    }
+
+    ~ScopedAlloc()
+    {
+        alloc_.deallocate(data_, size_, alignment);
+    }
 
     ScopedAlloc(ScopedAlloc const&) = delete;
     ScopedAlloc& operator=(ScopedAlloc const&) = delete;
 
-    Span<u8> data() const;
+    Span<u8> data()
+    {
+        return {static_cast<u8*>(data_), static_cast<isize>(size_)};
+    }
+
+    Span<u8 const> data() const
+    {
+        return {static_cast<u8 const*>(data_), static_cast<isize>(size_)};
+    }
+
+    template <typename T>
+    Span<T> data_as()
+    {
+        static_assert(alignof(T) <= alignment);
+        return {static_cast<T*>(data_), static_cast<isize>(size_ / sizeof(T))};
+    }
+
+    template <typename T>
+    Span<T const> data_as()
+    {
+        static_assert(alignof(T) <= alignment);
+        return {static_cast<T const*>(data_), static_cast<isize>(size_ / sizeof(T))};
+    }
 
   private:
     void* data_;
     usize size_;
-    usize alignment_;
     Allocator alloc_;
 };
 
