@@ -75,7 +75,7 @@ void make_cotan_laplacian(
     static_assert(is_integer<Index> || is_natural<Index>);
 
     DynamicArray<Triplet<Real, Index>> coeffs{alloc};
-    cotan_laplace_coeffs(vertex_positions, face_vertices, coeffs);
+    make_cotan_laplacian(vertex_positions, face_vertices, coeffs);
 
     result.resize(vertex_positions.size(), vertex_positions.size());
     result.setFromTriplets(coeffs.begin(), coeffs.end());
@@ -114,7 +114,7 @@ void make_incidence(
     static_assert(is_integer<Index> || is_natural<Index>);
 
     DynamicArray<Triplet<Scalar, Index>> coeffs{alloc};
-    incidence_coeffs(elements, coeffs);
+    make_incidence(elements, coeffs);
 
     result.resize(rows, elements.size());
     result.setFromTriplets(coeffs.begin(), coeffs.end());
@@ -154,7 +154,7 @@ void make_vector_area(
     static_assert(is_integer<Index> || is_natural<Index>);
 
     DynamicArray<Triplet<Real, Index>> coeffs{alloc};
-    vector_area_coeffs(boundary_edge_vertices, num_vertices, coeffs);
+    make_vector_area(boundary_edge_vertices, num_vertices, coeffs);
 
     result.resize(num_vertices * 2, num_vertices * 2);
     result.setFromTriplets(coeffs.begin(), coeffs.end());
