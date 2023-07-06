@@ -178,8 +178,22 @@ struct HalfedgeMesh : AllocatorAware
             bool include_previous = true,
             bool include_holes = true);
 
+        template <typename SrcIndex, int n>
+        Error make_from_face_vertex(
+            Span<Vec<SrcIndex, n> const> const& face_vertices,
+            HalfedgeMesh& result,
+            bool include_previous = true,
+            bool include_holes = true);
+
       private:
         IncidenceMap<Index, 2> v_to_he_;
+
+        template <typename SrcIndex, typename FaceVertexSrc>
+        Error make_from_face_vertex_impl(
+            FaceVertexSrc&& face_vertices,
+            HalfedgeMesh& result,
+            bool include_previous = true,
+            bool include_holes = true);
     };
 
     HalfedgeMesh(Allocator const alloc = {}) :

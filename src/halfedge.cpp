@@ -1,6 +1,7 @@
 #include <dr/halfedge.hpp>
 
 #include <dr/math_traits.hpp>
+#include <dr/meta.hpp>
 
 namespace dr
 {
@@ -9,6 +10,9 @@ namespace
 
 using Index = HalfedgeMesh::Index;
 using Builder = HalfedgeMesh::Builder;
+
+TypePack<i16, i32, i64, u16, u32, u64> supported_index_types{};
+ValuePack<int, 3, 4> supported_face_sizes{};
 
 } // namespace
 
@@ -35,10 +39,57 @@ Builder::Error Builder::make_from_face_vertex(
     bool const include_previous,
     bool const include_holes)
 {
+    static_assert(supported_index_types.includes<SrcIndex>());
+
+    struct FaceVertexSrc
+    {
+        SlicedArray<SrcIndex> const* src;
+        Index size() const { return src->num_slices(); }
+        Span<SrcIndex const> operator[](Index const face) const { return (*src)[face]; };
+    };
+
+    return make_from_face_vertex_impl<SrcIndex>(
+        FaceVertexSrc{&face_vertices},
+        result,
+        include_previous,
+        include_holes);
+}
+
+template <typename SrcIndex, int n>
+Builder::Error Builder::make_from_face_vertex(
+    Span<Vec<SrcIndex, n> const> const& face_vertices,
+    HalfedgeMesh& result,
+    bool const include_previous,
+    bool const include_holes)
+{
+    static_assert(supported_index_types.includes<SrcIndex>());
+    static_assert(supported_face_sizes.includes<n>());
+
+    struct FaceVertexSrc
+    {
+        Span<Vec<SrcIndex, n> const> src;
+        Index size() const { return src.size(); }
+        Span<SrcIndex const> operator[](Index const face) const { return as_span(src[face]); }
+    };
+
+    return make_from_face_vertex_impl<SrcIndex>(
+        FaceVertexSrc{face_vertices},
+        result,
+        include_previous,
+        include_holes);
+}
+
+template <typename SrcIndex, typename FaceVertexSrc>
+Builder::Error Builder::make_from_face_vertex_impl(
+    FaceVertexSrc&& face_vertices,
+    HalfedgeMesh& result,
+    bool const include_previous,
+    bool const include_holes)
+{
     static_assert(is_integer<SrcIndex> || is_natural<SrcIndex>);
 
     v_to_he_.clear();
-    Index const num_faces = face_vertices.num_slices();
+    Index const num_faces = face_vertices.size();
     Index num_hedges = 0;
     Index num_verts = 0;
 
@@ -58,14 +109,14 @@ Builder::Error Builder::make_from_face_vertex(
             if (v0 == v1)
                 return Error_DegenerateEdge;
 
-            // Try inserting a halfedge between the vertex pair. If one already exists,
-            // then we have a non-manifold edge.
+            // Try inserting a halfedge between the vertex pair. If one already exists, then we have
+            // a non-manifold edge.
             auto const [it0, inserted] = v_to_he_.insert({{v0, v1}, invalid_index_});
             if (!inserted)
                 return Error_NonManifoldEdge;
 
-            // Infer the index of the new halfedge if its twin already exists. Otherwise,
-            // treat it as the first of a new pair.
+            // Infer the index of the new halfedge if its twin already exists. Otherwise, treat it
+            // as the first of a new pair.
             auto const it1 = v_to_he_.find({v1, v0});
             if (it1 == v_to_he_.end())
             {
@@ -114,8 +165,8 @@ Builder::Error Builder::make_from_face_vertex(
 
         for (Index i = 0, n = f_v.size(); i < n; ++i)
         {
-            // If the twin halfedge is already in the face, then we have a (partially)
-            // degenerate face
+            // If the twin halfedge is already in the face, then we have a (partially) degenerate
+            // face
             if (he_face[he0 ^ 1] == f)
                 return Error_DegenerateFace;
 
@@ -232,8 +283,8 @@ Builder::Error Builder::make_from_face_vertex(
     {
         Index he_count = 0;
 
-        // Count halfedges by circulating vertices. If the result is inconsistent, then we have
-        // one or more non-manifold vertices.
+        // Count halfedges by circulating vertices. If the result is inconsistent, then we have one
+        // or more non-manifold vertices.
         for (Index v = 0; v < num_verts; ++v)
         {
             Index he0 = v_hedge[v];
@@ -257,23 +308,46 @@ Builder::Error Builder::make_from_face_vertex(
 
 // Explicit template instantiation
 
-#ifdef MAKE_FROM_FACE_VERTEX
-static_assert(false);
-#else
-#define MAKE_FROM_FACE_VERTEX(SrcIndex)                     \
+#define DR_INSTANTIATE(SrcIndex)                            \
     template Builder::Error Builder::make_from_face_vertex( \
         SlicedArray<SrcIndex> const& face_vertices,         \
         HalfedgeMesh& result,                               \
         bool include_previous,                              \
         bool include_holes);
 
-MAKE_FROM_FACE_VERTEX(i16)
-MAKE_FROM_FACE_VERTEX(i32)
-MAKE_FROM_FACE_VERTEX(i64)
-MAKE_FROM_FACE_VERTEX(u16)
-MAKE_FROM_FACE_VERTEX(u32)
-MAKE_FROM_FACE_VERTEX(u64)
-#undef MAKE_FROM_FACE_VERTEX
-#endif
+DR_INSTANTIATE(i16)
+DR_INSTANTIATE(i32)
+DR_INSTANTIATE(i64)
+
+DR_INSTANTIATE(u16)
+DR_INSTANTIATE(u32)
+DR_INSTANTIATE(u64)
+
+#undef DR_INSTANTIATE
+
+#define DR_INSTANTIATE(SrcIndex, size)                        \
+    template Builder::Error Builder::make_from_face_vertex(   \
+        Span<Vec<SrcIndex, size> const> const& face_vertices, \
+        HalfedgeMesh& result,                                 \
+        bool include_previous,                                \
+        bool include_holes);
+
+DR_INSTANTIATE(i16, 3)
+DR_INSTANTIATE(i32, 3)
+DR_INSTANTIATE(i64, 3)
+
+DR_INSTANTIATE(u16, 3)
+DR_INSTANTIATE(u32, 3)
+DR_INSTANTIATE(u64, 3)
+
+DR_INSTANTIATE(i16, 4)
+DR_INSTANTIATE(i32, 4)
+DR_INSTANTIATE(i64, 4)
+
+DR_INSTANTIATE(u16, 4)
+DR_INSTANTIATE(u32, 4)
+DR_INSTANTIATE(u64, 4)
+
+#undef DR_INSTANTIATE
 
 } // namespace dr
