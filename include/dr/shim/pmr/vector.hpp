@@ -4,7 +4,7 @@
 
 #include <dr/shim/pmr/memory_resource.hpp>
 
-#ifdef PMR_EXPERIMENTAL
+#ifdef DR_PMR_EXPERIMENTAL
 
 namespace std::experimental::pmr
 {
