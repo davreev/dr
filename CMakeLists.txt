@@ -56,10 +56,17 @@ target_compile_options(
         -Wall -Wextra -Wpedantic -Werror
 )
 
+option(
+    DR_PMR_EXPERIMENTAL 
+    "Use the std::experimental::pmr namespace instead of std::pmr. Intended for use with non-compliant C++17 standard library implementations (e.g. libc++)." 
+    OFF
+)
+
 target_compile_definitions(
     dr
     PUBLIC
         EIGEN_INITIALIZE_MATRICES_BY_ZERO
+        $<$<BOOL:${DR_PMR_EXPERIMENTAL}>: DR_PMR_EXPERIMENTAL>
 )
 
 target_link_options(
