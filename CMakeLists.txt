@@ -79,16 +79,6 @@ target_link_options(
 # Optional targets
 #
 
-option(DR_BENCH "Generate benchmark targets" OFF)
-if(DR_BENCH)
-    add_subdirectory(bench)
-endif()
-
-option(DR_EXAMPLE "Generate example targets" OFF)
-if(DR_EXAMPLE)
-    add_subdirectory(example)
-endif()
-
 option(DR_TEST "Generate test target" OFF)
 if(DR_TEST)
     enable_testing()

@@ -18,11 +18,11 @@ mkdir build
 cd build
 
 # If using a single-config generator (e.g. Unix Makefiles, Ninja)
-cmake -DCMAKE_BUILD_TYPE=(Debug|Release|RelWithDebInfo) [-DDR_BENCH=ON] [-DDR_EXAMPLE=ON] [-DDR_TEST=ON] ..
+cmake -DCMAKE_BUILD_TYPE=(Debug|Release|RelWithDebInfo) [-DDR_TEST=ON] ..
 cmake --build .
 
 # If using a multi-config generator (e.g. Ninja Multi-Config, Xcode)
-cmake [-DDR_BENCH=ON] [-DDR_EXAMPLE=ON] [-DDR_TEST=ON] ..
+cmake [-DDR_TEST=ON] ..
 cmake --build . --config (Debug|Release|RelWithDebInfo)
 ```
 
