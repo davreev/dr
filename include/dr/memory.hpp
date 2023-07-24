@@ -102,6 +102,24 @@ constexpr Span<Dst const> as(Span<Src const> const& src)
         static_cast<isize>((src.size() * sizeof(Src)) / sizeof(Dst))};
 }
 
+/// Views the given instance as a span of bytes
+template <typename T>
+Span<u8> as_bytes(T& item)
+{
+    return {as<u8>(&item), static_cast<isize>(sizeof(T))};
+}
+
+/// Views the given instance as a span of bytes
+template <typename T>
+Span<u8 const> as_bytes(T const& item)
+{
+    return {as<u8>(&item), static_cast<isize>(sizeof(T))};
+}
+
+/// Deleted to avoid creating a span over a temporary
+template <typename T>
+Span<u8 const> as_bytes(T const&& item) = delete;
+
 using AllocatorBase = std::pmr::polymorphic_allocator<std::byte>;
 
 struct Allocator : AllocatorBase
