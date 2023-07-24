@@ -11,6 +11,7 @@ add_executable(
     linalg_tests.cpp
     main.cpp
     math_tests.cpp
+    memory_tests.cpp
     mesh_tests.cpp
     mesh_repair_tests.cpp
     meta_tests.cpp
