@@ -85,7 +85,7 @@ Dst const* as(Src const* const ptr)
 }
 
 /// Reinterprets a span of one type as a span of another
-template <typename Dst, typename Src, std::enable_if_t<(alignof(Dst) <= alignof(Src))>* = nullptr>
+template <typename Dst, typename Src>
 constexpr Span<Dst> as(Span<Src> const& src)
 {
     return {
@@ -94,26 +94,8 @@ constexpr Span<Dst> as(Span<Src> const& src)
 }
 
 /// Reinterprets a span of one type as a span of another
-template <typename Dst, typename Src, std::enable_if_t<(alignof(Dst) > alignof(Src))>* = nullptr>
-Span<Dst> as(Span<Src> const& src)
-{
-    return {
-        as<Dst>(src.data()),
-        static_cast<isize>((src.size() * sizeof(Src)) / sizeof(Dst))};
-}
-
-/// Reinterprets a span of one type as a span of another
-template <typename Dst, typename Src, std::enable_if_t<(alignof(Dst) <= alignof(Src))>* = nullptr>
+template <typename Dst, typename Src>
 constexpr Span<Dst const> as(Span<Src const> const& src)
-{
-    return {
-        as<Dst>(src.data()),
-        static_cast<isize>((src.size() * sizeof(Src)) / sizeof(Dst))};
-}
-
-/// Reinterprets a span of one type as a span of another
-template <typename Dst, typename Src, std::enable_if_t<(alignof(Dst) > alignof(Src))>* = nullptr>
-Span<Dst const> as(Span<Src const> const& src)
 {
     return {
         as<Dst>(src.data()),
@@ -187,7 +169,7 @@ struct ScopedAlloc
     }
 
     template <typename T>
-    Span<T const> data_as()
+    Span<T const> data_as() const
     {
         static_assert(alignof(T) <= alignment);
         return {static_cast<T const*>(data_), static_cast<isize>(size_ / sizeof(T))};
