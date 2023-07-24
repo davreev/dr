@@ -4,6 +4,7 @@ add_executable(
     container_tests.cpp
     defer_tests.cpp
     diagnostics_tests.cpp
+    function_ref_tests.cpp
     geometry_tests.cpp
     halfedge_tests.cpp
     hash_grid_tests.cpp
