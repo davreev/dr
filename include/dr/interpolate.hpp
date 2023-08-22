@@ -11,7 +11,7 @@ namespace impl
 {
 
 template <typename Real>
-constexpr void eval_catmull_rom_basis(Real const t, Real const result[4])
+constexpr void eval_catmull_rom_basis(Real const t, Real result[4])
 {
     static_assert(is_real<Real>);
 
@@ -34,14 +34,14 @@ constexpr void eval_catmull_rom_basis(Real const t, Real const result[4])
 }
 
 template <typename Real>
-constexpr void eval_hat_basis(Real const t, Real const result[2])
+constexpr void eval_hat_basis(Real const t, Real result[2])
 {
     result[0] = Real{1.0} - t;
     result[1] = t;
 }
 
 template <typename Real>
-constexpr void eval_bernstein_basis_deg2(Real const t, Real const result[3])
+constexpr void eval_bernstein_basis_deg2(Real const t, Real result[3])
 {
     static_assert(is_real<Real>);
 
@@ -61,7 +61,7 @@ constexpr void eval_bernstein_basis_deg2(Real const t, Real const result[3])
 }
 
 template <typename Real>
-constexpr void eval_bernstein_basis_deg3(Real const t, Real const result[4])
+constexpr void eval_bernstein_basis_deg3(Real const t, Real result[4])
 {
     static_assert(is_real<Real>);
 
