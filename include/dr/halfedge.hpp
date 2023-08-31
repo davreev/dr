@@ -66,26 +66,26 @@ struct HalfedgeMesh : AllocatorAware
         {
         }
 
-        // Returns the current halfedge
+        /// Returns the current halfedge
         Halfedge current() const
         {
             return Halfedge{current_};
         }
 
-        // Returns true if the current halfedge is valid
+        /// Returns true if the current halfedge is valid
         bool is_valid() const
         {
             return current_ != invalid_index_;
         }
 
-        // Advances to the next halfedge around the vertex
+        /// Advances to the next halfedge around the vertex
         void advance()
         {
             Index const next = halfedge_next_[current_ ^ 1];
             current_ = (next == start_) ? invalid_index_ : next;
         }
 
-        // Advances to the next halfedge around the vertex
+        /// Advances to the next halfedge around the vertex
         void operator++() { advance(); }
 
       private:
@@ -104,26 +104,26 @@ struct HalfedgeMesh : AllocatorAware
         {
         }
 
-        // Returns the current halfedge
+        /// Returns the current halfedge
         Halfedge current() const
         {
             return Halfedge{current_};
         }
 
-        // Returns true if the current halfedge is valid
+        /// Returns true if the current halfedge is valid
         bool is_valid() const
         {
             return current_ != invalid_index_;
         }
 
-        // Advances to the next halfedge in the face
+        /// Advances to the next halfedge in the face
         void advance()
         {
             Index const next = halfedge_next_[current_];
             current_ = (next == start_) ? invalid_index_ : next;
         }
 
-        // Advances to the next halfedge in the face
+        /// Advances to the next halfedge in the face
         void operator++() { advance(); }
 
       private:
