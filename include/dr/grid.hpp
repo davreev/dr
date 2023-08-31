@@ -11,8 +11,8 @@ struct Grid
 {
     using Index = isize;
 
-    Vec<Index, dim> count;
-    Vec<Scalar, dim> scale{1, 1, 1};
+    Vec<Index, dim> count{};
+    Vec<Scalar, dim> scale{};
     Vec<Scalar, dim> translate{};
 
     Vec<Index, dim> stride() const
