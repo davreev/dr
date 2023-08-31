@@ -1,5 +1,9 @@
 #pragma once
 
+#if not __has_include(<memory_resource>)
+#define DR_PMR_EXPERIMENTAL
+#endif
+
 #ifdef DR_PMR_EXPERIMENTAL
 
 /*
