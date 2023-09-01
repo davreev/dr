@@ -18,6 +18,7 @@ add_executable(
     meta_tests.cpp
     random_tests.cpp
     slot_map_tests.cpp
+    transform_tests.cpp
     span_tests.cpp
 )
 
