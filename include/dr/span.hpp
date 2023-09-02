@@ -75,7 +75,7 @@ struct Span
     /// Explicit conversion to a span of const elements
     constexpr Span<T const> as_const() const { return {data_, size_}; }
 
-    /// True if this span refers to a valid memory address
+    /// Returns true if the instance refers to a valid memory address
     constexpr bool is_valid() const { return data_ != nullptr; }
     constexpr explicit operator bool() const { return is_valid(); }
 
