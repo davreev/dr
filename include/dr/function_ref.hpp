@@ -14,58 +14,60 @@ struct FunctionRef;
 template <typename Return, typename... Args>
 struct FunctionRef<Return(Args...)>
 {
+    constexpr FunctionRef() = default;
+
+    /// Creates a function reference from a function object
     template <typename Src>
     constexpr FunctionRef(Src* src)
     {
-        ptr_.obj = src;
-        set_invoke_obj<Src>();
+        static_assert(std::is_invocable_r_v<Return, Src, Args...>);
+
+        if (src != nullptr)
+        {
+            if constexpr (std::is_const_v<Src>)
+                ptr_.obj = const_cast<void*>(static_cast<void const*>(src));
+            else
+                ptr_.obj = src;
+
+            invoke_ = [](Ptr const& ptr, Args&&... args) -> Return {
+                return (*static_cast<Src*>(ptr.obj))(std::forward<Args>(args)...);
+            };
+        }
     }
 
-    template <typename Src>
-    constexpr FunctionRef(Src const* src)
-    {
-        ptr_.obj = const_cast<Src*>(src);
-        set_invoke_obj<Src const>();
-    }
-
+    /// Creates a function reference from a function pointer
     constexpr FunctionRef(Return (*src)(Args...))
     {
-        ptr_.fn = reinterpret_cast<void (*)()>(src);
-        set_invoke_fn<decltype(src)>();
+        using Src = decltype(src);
+
+        if (src != nullptr)
+        {
+            ptr_.fn = reinterpret_cast<void (*)()>(src);
+            invoke_ = [](Ptr const& ptr, Args&&... args) -> Return {
+                return (reinterpret_cast<Src>(ptr.fn))(std::forward<Args>(args)...);
+            };
+        }
     }
 
+    /// Invokes the referenced function
     constexpr Return operator()(Args&&... args) const
     {
         return invoke_(ptr_, std::forward<Args>(args)...);
     }
+
+    /// Returns true if the instance refers to a valid memory address
+    constexpr bool is_valid() const { return invoke_ != nullptr; }
+    constexpr explicit operator bool() const { return is_valid(); }
 
   private:
     union Ptr
     {
         void* obj;
         void (*fn)();
-    } ptr_;
-    Return (*invoke_)(Ptr const&, Args&&...);
+    };
 
-    template <typename Src>
-    constexpr void set_invoke_obj()
-    {
-        static_assert(std::is_invocable_r_v<Return, Src, Args...>);
-
-        // Invokes as function object
-        invoke_ = [](Ptr const& ptr, Args&&... args) -> Return {
-            return (*static_cast<Src*>(ptr.obj))(std::forward<Args>(args)...);
-        };
-    }
-
-    template <typename Src>
-    constexpr void set_invoke_fn()
-    {
-        // Invokes as function ptr
-        invoke_ = [](Ptr const& ptr, Args&&... args) -> Return {
-            return (reinterpret_cast<Src>(ptr.fn))(std::forward<Args>(args)...);
-        };
-    }
+    Ptr ptr_{};
+    Return (*invoke_)(Ptr const&, Args&&...){};
 };
 
 } // namespace dr

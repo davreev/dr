@@ -61,3 +61,23 @@ UTEST(function_ref, function_object)
     FunctionRef<isize(isize)> const affine_ref{&affine};
     ASSERT_EQ(affine(2), affine_ref(2));
 }
+
+UTEST(function_ref, is_valid)
+{
+    using namespace dr;
+
+    {
+        FunctionRef<f32(f32)> fn{};
+        ASSERT_FALSE(fn.is_valid());
+    }
+
+    {
+        FunctionRef<f32(f32)> fn{nullptr};
+        ASSERT_FALSE(fn.is_valid());
+    }
+
+    {
+        FunctionRef<f32(f32)> fn{[](f32 const x) { return x * x; }};
+        ASSERT_TRUE(fn.is_valid());
+    }
+}
