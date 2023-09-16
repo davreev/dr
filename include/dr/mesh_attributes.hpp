@@ -8,7 +8,6 @@
 #include <dr/linalg_reshape.hpp>
 #include <dr/linalg_types.hpp>
 #include <dr/math.hpp>
-#include <dr/parallel.hpp>
 #include <dr/span.hpp>
 
 namespace dr
@@ -84,9 +83,7 @@ void vertex_areas_barycentric(
 
 /// Computes the degree of each vertex in a triangle mesh
 template <typename Scalar, typename Index>
-void vertex_degrees(
-    Span<Vec3<Index> const> const& face_vertices,
-    Span<Scalar> const& result)
+void vertex_degrees(Span<Vec3<Index> const> const& face_vertices, Span<Scalar> const& result)
 {
     std::fill(begin(result), end(result), Scalar{0});
 
@@ -104,61 +101,43 @@ template <typename Real, typename Index>
 void face_vector_areas(
     Span<Vec3<Real> const> const& vertex_positions,
     Span<Vec3<Index> const> const& face_vertices,
-    Span<Vec3<Real>> const& result)
+    Span<Vec3<Real>> const& result,
+    isize const num_threads = 1)
 {
     assert(result.size() == face_vertices.size());
+    assert(num_threads > 0);
 
-    for (isize i = 0; i < face_vertices.size(); ++i)
-    {
+    auto const body = [&](isize const i) {
         auto const& f_v = face_vertices[i];
         result[i] = vector_area(
             vertex_positions[f_v[0]],
             vertex_positions[f_v[1]],
             vertex_positions[f_v[2]]);
+    };
+
+    if (num_threads > 1)
+    {
+#pragma omp parallel for num_threads(num_threads) schedule(static)
+        for (isize i = 0; i < face_vertices.size(); ++i)
+            body(i);
+    }
+    else
+    {
+        for (isize i = 0; i < face_vertices.size(); ++i)
+            body(i);
     }
 }
 
-/// Computes the vector area of each face in a triangle mesh
-template <typename Real, typename Index>
-void face_vector_areas(
-    Span<Vec3<Real> const> const& vertex_positions,
-    Span<Vec3<Index> const> const& face_vertices,
-    ParallelFor const& parallel_for,
-    Span<Vec3<Real>> const& result)
-{
-    assert(result.size() == face_vertices.size());
-
-    parallel_for(face_vertices.size(), [&](isize const i, isize /*thread_id*/) {
-        auto const& f_v = face_vertices[i];
-        result[i] = vector_area(
-            vertex_positions[f_v[0]],
-            vertex_positions[f_v[1]],
-            vertex_positions[f_v[2]]);
-    });
-}
-
 /// Computes the normal of each face in a triangle mesh
 template <typename Real, typename Index>
 void face_normals(
     Span<Vec3<Real> const> const& vertex_positions,
     Span<Vec3<Index> const> const& face_vertices,
-    Span<Vec3<Real>> const& result)
+    Span<Vec3<Real>> const& result,
+    isize const num_threads = 1)
 {
     assert(result.size() == face_vertices.size());
-    face_vector_areas(vertex_positions, face_vertices, result);
-    as_mat(result).colwise().normalize();
-}
-
-/// Computes the normal of each face in a triangle mesh
-template <typename Real, typename Index>
-void face_normals(
-    Span<Vec3<Real> const> const& vertex_positions,
-    Span<Vec3<Index> const> const& face_vertices,
-    ParallelFor const& parallel_for,
-    Span<Vec3<Real>> const& result)
-{
-    assert(result.size() == face_vertices.size());
-    face_vector_areas(vertex_positions, face_vertices, parallel_for, result);
+    face_vector_areas(vertex_positions, face_vertices, result, num_threads);
     as_mat(result).colwise().normalize();
 }
 
@@ -277,11 +256,8 @@ Vec3<Real> area_centroid(
     Span<Vec3<Index> const> const& element_vertices)
 {
     Real area{};
-    Vec3<Real> const sum = eval_vertex_integral(
-        vertex_positions,
-        vertex_positions,
-        element_vertices,
-        area);
+    Vec3<Real> const sum =
+        eval_vertex_integral(vertex_positions, vertex_positions, element_vertices, area);
 
     return sum / area;
 }
@@ -293,20 +269,15 @@ Vec3<Real> length_centroid(
     Span<Vec2<Index> const> const& element_vertices)
 {
     Real length{};
-    Vec3<Real> const sum = eval_vertex_integral(
-        vertex_positions,
-        vertex_positions,
-        element_vertices,
-        length);
+    Vec3<Real> const sum =
+        eval_vertex_integral(vertex_positions, vertex_positions, element_vertices, length);
 
     return sum / length;
 }
 
 /// Computes the bounding radius of a point cloud with a given centroid
 template <typename Real>
-Real bounding_radius(
-    Span<Vec3<Real> const> const& points,
-    Vec3<Real> const& centroid)
+Real bounding_radius(Span<Vec3<Real> const> const& points, Vec3<Real> const& centroid)
 {
     Real sqr_rad{0.0};
 

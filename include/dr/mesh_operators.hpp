@@ -8,7 +8,6 @@
 #include <dr/linalg_reshape.hpp>
 #include <dr/linalg_types.hpp>
 #include <dr/math_types.hpp>
-#include <dr/parallel.hpp>
 #include <dr/span.hpp>
 #include <dr/sparse_linalg_types.hpp>
 
@@ -167,17 +166,17 @@ void eval_gradient(
     Span<Vec3<Real> const> const& vertex_positions,
     Span<Real const> const& vertex_scalars,
     Span<Vec3<Index> const> const& face_vertices,
-    Span<Covec3<Real>> const& result)
+    Span<Covec3<Real>> const& result,
+    isize const num_threads = 1)
 {
     static_assert(is_real<Real>);
     static_assert(is_integer<Index> || is_natural<Index>);
 
     assert(result.size() == face_vertices.size());
+    assert(num_threads > 0);
 
-    for (isize i = 0; i < face_vertices.size(); ++i)
-    {
+    auto const body = [&](isize const i) {
         auto const f_v = face_vertices[i];
-
         result[i] = eval_gradient(
             vertex_positions[f_v[0]],
             vertex_positions[f_v[1]],
@@ -185,62 +184,18 @@ void eval_gradient(
             vertex_scalars[f_v[0]],
             vertex_scalars[f_v[1]],
             vertex_scalars[f_v[2]]);
-    }
-}
+    };
 
-/// Evaluates the gradient of a scalar function defined on mesh vertices. Returns a covector
-/// associated with each face.
-template <typename Real, typename Index>
-void eval_gradient(
-    Span<Vec3<Real> const> const& vertex_positions,
-    Span<Real const> const& vertex_scalars,
-    Span<Vec3<Index> const> const& face_vertices,
-    ParallelFor const& parallel_for,
-    Span<Covec3<Real>> const& result)
-{
-    static_assert(is_real<Real>);
-    static_assert(is_integer<Index> || is_natural<Index>);
-
-    assert(result.size() == face_vertices.size());
-
-    parallel_for(face_vertices.size(), [&](isize const i, isize /*thread_id*/) {
-        auto const& f_v = face_vertices[i];
-
-        result[i] = eval_gradient(
-            vertex_positions[f_v[0]],
-            vertex_positions[f_v[1]],
-            vertex_positions[f_v[2]],
-            vertex_scalars[f_v[0]],
-            vertex_scalars[f_v[1]],
-            vertex_scalars[f_v[2]]);
-    });
-}
-
-/// Evaluates the Jacobian of a vector-valued function defined on mesh vertices. Returns a matrix
-/// associated with each face.
-template <typename Real, typename Index>
-void eval_jacobian(
-    Span<Vec3<Real> const> const& vertex_positions,
-    Span<Vec3<Real> const> const& vertex_vectors,
-    Span<Vec3<Index> const> const& face_vertices,
-    Span<Mat3<Real>> const& result)
-{
-    static_assert(is_real<Real>);
-    static_assert(is_integer<Index> || is_natural<Index>);
-
-    assert(result.size() == face_vertices.size());
-
-    for (isize i = 0; i < face_vertices.size(); ++i)
+    if (num_threads > 1)
     {
-        auto const& f_v = face_vertices[i];
-
-        result[i] = eval_jacobian(
-            vertex_positions[f_v[0]],
-            vertex_positions[f_v[1]],
-            vertex_positions[f_v[2]],
-            vertex_vectors[f_v[0]],
-            vertex_vectors[f_v[1]],
-            vertex_vectors[f_v[2]]);
+#pragma omp parallel for num_threads(num_threads) schedule(static)
+        for (isize i = 0; i < face_vertices.size(); ++i)
+            body(i);
+    }
+    else
+    {
+        for (isize i = 0; i < face_vertices.size(); ++i)
+            body(i);
     }
 }
 
@@ -251,17 +206,17 @@ void eval_jacobian(
     Span<Vec3<Real> const> const& vertex_positions,
     Span<Vec3<Real> const> const& vertex_vectors,
     Span<Vec3<Index> const> const& face_vertices,
-    ParallelFor const& parallel_for,
-    Span<Mat3<Real>> const& result)
+    Span<Mat3<Real>> const& result,
+    isize const num_threads = 1)
 {
     static_assert(is_real<Real>);
     static_assert(is_integer<Index> || is_natural<Index>);
 
     assert(result.size() == face_vertices.size());
+    assert(num_threads > 0);
 
-    parallel_for(face_vertices.size(), [&](isize const i, isize const /*thread_id*/) {
+    auto const body = [&](isize const i) {
         auto const& f_v = face_vertices[i];
-
         result[i] = eval_jacobian(
             vertex_positions[f_v[0]],
             vertex_positions[f_v[1]],
@@ -269,7 +224,19 @@ void eval_jacobian(
             vertex_vectors[f_v[0]],
             vertex_vectors[f_v[1]],
             vertex_vectors[f_v[2]]);
-    });
+    };
+
+    if (num_threads > 1)
+    {
+#pragma omp parallel for num_threads(num_threads) schedule(static)
+        for (isize i = 0; i < face_vertices.size(); ++i)
+            body(i);
+    }
+    else
+    {
+        for (isize i = 0; i < face_vertices.size(); ++i)
+            body(i);
+    }
 }
 
 /// Evaluates the (integrated) divergence of a vector-valued function defined on mesh triangles.
