@@ -1,5 +1,7 @@
 #pragma once
 
+#include <type_traits>
+
 #include <dr/basic_types.hpp>
 
 namespace dr
@@ -21,35 +23,47 @@ struct ParallelFor
     /// The maximum number of threads that can be used within a loop
     static isize max_num_threads();
 
-    /// Executes the given loop body in parallel. The loop body is expected to take a loop index and
-    /// a thread index as arguments e.g. void body(isize i, isize thread_idx).
+    /// Executes the given loop body in parallel. The loop body is expected to be an invocable with
+    /// the signature `void body(isize i, isize j, isize thread_idx)`.
     template <typename Body>
     void operator()(isize const count, Body&& body) const
     {
+        static_assert(std::is_invocable_v<Body, isize, isize>);
         set_schedule(schedule, chunk_size);
 
-#pragma omp parallel for num_threads(num_threads) schedule(runtime)
-        for (isize i = 0; i < count; ++i)
-            body(i, thread_index());
-    }
-
-    /// Executes the given loop body in parallel. The loop body is expected to take two loop indices
-    /// and a thread index as arguments e.g. void body(isize i, isize j, isize thread_idx).
-    template <typename Body>
-    void operator()(isize const count_i, isize const count_j, Body&& body) const
-    {
-        set_schedule(schedule, chunk_size);
-
-#pragma omp parallel for num_threads(num_threads) schedule(runtime) collapse(2)
-        for (isize i = 0; i < count_i; ++i)
+#pragma omp parallel num_threads(num_threads)
         {
-            for (isize j = 0; j < count_j; ++j)
-                body(i, j, thread_index());
+            isize const t_idx = thread_index();
+
+#pragma omp for schedule(runtime)
+            for (isize i = 0; i < count; ++i)
+                body(i, t_idx);
         }
     }
 
-    /// Executes the given loop body in parallel. The loop body is expected to take three loop
-    /// indices and a thread index as arguments e.g. void body(isize i, isize j, isize k, isize
+    /// Executes the given loop body in parallel. The loop body is expected to be an invocable with
+    /// the signature `void body(isize i, isize j, isize thread_idx)`.
+    template <typename Body>
+    void operator()(isize const count_i, isize const count_j, Body&& body) const
+    {
+        static_assert(std::is_invocable_v<Body, isize, isize, isize>);
+        set_schedule(schedule, chunk_size);
+
+#pragma omp parallel num_threads(num_threads)
+        {
+            isize const t_idx = thread_index();
+
+#pragma omp for schedule(runtime) collapse(2)
+            for (isize i = 0; i < count_i; ++i)
+            {
+                for (isize j = 0; j < count_j; ++j)
+                    body(i, j, t_idx);
+            }
+        }
+    }
+
+    /// Executes the given loop body in parallel. The loop body is expected to be an invocable with
+    /// the signature `void body(isize i, isize j, isize thread_idx)`.
     /// thread_idx).
     template <typename Body>
     void operator()(
@@ -58,15 +72,21 @@ struct ParallelFor
         isize const count_k,
         Body&& body) const
     {
+        static_assert(std::is_invocable_v<Body, isize, isize, isize, isize>);
         set_schedule(schedule, chunk_size);
 
-#pragma omp parallel for num_threads(num_threads) schedule(runtime) collapse(3)
-        for (isize i = 0; i < count_i; ++i)
+#pragma omp parallel num_threads(num_threads)
         {
-            for (isize j = 0; j < count_j; ++j)
+            isize const t_idx = thread_index();
+
+#pragma omp for schedule(runtime) collapse(3)
+            for (isize i = 0; i < count_i; ++i)
             {
-                for (isize k = 0; k < count_k; ++k)
-                    body(i, j, k, thread_index());
+                for (isize j = 0; j < count_j; ++j)
+                {
+                    for (isize k = 0; k < count_k; ++k)
+                        body(i, j, k, t_idx);
+                }
             }
         }
     }
