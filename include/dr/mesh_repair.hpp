@@ -149,20 +149,21 @@ void find_unique_points(
     assert(points.size() == point_to_unique.size());
 
     unique_points.resize(points.size());
-    auto const sorted_pts = as_span(unique_points);
+    Span<Index> const sorted_pts = as_span(unique_points);
 
     for (isize i = 0; i < points.size(); ++i)
         sorted_pts[i] = i;
 
     auto const compare = [&](Index const a, Index const b) {
-        auto const& pa = points[a];
-        auto const& pb = points[b];
+        Vec<Real, dim> const& p_a = points[a];
+        Vec<Real, dim> const& p_b = points[b];
 
         for (int i = 0; i < dim; ++i)
         {
-            if (pa[i] < pb[i])
+            Real const d = p_a[i] - p_b[i];
+            if (d < -tolerance)
                 return true;
-            if (pa[i] > pb[i])
+            if (d > tolerance)
                 return false;
         }
 
@@ -171,38 +172,68 @@ void find_unique_points(
 
     std::sort(begin(sorted_pts), end(sorted_pts), compare);
 
-    auto const are_equal = [&](Index const a, Index const b) {
-        auto const& pa = points[a];
-        auto const& pb = points[b];
-
-        for (int i = 0; i < dim; ++i)
-        {
-            if (abs(pa[i] - pb[i]) > tolerance)
-                return false;
-        }
-
-        return true;
-    };
-
-    // Find unique points and create map from original to unique points
+    // Create maps to/from unique points
     {
-        isize unique_pt = sorted_pts[0];
-        isize unique_idx = 0;
-        point_to_unique[unique_pt] = 0;
+        struct
+        {
+            Vec<Real, dim> coords_sum;
+            isize count;
+            isize start;
+            isize index;
+            Vec<Real, dim> coords() { return coords_sum / count; }
+        } unique_pt{};
+
+        auto const assign_unique = [&]() {
+            Vec<Real, dim> const cen = unique_pt.coords();
+            Real min_dist = tolerance;
+            isize nearest_pt = -1;
+
+            // Assign the unique point to each coincident original point. For the reverse map, we
+            // use the closest original point to the unique point's center.
+            for (isize j = 0; j < unique_pt.count; ++j)
+            {
+                isize const pt = sorted_pts[unique_pt.start + j];
+                point_to_unique[pt] = unique_pt.index;
+
+                Real const dist = (cen - points[pt]).cwiseAbs().maxCoeff();
+                if (dist < min_dist)
+                {
+                    nearest_pt = pt;
+                    min_dist = dist;
+                }
+            }
+
+            unique_points[unique_pt.index] = nearest_pt;
+        };
+
+        // Init unique point from first original point
+        unique_pt.coords_sum = points[sorted_pts[0]];
+        unique_pt.count = 1;
 
         for (isize i = 1; i < points.size(); ++i)
         {
-            isize const pt = sorted_pts[i];
+            Vec<Real, dim> const& pt_coords = points[sorted_pts[i]];
 
-            // If the point is unique, store its index
-            if (!are_equal(unique_pt, pt))
-                unique_points[++unique_idx] = (unique_pt = pt);
-
-            point_to_unique[pt] = unique_idx;
+            if (near_equal(pt_coords, unique_pt.coords(), tolerance))
+            {
+                // Update unique point
+                unique_pt.coords_sum += pt_coords;
+                ++unique_pt.count;
+            }
+            else
+            {
+                // Assign and reset unique point
+                assign_unique();
+                unique_pt.coords_sum = pt_coords;
+                unique_pt.count = 1;
+                unique_pt.start = i;
+                ++unique_pt.index;
+            }
         }
 
-        isize const num_unique = unique_idx + 1;
-        unique_points.erase(unique_points.begin() + num_unique, unique_points.end());
+        // Assign last unique point and trim the array
+        assign_unique();
+        unique_points.erase(unique_points.begin() + unique_pt.index + 1, unique_points.end());
     }
 }
 
