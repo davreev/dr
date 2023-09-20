@@ -12,7 +12,7 @@ namespace dr
 
 /// Returns the number of elements in the given array
 template <typename T, isize n>
-constexpr isize size(T const (& /*array*/)[n])
+constexpr isize size(T (& /*array*/)[n])
 {
     return n;
 }
