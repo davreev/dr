@@ -88,18 +88,14 @@ Dst const* as(Src const* const ptr)
 template <typename Dst, typename Src>
 constexpr Span<Dst> as(Span<Src> const& src)
 {
-    return {
-        as<Dst>(src.data()),
-        static_cast<isize>((src.size() * sizeof(Src)) / sizeof(Dst))};
+    return {as<Dst>(src.data()), static_cast<isize>((src.size() * sizeof(Src)) / sizeof(Dst))};
 }
 
 /// Reinterprets a span of one type as a span of another
 template <typename Dst, typename Src>
 constexpr Span<Dst const> as(Span<Src const> const& src)
 {
-    return {
-        as<Dst>(src.data()),
-        static_cast<isize>((src.size() * sizeof(Src)) / sizeof(Dst))};
+    return {as<Dst>(src.data()), static_cast<isize>((src.size() * sizeof(Src)) / sizeof(Dst))};
 }
 
 /// Views the given instance as a span of bytes
@@ -132,15 +128,31 @@ struct Allocator : AllocatorBase
     void deallocate(void* ptr, usize size, usize alignment) const;
 
     template <typename T>
-    T* allocate(usize const count) const
+    T* allocate(usize const count = 1) const
     {
         return static_cast<T*>(allocate(count * sizeof(T), alignof(T)));
     }
 
     template <typename T>
-    void deallocate(T* const ptr, usize const count) const
+    void deallocate(T* const ptr, usize const count = 1) const
     {
         deallocate(ptr, count * sizeof(T), alignof(T));
+    }
+
+    template <typename T, typename... Args>
+    T* new_object(Args&&... args)
+    {
+        static_assert(!std::is_array_v<T>);
+        T* const ptr = allocate<T>();
+        construct(ptr, std::forward<Args>(args)...);
+        return ptr;
+    }
+
+    template <typename T>
+    void delete_object(T* ptr) const
+    {
+        ptr->~T();
+        deallocate(ptr);
     }
 };
 
@@ -159,24 +171,16 @@ template <usize alignment>
 struct ScopedAlloc
 {
     ScopedAlloc(usize size, Allocator alloc = {}) :
-        data_{alloc.allocate(size, alignment)},
-        size_{size},
-        alloc_{alloc}
+        data_{alloc.allocate(size, alignment)}, size_{size}, alloc_{alloc}
     {
     }
 
-    ~ScopedAlloc()
-    {
-        alloc_.deallocate(data_, size_, alignment);
-    }
+    ~ScopedAlloc() { alloc_.deallocate(data_, size_, alignment); }
 
     ScopedAlloc(ScopedAlloc const&) = delete;
     ScopedAlloc& operator=(ScopedAlloc const&) = delete;
 
-    Span<u8> data()
-    {
-        return {static_cast<u8*>(data_), static_cast<isize>(size_)};
-    }
+    Span<u8> data() { return {static_cast<u8*>(data_), static_cast<isize>(size_)}; }
 
     Span<u8 const> data() const
     {
@@ -212,7 +216,7 @@ struct DeleteUnique
     void operator()(T* const ptr)
     {
         ptr->~T();
-        alloc.deallocate(ptr, 1);
+        alloc.deallocate(ptr);
     }
 };
 
@@ -222,15 +226,9 @@ using UniquePtr = std::unique_ptr<T, DeleteUnique>;
 
 /// Creates an allocator-backed unique pointer
 template <typename T, typename... Args>
-UniquePtr<T> make_unique(Allocator const alloc, Args&&... args)
+UniquePtr<T> make_unique(Allocator alloc, Args&&... args)
 {
-    static_assert(!std::is_array_v<T>);
-    T* const ptr = alloc.allocate<T>(1);
-
-    if constexpr (is_allocator_aware<T>)
-        return {new (ptr) T{std::forward<Args>(args)..., alloc}, DeleteUnique{alloc}};
-    else
-        return {new (ptr) T{std::forward<Args>(args)...}, DeleteUnique{alloc}};
+    return {alloc.new_object<T>(std::forward<Args>(args)...), DeleteUnique{alloc}};
 }
 
 /// Memory resource for tracking allocation frequency and memory footprint
