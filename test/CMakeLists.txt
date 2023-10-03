@@ -6,6 +6,7 @@ add_executable(
     diagnostics_tests.cpp
     function_ref_tests.cpp
     geometry_tests.cpp
+    grid_tests.cpp
     halfedge_tests.cpp
     hash_grid_tests.cpp
     sliced_array_tests.cpp

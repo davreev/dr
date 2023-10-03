@@ -1,10 +1,42 @@
 #pragma once
 
-#include <dr/geometry_types.hpp>
 #include <dr/math_types.hpp>
 
 namespace dr
 {
+
+template <typename Index, int dim>
+Vec<Index, dim> grid_stride(Vec<Index, dim> const& count)
+{
+    Vec<Index, dim> result{};
+    result[0] = 1;
+
+    for (int i = 1; i < dim; ++i)
+        result[i] = count[i - 1] * result[i - 1];
+
+    return result;
+}
+
+template <typename Index, int dim>
+Index grid_to_index(Vec<Index, dim> const& id, Vec<Index, dim> const& stride)
+{
+    return id.dot(stride);
+}
+
+template <typename Index, int dim>
+Vec<Index, dim> index_to_grid(Index index, Vec<Index, dim> const& stride)
+{
+    Vec<Index, dim> result{};
+
+    for (int i = dim - 1; i > 0; --i)
+    {
+        result[i] = index / stride[i];
+        index -= result[i] * stride[i];
+    }
+    result[0] = index;
+
+    return result;
+}
 
 template <typename Scalar, int dim>
 struct Grid
@@ -12,48 +44,26 @@ struct Grid
     using Index = isize;
 
     Vec<Index, dim> count{};
-    Vec<Scalar, dim> scale{};
-    Vec<Scalar, dim> translate{};
+    Vec<Scalar, dim> spacing{Vec<Scalar, dim>::Ones()};
+    Vec<Scalar, dim> origin{};
 
-    Vec<Index, dim> stride() const
-    {
-        Vec<Index, dim> result{};
-        result[0] = 1;
-
-        for (int i = 1; i < dim; ++i)
-            result[i] = count[i - 1] * result[i - 1];
-
-        return result;
-    }
+    Vec<Index, dim> stride() const { return grid_stride(count); }
 
     Index to_index(Vec<Index, dim> const& grid_pt) const
     {
-        return grid_pt.dot(stride());
+        return grid_to_index(grid_pt, stride());
     }
 
-    Vec<Index, dim> to_grid(Index index) const
-    {
-        auto const stride = this->stride();
-        Vec<Index, dim> result{};
-
-        for (int i = dim - 1; i > 0; --i)
-        {
-            result[i] = index / stride[i];
-            index -= result[i] * stride[i];
-        }
-        result[0] = index;
-
-        return result;
-    }
+    Vec<Index, dim> to_grid(Index const index) const { return index_to_grid(index, stride()); }
 
     Vec<Scalar, dim> to_grid(Vec<Scalar, dim> const& world_pt) const
     {
-        return (world_pt - translate).array() / scale.array();
+        return (world_pt - origin).array() / spacing.array();
     }
 
     Vec<Scalar, dim> to_world(Vec<Scalar, dim> const& grid_pt) const
     {
-        return grid_pt.array() * scale.array() + translate.array();
+        return grid_pt.array() * spacing.array() + origin.array();
     }
 
     Vec<Scalar, dim> to_world(Vec<Index, dim> const& grid_pt) const
@@ -61,12 +71,9 @@ struct Grid
         return to_world(grid_pt.template cast<Scalar>().eval());
     }
 
-    Interval<Scalar, dim> bounds() const
+    Vec<Scalar, dim> const& extents() const
     {
-        return {
-            translate,
-            translate.array() + scale.array() * (count.array() - 1).template cast<Scalar>(),
-        };
+        return spacing.array() * (count.array() - 1).template cast<Scalar>();
     }
 };
 
