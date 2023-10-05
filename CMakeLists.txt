@@ -23,10 +23,10 @@ list(
 
 add_library(
     dr STATIC
-    src/halfedge.cpp
-    src/memory.cpp
-    src/mesh_primitives.cpp
-    src/parallel.cpp
+    "src/halfedge.cpp"
+    "src/memory.cpp"
+    "src/mesh_primitives.cpp"
+    "src/parallel.cpp"
 )
 add_library(dr::dr ALIAS dr)
 
@@ -50,8 +50,6 @@ target_link_libraries(
 
 target_compile_options(
     dr
-    PUBLIC
-        -fstrict-aliasing
     PRIVATE
         -Wall -Wextra -Wpedantic -Werror
 )
