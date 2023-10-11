@@ -66,24 +66,24 @@ constexpr Nat prev_pow2(Nat x)
 }
 
 template <typename Scalar>
-void unit_square_vertex(u8 const index, Scalar& x, Scalar& y)
+void unit_square_vertex_coords(u8 const vertex, Scalar result[2])
 {
     static_assert(is_real<Scalar> || is_integer<Scalar> || is_natural<Scalar>);
 
-    assert(index < 4);
-    x = static_cast<Scalar>(index & 1);
-    y = static_cast<Scalar>((index >> 1) & 1);
+    assert(vertex < 4);
+    result[0] = static_cast<Scalar>(vertex & 1);
+    result[1] = static_cast<Scalar>((vertex >> 1) & 1);
 }
 
 template <typename Scalar>
-void unit_cube_vertex(u8 const index, Scalar& x, Scalar& y, Scalar& z)
+void unit_cube_vertex_coords(u8 const vertex, Scalar result[3])
 {
     static_assert(is_real<Scalar> || is_integer<Scalar> || is_natural<Scalar>);
 
-    assert(index < 8);
-    x = static_cast<Scalar>(index & 1);
-    y = static_cast<Scalar>((index >> 1) & 1);
-    z = static_cast<Scalar>((index >> 2) & 1);
+    assert(vertex < 8);
+    result[0] = static_cast<Scalar>(vertex & 1);
+    result[1] = static_cast<Scalar>((vertex >> 1) & 1);
+    result[2] = static_cast<Scalar>((vertex >> 2) & 1);
 }
 
 } // namespace dr
