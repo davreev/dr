@@ -1,49 +1,62 @@
 ---
 BasedOnStyle: LLVM
+ColumnLimit: 100
 IndentWidth: 4
 TabWidth: 4
-ColumnLimit: 0
 ---
 Language: Cpp
-BreakBeforeBraces: Custom
+AlignAfterOpenBracket: AlwaysBreak
+AlignOperands: DontAlign
+AlignTrailingComments: false
+AllowAllArgumentsOnNextLine: false
+AllowAllParametersOfDeclarationOnNextLine: false
+AlwaysBreakTemplateDeclarations: Yes
+BinPackArguments: false
+BinPackParameters: false
 BraceWrapping:
   AfterCaseLabel: true
   AfterClass: true
   AfterControlStatement: Always
   AfterEnum: true
+  AfterExternBlock: true
   AfterFunction: true
   AfterNamespace: true
   AfterObjCDeclaration: true
   AfterStruct: true
   AfterUnion: true
-  AfterExternBlock: true
   BeforeCatch: true
   BeforeElse: true
   BeforeLambdaBody: false
   BeforeWhile: false
   IndentBraces: false
   SplitEmptyFunction: true
-  SplitEmptyRecord: true
   SplitEmptyNamespace: true
-BinPackArguments: false
-BinPackParameters: false
-AllowAllArgumentsOnNextLine: false
-AllowAllParametersOfDeclarationOnNextLine: false
-AlignAfterOpenBracket: AlwaysBreak
+  SplitEmptyRecord: true
+BreakAfterAttributes: Always
 BreakBeforeBinaryOperators: NonAssignment
+BreakBeforeBraces: Custom
 BreakBeforeTernaryOperators: true
-AlignOperands: DontAlign
+BreakConstructorInitializers: AfterColon
+BreakStringLiterals: false
+DerivePointerAlignment: false
+FixNamespaceComments: true
+IncludeBlocks: Preserve
 IndentCaseLabels: true
 IndentExternBlock: NoIndent
-BreakConstructorInitializers: AfterColon
+MaxEmptyLinesToKeep: 1
 NamespaceIndentation: None
-FixNamespaceComments: true
-SortIncludes: true
-IncludeBlocks: Preserve
-SpaceAfterTemplateKeyword: true
-DerivePointerAlignment: false
+PackConstructorInitializers: NextLine
+PenaltyBreakAssignment: 2
+PenaltyBreakBeforeFirstCallParameter: 1
+PenaltyBreakComment: 300
+PenaltyBreakFirstLessLess: 120
+PenaltyBreakOpenParenthesis: 0
+PenaltyBreakString: 1000
+# PenaltyBreakTemplateDeclaration: 10 # Overridden by AlwaysBreakTemplateDeclarations
+PenaltyExcessCharacter: 1000000
+PenaltyIndentedWhitespace: 0
+PenaltyReturnTypeOnItsOwnLine: 1000
 PointerAlignment: Left
 QualifierAlignment: Right
-AlignTrailingComments: false
-MaxEmptyLinesToKeep: 1
-BreakAfterAttributes: Always
+SortIncludes: true
+SpaceAfterTemplateKeyword: true
