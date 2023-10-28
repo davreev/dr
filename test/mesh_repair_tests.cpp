@@ -5,7 +5,7 @@
 
 #include "test_utils.hpp"
 
-UTEST(mesh_repair, find_unique_points_hash_grid)
+UTEST(mesh_repair, find_unique_points)
 {
     using namespace dr;
 
@@ -100,107 +100,6 @@ UTEST(mesh_repair, find_unique_points_hash_grid)
         unique_pts.clear();
         pt_to_unique.assign(points.size(), -1);
         find_unique_points(as_span(points), grid, tol, unique_pts, as_span(pt_to_unique));
-
-        ASSERT_TRUE(equal(as_span(pt_to_unique), as_span(result.point_to_unique)));
-        ASSERT_TRUE(equal(as_span(unique_pts), as_span(result.unique_points)));
-    }
-}
-
-UTEST(mesh_repair, find_unique_points_sort)
-{
-    using namespace dr;
-
-    struct TestCase
-    {
-        DynamicArray<Vec2<f64>> points;
-        f64 tolerance;
-        struct
-        {
-            DynamicArray<i32> unique_points;
-            DynamicArray<i32> point_to_unique;
-        } result;
-    };
-
-    TestCase const test_cases[] = {
-        {
-            {
-                {0.0, 0.0},
-                {1.0, 1.0},
-                {2.0, 2.0},
-            },
-            1.0e-8,
-            {
-                {0, 1, 2},
-                {0, 1, 2},
-            },
-        },
-        {
-            {
-                {0.0, 0.0},
-                {1.0, 1.0},
-                {1.0, 1.0},
-            },
-            1.0e-8,
-            {
-                {0, 1},
-                {0, 1, 1},
-            },
-        },
-        {
-            {
-                {0.0, 0.0},
-                {0.0, 0.0},
-                {0.0, 0.0},
-            },
-            1.0e-8,
-            {
-                {0},
-                {0, 0, 0},
-            },
-        },
-        {
-            {
-                {-1.0, -1.0},
-                {1.0, 1.0},
-                {-1.0, -1.0},
-                {1.0, 1.0},
-            },
-            1.0e-8,
-            {
-                {0, 1},
-                {0, 1, 0, 1},
-            },
-        },
-        {
-            {
-                {0.0, 0.0},
-                {0.1, 0.1},
-                {1.0, 1.0},
-                {1.1, 1.1},
-                {2.0, 2.0},
-                {2.1, 2.1},
-                {3.0, 3.0},
-                {3.1, 3.1},
-                {4.0, 4.0},
-                {4.1, 4.1},
-            },
-            0.2,
-            {
-                {0, 2, 4, 6, 8},
-                {0, 0, 1, 1, 2, 2, 3, 3, 4, 4},
-            },
-        },
-    };
-
-    DynamicArray<i32> unique_pts{};
-    DynamicArray<i32> pt_to_unique{};
-
-    // Deduplication via sort
-    for (auto const& [points, tol, result] : test_cases)
-    {
-        unique_pts.clear();
-        pt_to_unique.assign(points.size(), -1);
-        find_unique_points(as_span(points), tol, unique_pts, as_span(pt_to_unique));
 
         ASSERT_TRUE(equal(as_span(pt_to_unique), as_span(result.point_to_unique)));
         ASSERT_TRUE(equal(as_span(unique_pts), as_span(result.unique_points)));
