@@ -85,6 +85,8 @@ bool gather_points(
     return false;
 }
 
+/// Finds unique points based on a given (Euclidean) distance tolerance. Returns the index of each
+/// unique point along with the mapping from original points to unique points.
 template <typename Real, typename Index, int dim>
 void find_unique_points(
     Span<Vec<Real, dim> const> const& points,
@@ -136,19 +138,24 @@ void find_unique_points(
     }
 }
 
+/// Removes values associated with non-unique vertices from the given array. Returns the truncated
+/// array of values associated with unique vertices. To allow for in-place removal, the given array
+/// of unique vertices is assumed to be monotonic increasing.
 template <typename Scalar, typename Index, int dim>
 Span<Vec<Scalar, dim>> merge_vertices(
-    Span<Vec<Scalar, dim>> const& vertex_positions,
+    Span<Vec<Scalar, dim>> const& vertex_values,
     Span<Index const> const& unique_vertices)
 {
     static_assert(is_integer<Index> || is_natural<Index>);
 
     for (isize i = 0; i < unique_vertices.size(); ++i)
-        vertex_positions[i] = vertex_positions[unique_vertices[i]];
+        vertex_values[i] = vertex_values[unique_vertices[i]];
 
-    return vertex_positions.front(unique_vertices.size());
+    return vertex_values.front(unique_vertices.size());
 }
 
+/// Re-indexes faces of a mesh given a map from old vertex indices to new vertex indices. By
+/// default, any degenerate faces created by this process are removed.
 template <typename Index>
 Span<Vec3<Index>> reindex_faces(
     Span<Vec3<Index>> const& face_vertices,
