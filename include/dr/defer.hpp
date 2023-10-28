@@ -24,6 +24,7 @@ struct Defer
 };
 
 template <typename Func>
+[[nodiscard]]
 Defer<Func> defer(Func&& func)
 {
     return {std::forward<Func>(func)};
