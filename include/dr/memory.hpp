@@ -7,6 +7,7 @@
 #include <memory>
 #include <type_traits>
 
+#include <dr/allocator.hpp>
 #include <dr/basic_types.hpp>
 #include <dr/span.hpp>
 
@@ -116,56 +117,6 @@ Span<u8 const> as_bytes(T const& item)
 template <typename T>
 Span<u8 const> as_bytes(T const&& item) = delete;
 
-using AllocatorBase = std::pmr::polymorphic_allocator<std::byte>;
-
-struct Allocator : AllocatorBase
-{
-    // Expose constructors of base type for compatibility with pmr containers
-    using AllocatorBase::AllocatorBase;
-
-    void* allocate(usize size, usize alignment) const;
-
-    void deallocate(void* ptr, usize size, usize alignment) const;
-
-    template <typename T>
-    T* allocate(usize const count = 1) const
-    {
-        return static_cast<T*>(allocate(count * sizeof(T), alignof(T)));
-    }
-
-    template <typename T>
-    void deallocate(T* const ptr, usize const count = 1) const
-    {
-        deallocate(ptr, count * sizeof(T), alignof(T));
-    }
-
-    template <typename T, typename... Args>
-    T* new_object(Args&&... args)
-    {
-        static_assert(!std::is_array_v<T>);
-        T* const ptr = allocate<T>();
-        construct(ptr, std::forward<Args>(args)...);
-        return ptr;
-    }
-
-    template <typename T>
-    void delete_object(T* ptr) const
-    {
-        ptr->~T();
-        deallocate(ptr);
-    }
-};
-
-/// Derived types will use the allocator of a parent container if compatible
-struct AllocatorAware
-{
-    using allocator_type = Allocator;
-};
-
-/// Returns true if T is allocator-aware
-template <typename T>
-inline constexpr bool is_allocator_aware = std::uses_allocator_v<std::decay_t<T>, Allocator>;
-
 /// Simple RAII-style heap allocation
 template <usize alignment>
 struct ScopedAlloc
@@ -190,6 +141,7 @@ struct ScopedAlloc
     template <typename T>
     Span<T> data_as()
     {
+        static_assert(std::is_trivially_destructible_v<T>);
         static_assert(alignof(T) <= alignment);
         return {static_cast<T*>(data_), static_cast<isize>(size_ / sizeof(T))};
     }
@@ -197,6 +149,7 @@ struct ScopedAlloc
     template <typename T>
     Span<T const> data_as() const
     {
+        static_assert(std::is_trivially_destructible_v<T>);
         static_assert(alignof(T) <= alignment);
         return {static_cast<T const*>(data_), static_cast<isize>(size_ / sizeof(T))};
     }
@@ -215,8 +168,7 @@ struct DeleteUnique
     template <typename T>
     void operator()(T* const ptr)
     {
-        ptr->~T();
-        alloc.deallocate(ptr);
+        alloc.delete_object(ptr);
     }
 };
 

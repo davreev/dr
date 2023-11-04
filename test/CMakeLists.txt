@@ -1,5 +1,6 @@
 add_executable(
-    dr-test 
+    dr-test
+    allocator_tests.cpp
     bitwise_tests.cpp
     container_tests.cpp
     defer_tests.cpp
