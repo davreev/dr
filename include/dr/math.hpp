@@ -122,6 +122,10 @@ Scalar mod(Scalar const x, Scalar const y)
     {
         return x % y;
     }
+    else
+    {
+        static_assert(sizeof(Scalar*) == 0, "Unsupported type");
+    }
 }
 
 /// Returns the fractional component of a number

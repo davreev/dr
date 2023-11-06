@@ -127,6 +127,10 @@ struct HashGrid : AllocatorAware
                 }
             }
         }
+        else
+        {
+            static_assert(dim != dim, "Unsupported value");
+        }
     }
 
   private:
