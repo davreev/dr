@@ -13,51 +13,47 @@ UTEST(geometry, eval_gradient)
 
     struct TestCase
     {
-        Vec3<f64> p0;
-        Vec3<f64> p1;
-        Vec3<f64> p2;
-        f64 f0;
-        f64 f1;
-        f64 f2;
+        Vec3<f64> p[3];
+        f64 f[3];
         Covec3<f64> result;
     };
 
     TestCase const test_cases[] = {
         {
-            vec(0.0, 0.0, 0.0),
-            vec(1.0, 0.0, 0.0),
+            {
+                vec(0.0, 0.0, 0.0),
+                vec(1.0, 0.0, 0.0),
+                vec(0.0, 1.0, 0.0),
+            },
+            {0.0, 0.0, 1.0},
             vec(0.0, 1.0, 0.0),
-            0.0,
-            0.0,
-            1.0,
-            covec(0.0, 1.0, 0.0),
         },
         {
-            vec(0.0, 0.0, 0.0),
-            vec(1.0, 0.0, 0.0),
-            vec(0.0, 1.0, 0.0),
-            0.0,
-            0.0,
-            2.0,
-            covec(0.0, 2.0, 0.0),
-        },
-        {
-            vec(0.0, 0.0, 0.0),
-            vec(1.0, 0.0, 0.0),
+            {
+                vec(0.0, 0.0, 0.0),
+                vec(1.0, 0.0, 0.0),
+                vec(0.0, 1.0, 0.0),
+            },
+            {0.0, 0.0, 2.0},
             vec(0.0, 2.0, 0.0),
-            0.0,
-            0.0,
-            1.0,
-            covec(0.0, 0.5, 0.0),
+        },
+        {
+            {
+                vec(0.0, 0.0, 0.0),
+                vec(1.0, 0.0, 0.0),
+                vec(0.0, 2.0, 0.0),
+            },
+            {0.0, 0.0, 1.0},
+            vec(0.0, 0.5, 0.0),
         },
     };
 
-    for (auto const& [p0, p1, p2, f0, f1, f2, result] : test_cases)
+    for (auto const& [p, f, result] : test_cases)
     {
-        auto const g = eval_gradient(p0, p1, p2, f0, f1, f2);
-        ASSERT_NEAR(result[0], g[0], eps);
-        ASSERT_NEAR(result[1], g[1], eps);
-        ASSERT_NEAR(result[2], g[2], eps);
+        auto const grad = eval_gradient(p[0], p[1], p[2], f[0], f[1], f[2]);
+        ASSERT_NEAR(result[0], grad[0], eps);
+        ASSERT_NEAR(result[1], grad[1], eps);
+        ASSERT_NEAR(result[2], grad[2], eps);
     }
 }
 
@@ -69,43 +65,43 @@ UTEST(geometry, eval_jacobian)
 
     struct TestCase
     {
-        Vec3<f64> p0;
-        Vec3<f64> p1;
-        Vec3<f64> p2;
-        Vec2<f64> f0;
-        Vec2<f64> f1;
-        Vec2<f64> f2;
+        Vec3<f64> p[3];
+        Vec2<f64> f[3];
         Mat<f64, 2, 3> result;
     };
 
     TestCase const test_cases[] = {
         {
-            vec(0.0, 0.0, 0.0),
-            vec(1.0, 0.0, 0.0),
-            vec(0.0, 1.0, 0.0),
-            vec(0.0, 0.0),
-            vec(0.0, 0.0),
-            vec(1.0, 1.0),
-            mat(
-                covec(0.0, 1.0, 0.0),
-                covec(0.0, 1.0, 0.0)),
+            {
+                vec(0.0, 0.0, 0.0),
+                vec(1.0, 0.0, 0.0),
+                vec(0.0, 1.0, 0.0),
+            },
+            {
+                vec(0.0, 0.0),
+                vec(0.0, 0.0),
+                vec(1.0, 1.0),
+            },
+            mat(row(0.0, 1.0, 0.0), row(0.0, 1.0, 0.0)),
         },
         {
-            vec(0.0, 0.0, 0.0),
-            vec(1.0, 0.0, 0.0),
-            vec(0.0, 1.0, 0.0),
-            vec(0.0, 0.0),
-            vec(0.0, 0.0),
-            vec(1.0, 2.0),
-            mat(
-                covec(0.0, 1.0, 0.0),
-                covec(0.0, 2.0, 0.0)),
+            {
+                vec(0.0, 0.0, 0.0),
+                vec(1.0, 0.0, 0.0),
+                vec(0.0, 1.0, 0.0),
+            },
+            {
+                vec(0.0, 0.0),
+                vec(0.0, 0.0),
+                vec(1.0, 2.0),
+            },
+            mat(row(0.0, 1.0, 0.0), row(0.0, 2.0, 0.0)),
         },
     };
 
-    for (auto const& [p0, p1, p2, f0, f1, f2, result] : test_cases)
+    for (auto const& [p, f, result] : test_cases)
     {
-        auto const J = eval_jacobian(p0, p1, p2, f0, f1, f2);
+        auto const J = eval_jacobian(p[0], p[1], p[2], f[0], f[1], f[2]);
         ASSERT_NEAR(result(0, 0), J(0, 0), eps);
         ASSERT_NEAR(result(0, 1), J(0, 1), eps);
         ASSERT_NEAR(result(0, 2), J(0, 2), eps);
@@ -123,11 +119,9 @@ UTEST(geometry, eval_divergence)
 
     struct TestCase
     {
-        Vec3<f64> p0;
-        Vec3<f64> p1;
-        Vec3<f64> p2;
+        Vec3<f64> p[3];
         Vec3<f64> f;
-        Vec3<f64> result;
+        f64 result[3];
     };
 
     /*
@@ -148,41 +142,117 @@ UTEST(geometry, eval_divergence)
 
     TestCase const test_cases[] = {
         {
-            vec(0.0, 0.0, 0.0),
+            {
+                vec(0.0, 0.0, 0.0),
+                vec(1.0, 0.0, 0.0),
+                vec(0.0, 1.0, 0.0),
+            },
             vec(1.0, 0.0, 0.0),
-            vec(0.0, 1.0, 0.0),
-            vec(1.0, 0.0, 0.0),
-            vec(0.5, -0.5, 0.0),
+            {0.5, -0.5, 0.0},
         },
         {
-            vec(0.0, 0.0, 0.0),
-            vec(1.0, 0.0, 0.0),
-            vec(0.0, 1.0, 0.0),
+            {
+                vec(0.0, 0.0, 0.0),
+                vec(1.0, 0.0, 0.0),
+                vec(0.0, 1.0, 0.0),
+            },
             vec(1.0, 1.0, 0.0),
-            vec(1.0, -0.5, -0.5),
+            {1.0, -0.5, -0.5},
         },
         {
-            vec(0.0, 0.0, 0.0),
-            vec(1.0, 0.0, 0.0),
-            vec(0.0, 1.0, 0.0),
+            {
+                vec(0.0, 0.0, 0.0),
+                vec(1.0, 0.0, 0.0),
+                vec(0.0, 1.0, 0.0),
+            },
             vec(1.0, -1.0, 0.0),
-            vec(0.0, -0.5, 0.5),
+            {0.0, -0.5, 0.5},
         },
         {
-            vec(0.0, 0.0, 0.0),
-            vec(1.0, 0.0, 0.0),
-            vec(0.0, 1.0, 0.0),
+            {
+                vec(0.0, 0.0, 0.0),
+                vec(1.0, 0.0, 0.0),
+                vec(0.0, 1.0, 0.0),
+            },
             vec(1.0, 2.0, 0.0),
-            vec(1.5, -0.5, -1.0),
+            {1.5, -0.5, -1.0},
         },
     };
 
-    for (auto const& [p0, p1, p2, f, result] : test_cases)
+    for (auto const& [p, f, result] : test_cases)
     {
-        auto const d = eval_divergence(p0, p1, p2, f);
+        auto const d = eval_divergence(p[0], p[1], p[2], f);
         ASSERT_NEAR(result[0], d[0], eps);
         ASSERT_NEAR(result[1], d[1], eps);
         ASSERT_NEAR(result[2], d[2], eps);
+    }
+}
+
+UTEST(geometry, eval_laplacian)
+{
+    using namespace dr;
+
+    constexpr f64 eps = 1.0e-8;
+
+    struct TestCase
+    {
+        Vec3<f64> p[3];
+        f64 f[3];
+        f64 result[3];
+    };
+
+    /*
+        Testing on unit triangle
+
+               v2
+               |\          |\
+               | \      e2 | \ e1
+               |  \        |  \
+               -----       -----
+             v0     v1      e0
+
+        Cotan weights
+
+            w[e0] = w[e2] = cos(pi/4) / sin(pi/4) = 1
+            w[e1] = cos(pi/2) / sin(pi/2) = 0
+    */
+
+    TestCase const test_cases[] = {
+        {
+            {
+                vec(0.0, 0.0, 0.0),
+                vec(1.0, 0.0, 0.0),
+                vec(0.0, 1.0, 0.0),
+            },
+            {1.0, 1.0, 1.0},
+            {0.0, 0.0, 0.0},
+        },
+        {
+            {
+                vec(0.0, 0.0, 0.0),
+                vec(1.0, 0.0, 0.0),
+                vec(0.0, 1.0, 0.0),
+            },
+            {1.0, 0.0, 0.0},
+            {-1.0, 0.5, 0.5},
+        },
+        {
+            {
+                vec(0.0, 0.0, 0.0),
+                vec(1.0, 0.0, 0.0),
+                vec(0.0, 1.0, 0.0),
+            },
+            {0.0, 1.0, 2.0},
+            {1.5, -0.5, -1.0},
+        },
+    };
+
+    for (auto const& [p, f, result] : test_cases)
+    {
+        auto const lap = eval_laplacian(p[0], p[1], p[2], f[0], f[1], f[2]);
+        ASSERT_NEAR(result[0], lap[0], eps);
+        ASSERT_NEAR(result[1], lap[1], eps);
+        ASSERT_NEAR(result[2], lap[2], eps);
     }
 }
 
@@ -412,11 +482,7 @@ UTEST(geometry, intersect_line_line)
 
     for (auto const& [a_start, a_delta, b_start, b_delta, result] : test_cases)
     {
-        auto const t = intersect_line_line(
-            a_start,
-            a_delta,
-            b_start,
-            b_delta);
+        auto const t = intersect_line_line(a_start, a_delta, b_start, b_delta);
 
         if (t.has_value())
         {
@@ -479,11 +545,7 @@ UTEST(geometry, intersect_line_plane)
 
     for (auto const& [ln_start, ln_delta, pl_orig, pl_norm, result] : test_cases)
     {
-        auto const t = intersect_line_plane(
-            ln_start,
-            ln_delta,
-            pl_orig,
-            pl_norm);
+        auto const t = intersect_line_plane(ln_start, ln_delta, pl_orig, pl_norm);
 
         if (t.has_value())
         {
@@ -553,11 +615,7 @@ UTEST(geometry, intersect_line_sphere)
 
     for (auto const& [ln_start, ln_delta, sp_orig, sp_rad, result] : test_cases)
     {
-        auto const t = intersect_line_sphere(
-            ln_start,
-            ln_delta,
-            sp_orig,
-            sp_rad);
+        auto const t = intersect_line_sphere(ln_start, ln_delta, sp_orig, sp_rad);
 
         if (t.has_value())
         {

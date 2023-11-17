@@ -29,10 +29,10 @@ void vertex_vector_areas(
         constexpr Real inv3{1.0 / 3.0};
 
         // clang-format off
-        Vec3<Real> const area = vector_area(
+        Vec3<Real> const area = inv3 * vector_area(
             vertex_positions[f_v[0]],
             vertex_positions[f_v[1]],
-            vertex_positions[f_v[2]]) * inv3;
+            vertex_positions[f_v[2]]);
         // clang-format on
 
         result[f_v[0]] += area;
@@ -69,10 +69,10 @@ void vertex_areas_barycentric(
         constexpr Real inv3{1.0 / 3.0};
 
         // clang-format off
-        Real const area = vector_area(
+        Real const area = inv3 * vector_area(
             vertex_positions[f_v[0]],
             vertex_positions[f_v[1]],
-            vertex_positions[f_v[2]]).norm() * inv3;
+            vertex_positions[f_v[2]]).norm();
         // clang-format on
 
         result[f_v[0]] += area;
@@ -172,12 +172,14 @@ Value eval_vertex_integral(
 
         // NOTE: Scaling each vertex value by the volume of its dual cell gives an integrated dual
         // 3-form
+
         result += e_val * e_vol;
         volume += e_vol;
     }
 
     // NOTE: Result is a dual 3-form integrated over all vertex dual cells. Caller can divide by the
     // returned volume to convert back to primal 0-form.
+
     return result;
 }
 
@@ -211,12 +213,14 @@ Value eval_vertex_integral(
 
         // NOTE: Scaling each vertex value by the area of its dual cell gives an integrated dual
         // 2-form
+
         result += e_val * e_area;
         area += e_area;
     }
 
     // NOTE: Result is a dual 2-form integrated over all vertex dual cells. Caller can divide by the
     // returned area to convert back to primal 0-form.
+
     return result;
 }
 
@@ -240,12 +244,14 @@ Value eval_vertex_integral(
 
         // NOTE: Scaling each vertex value by the length of its dual cell gives an integrated dual
         // 1-form
+
         result += e_val * e_len;
         length += e_len;
     }
 
     // NOTE: Result is a dual 1-form integrated over all vertex dual cells. Caller can divide by the
     // returned length to convert back to primal 0-form.
+
     return result;
 }
 
@@ -309,55 +315,6 @@ Real winding_number(
     }
 
     return sum * (0.25 * inv_pi<Real>);
-}
-
-/// Returns the interpolated value at a point inside a triangle mesh using mean value coordinates.
-template <typename Real, typename Value, typename Index>
-Value interpolate_mean_value_naive(
-    Span<Vec3<Real> const> const& vertex_positions,
-    Span<Value const> const& vertex_values,
-    Span<Vec3<Index> const> const& face_vertices,
-    Vec3<Real> const& point)
-{
-    // https://www.cse.wustl.edu/~taoju/research/meanvalue.pdf
-
-    Value sum{};
-    Real weight_sum{};
-
-    for (auto const& f_v : face_vertices)
-    {
-        Value const& f0 = vertex_values[f_v[0]];
-        Value const& f1 = vertex_values[f_v[1]];
-        Value const& f2 = vertex_values[f_v[2]];
-
-        Vec3<Real> const d0 = vertex_positions[f_v[0]] - point;
-        Vec3<Real> const d1 = vertex_positions[f_v[1]] - point;
-        Vec3<Real> const d2 = vertex_positions[f_v[2]] - point;
-
-        // Wedge unit normals
-        Vec3<Real> const n0 = d1.cross(d2).normalized();
-        Vec3<Real> const n1 = d2.cross(d0).normalized();
-        Vec3<Real> const n2 = d0.cross(d1).normalized();
-
-        // Wedge areas
-        Real const a0 = angle(d1, d2);
-        Real const a1 = angle(d2, d0);
-        Real const a2 = angle(d0, d1);
-
-        // Integral of unit normal over spherical triangle (eqn. 8)
-        Vec3<Real> const m = Real{0.5} * (a0 * n0 + a1 * n1 + a2 * n2);
-
-        // Compute weights (eqn. 9)
-        Real const w0 = n0.dot(m) / n0.dot(d0);
-        Real const w1 = n1.dot(m) / n1.dot(d1);
-        Real const w2 = n2.dot(m) / n2.dot(d2);
-
-        // Take weighted sum
-        sum += w0 * f0 + w1 * f1 + w2 * f2;
-        weight_sum += w0 + w1 + w2;
-    }
-
-    return sum / weight_sum;
 }
 
 /// Returns the interpolated value at a point inside a triangle mesh using mean value coordinates
@@ -450,6 +407,57 @@ Value interpolate_mean_value(
             sum += w0 * f0 + w1 * f1 + w2 * f2;
             weight_sum += w0 + w1 + w2;
         }
+    }
+
+    return sum / weight_sum;
+}
+
+/// Returns the interpolated value at a point inside a triangle mesh using mean value coordinates.
+/// The naive implementation is faster but less numerically robust particularly when evaluated near
+/// the boundary.
+template <typename Real, typename Value, typename Index>
+Value interpolate_mean_value_naive(
+    Span<Vec3<Real> const> const& vertex_positions,
+    Span<Value const> const& vertex_values,
+    Span<Vec3<Index> const> const& face_vertices,
+    Vec3<Real> const& point)
+{
+    // https://www.cse.wustl.edu/~taoju/research/meanvalue.pdf
+
+    Value sum{};
+    Real weight_sum{};
+
+    for (auto const& f_v : face_vertices)
+    {
+        Value const& f0 = vertex_values[f_v[0]];
+        Value const& f1 = vertex_values[f_v[1]];
+        Value const& f2 = vertex_values[f_v[2]];
+
+        Vec3<Real> const d0 = vertex_positions[f_v[0]] - point;
+        Vec3<Real> const d1 = vertex_positions[f_v[1]] - point;
+        Vec3<Real> const d2 = vertex_positions[f_v[2]] - point;
+
+        // Wedge unit normals
+        Vec3<Real> const n0 = d1.cross(d2).normalized();
+        Vec3<Real> const n1 = d2.cross(d0).normalized();
+        Vec3<Real> const n2 = d0.cross(d1).normalized();
+
+        // Wedge areas
+        Real const a0 = angle(d1, d2);
+        Real const a1 = angle(d2, d0);
+        Real const a2 = angle(d0, d1);
+
+        // Integral of unit normal over spherical triangle (eqn. 8)
+        Vec3<Real> const m = Real{0.5} * (a0 * n0 + a1 * n1 + a2 * n2);
+
+        // Compute weights (eqn. 9)
+        Real const w0 = n0.dot(m) / n0.dot(d0);
+        Real const w1 = n1.dot(m) / n1.dot(d1);
+        Real const w2 = n2.dot(m) / n2.dot(d2);
+
+        // Take weighted sum
+        sum += w0 * f0 + w1 * f1 + w2 * f2;
+        weight_sum += w0 + w1 + w2;
     }
 
     return sum / weight_sum;

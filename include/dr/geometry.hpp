@@ -12,7 +12,7 @@
 namespace dr
 {
 
-/// Returns the parameter of the closest point on the given line
+/// Returns the parameter for the closest point on the given line
 template <typename Real>
 Real nearest_point_line(
     Vec3<Real> const& point,
@@ -23,31 +23,15 @@ Real nearest_point_line(
     return line_delta.dot(point - line_start) / line_delta.squaredNorm();
 }
 
-/// Returns the parameter of the closest point on the given line
+/// Returns the parameter for the closest point on the given line segment
 template <typename Real>
-Real nearest_point_line(Vec3<Real> const& point, Line3<Real> const& line)
-{
-    static_assert(is_real<Real>);
-    return nearest_point_line(point, line.start, line.delta);
-}
-
-/// Returns the parameter of the closest point on the given line segment
-template <typename Real>
-Real nearest_point_line_seg(
+Real nearest_point_segment(
     Vec3<Real> const& point,
-    Vec3<Real> const& line_start,
-    Vec3<Real> const& line_delta)
+    Vec3<Real> const& seg_start,
+    Vec3<Real> const& seg_delta)
 {
     static_assert(is_real<Real>);
-    return saturate(nearest_point_line(point, line_start, line_delta));
-}
-
-/// Returns the parameter of the closest point on the given line segment
-template <typename Real>
-Real nearest_point_line_seg(Vec3<Real> const& point, Line3<Real> const& line)
-{
-    static_assert(is_real<Real>);
-    return nearest_point_line_seg(point, line.start, line.delta);
+    return saturate(nearest_point_line(point, seg_start, seg_delta));
 }
 
 /// Returns the closest point on the given plane
@@ -61,7 +45,7 @@ Vec3<Real> nearest_point_plane(
     return point + project((plane_origin - point).eval(), plane_normal);
 }
 
-/// Returns parameters of the closest pair of points on the given lines
+/// Returns parameters for the closest pair of points on the given lines
 template <typename Real>
 Vec2<Real> nearest_line_line(
     Vec3<Real> const& a_start,
@@ -73,28 +57,28 @@ Vec2<Real> nearest_line_line(
 
     Vec3<Real> const b = b_start - a_start;
     Vec2<Real> const x = solve_least_squares(mat(a_delta, b_delta), b);
-    return std::isnan(x[0]) ? vec<2>(Real{0.0}) : vec(x[0], -x[1]);
+    return std::isnan(x[0]) ? Vec2<Real>{} : vec(x[0], -x[1]);
 }
 
-/// Returns parameters of the closest pair of points on the given segment and line
+/// Returns parameters for the closest pair of points on the given line segment and line
 template <typename Real>
-Vec2<Real> nearest_line_line_seg(
-    Vec3<Real> const& a_start,
-    Vec3<Real> const& a_delta,
-    Vec3<Real> const& b_start,
-    Vec3<Real> const& b_delta)
+Vec2<Real> nearest_segment_line(
+    Vec3<Real> const& seg_start,
+    Vec3<Real> const& seg_delta,
+    Vec3<Real> const& line_start,
+    Vec3<Real> const& line_delta)
 {
     static_assert(is_real<Real>);
 
-    Vec2<Real> t = nearest_line_line(a_start, a_delta, b_start, b_delta);
+    Vec2<Real> t = nearest_line_line(seg_start, seg_delta, line_start, line_delta);
     t[0] = saturate(t[0]);
-    t[1] = nearest_point_line((a_start + a_delta * t[0]).eval(), b_start, b_delta);
+    t[1] = nearest_point_line((seg_start + seg_delta * t[0]).eval(), line_start, line_delta);
     return t;
 }
 
 /// Returns parameters of the closest pair of points on the given segments
 template <typename Real>
-Vec2<Real> nearest_line_seg_line_seg(
+Vec2<Real> nearest_segment_segment(
     Vec3<Real> const& a_start,
     Vec3<Real> const& a_delta,
     Vec3<Real> const& b_start,
@@ -161,8 +145,7 @@ std::optional<Real> intersect_line_disk(
 
     if (auto t = intersect_line_plane(line_start, line_delta, disk_origin, disk_normal))
     {
-        Vec3<Real> const& p = line_start + line_delta * t.value();
-
+        Vec3<Real> const p = line_start + line_delta * t.value();
         if ((p - disk_origin).squaredNorm() <= disk_radius * disk_radius)
             return t;
     }
@@ -216,7 +199,7 @@ bool is_in_triangle(
     return cross(d1, d2) * dir >= Real{0.0} && cross(d2, d0) * dir >= Real{0.0};
 }
 
-/// Returns true if the closest point on the plane of a triangle is inside the triangle
+/// Returns true if the point is inside the triangle
 template <typename Real>
 bool is_in_triangle(
     Vec3<Real> const& point,
@@ -226,13 +209,24 @@ bool is_in_triangle(
 {
     static_assert(is_real<Real>);
 
-    Vec3<Real> const cp = nearest_point_plane(point, tri_a, (tri_b - tri_a).cross(tri_c - tri_b));
-    Vec3<Real> const d0 = tri_a - cp;
-    Vec3<Real> const d1 = tri_b - cp;
-    Vec3<Real> const d2 = tri_c - cp;
-
+    Vec3<Real> const d0 = tri_a - point;
+    Vec3<Real> const d1 = tri_b - point;
+    Vec3<Real> const d2 = tri_c - point;
     Vec3<Real> const dir = d0.cross(d1);
     return d1.cross(d2).dot(dir) >= Real{0.0} && d2.cross(d0).dot(dir) >= Real{0.0};
+}
+
+/// Returns true if the closest point on the plane of the triangle is inside the triangle
+template <typename Real>
+bool is_nearest_in_triangle(
+    Vec3<Real> const& point,
+    Vec3<Real> const& tri_a,
+    Vec3<Real> const& tri_b,
+    Vec3<Real> const& tri_c)
+{
+    static_assert(is_real<Real>);
+    Vec3<Real> const cp = nearest_point_plane(point, tri_a, (tri_b - tri_a).cross(tri_c - tri_b));
+    return is_in_triangle(cp, tri_a, tri_b, tri_c);
 }
 
 /// Returns the line parameter of the intersection with a triangle
@@ -249,8 +243,7 @@ std::optional<Real> intersect_line_triangle(
 
     if (auto t = intersect_line_plane(line_start, line_delta, tri_a, norm))
     {
-        Vec3<Real> const& p = line_start + line_delta * t.value();
-
+        Vec3<Real> const p = line_start + line_delta * t.value();
         if (is_in_triangle(p, tri_a, tri_b, tri_c))
             return t;
     }
@@ -323,7 +316,7 @@ Real solid_angle(
 template <typename Real>
 Real solid_angle(Span<Vec3<Real> const> const& polygon, Vec3<Real> const& point)
 {
-    // https://math.stackexchange.com/a/3643176/809910
+    // Computed as the area of a spherical polygon (https://math.stackexchange.com/a/3643176/809910)
 
     static_assert(is_real<Real>);
 
@@ -331,10 +324,7 @@ Real solid_angle(Span<Vec3<Real> const> const& polygon, Vec3<Real> const& point)
     if (n < 3)
         return Real{0.0};
 
-    auto const to_sphere = [&](Vec3<Real> const& p) {
-        return (p - point).normalized();
-    };
-
+    auto const to_sphere = [&](Vec3<Real> const& p) { return (p - point).normalized(); };
     Vec3<Real> p0 = to_sphere(polygon[0]);
     Vec3<Real> p1 = to_sphere(polygon[1]);
     Real sum{};
@@ -342,12 +332,7 @@ Real solid_angle(Span<Vec3<Real> const> const& polygon, Vec3<Real> const& point)
     for (isize i = 0; i < n; ++i)
     {
         Vec3<Real> const p2 = to_sphere(polygon[mod(i + 2, n)]);
-
-        sum += signed_angle<Real>(
-            reject<Real>(p1 - p0, p1),
-            reject<Real>(p2 - p1, p1),
-            p1);
-
+        sum += signed_angle<Real>(reject<Real>(p1 - p0, p1), reject<Real>(p2 - p1, p1), p1);
         p0 = p1;
         p1 = p2;
     }
@@ -398,9 +383,7 @@ Vec3<Real> vector_area(Span<Vec3<Real> const> const& polygon)
     }
     else
     {
-        auto eval_edge = [&](isize const i, isize const j) {
-            return polygon[i].cross(polygon[j]);
-        };
+        auto eval_edge = [&](isize const i, isize const j) { return polygon[i].cross(polygon[j]); };
 
         auto sum = vec<3, Real>(0.0);
         isize const last = n - 1;
@@ -422,11 +405,7 @@ Real signed_area(Vec2<Real> const& a, Vec2<Real> const& b, Vec2<Real> const& c)
 
 /// Returns the signed area of a quadrilateral
 template <typename Real>
-Real signed_area(
-    Vec2<Real> const& a,
-    Vec2<Real> const& b,
-    Vec2<Real> const& c,
-    Vec2<Real> const& d)
+Real signed_area(Vec2<Real> const& a, Vec2<Real> const& b, Vec2<Real> const& c, Vec2<Real> const& d)
 {
     static_assert(is_real<Real>);
     return cross((c - a).eval(), (d - b).eval()) * Real{0.5};
@@ -476,7 +455,7 @@ Real signed_volume(
     Vec2<Real> const& d)
 {
     static_assert(is_real<Real>);
-    
+
     constexpr Real inv6 = Real{1.0} / Real{6.0};
     return inv6 * mat((b - a).eval(), (c - a).eval(), (d - a).eval()).determinant();
 }
@@ -505,7 +484,7 @@ Covec3<Real> eval_gradient(
     // Result is a linear combo of basis grads
     // | df0  df1 | * | g0 |
     //                | g1 |
-    return df[0] * g[0] + df[1] * g[1];
+    return as_row<2>(df) * as_mat<2>(g);
 }
 
 /// Evaluates the (constant) Jacobian of a function defined on vertices of a triangle
@@ -529,13 +508,37 @@ Mat<Real, dim, 3> eval_jacobian(
     norm /= norm.squaredNorm();
     Covec3<Real> const g[]{dp[1].cross(norm), norm.cross(dp[0])};
 
-    // Result is a linear combo of basis grads
+    // Each row of the result is a linear combo of basis grads
     // | df0  df1 | * | g0 |
     //                | g1 |
     return as_mat<2>(df) * as_mat<2>(g);
 }
 
-/// Evaluates the divergence of a constant vector field on a triangle. The result is an integrated
+/// Returns the cotangent weight for each of the given triangle edges
+template <typename Real>
+Vec3<Real> cotan_weights(Vec3<Real> const& e0, Vec3<Real> const& e1, Vec3<Real> const& e2)
+{
+    static_assert(is_real<Real>);
+
+    // NOTE: The cotangent weight of an edge is the ratio of its dual to primal length (aka
+    // Hodge star). This can be computed by taking half the cotangent of the angle opposite each
+    // edge in the triangle.
+    //
+    // If t is the angle bw vectors u and v then
+    //
+    // cot(t) = cos(t) / sin(t)
+    //        = (dot(u, v) |u| |v|) / (|cross(u, v)| |u| |v|)
+    //        = dot(u, v) / |cross(u, v)|
+
+    Real const inv_sin = Real{-0.5} / e0.cross(e1).norm();
+    return {
+        e1.dot(e2) * inv_sin,
+        e2.dot(e0) * inv_sin,
+        e0.dot(e1) * inv_sin,
+    };
+}
+
+/// Evaluates the divergence of a constant vector field on a triangle. Returns an integrated
 /// quantity associated with each vertex.
 template <typename Real>
 Vec3<Real> eval_divergence(
@@ -545,26 +548,66 @@ Vec3<Real> eval_divergence(
     Vec3<Real> const& f)
 {
     static_assert(is_real<Real>);
+
     Vec3<Real> const e[]{p1 - p0, p2 - p1, p0 - p2};
 
-    // NOTE: f is treated as a (constant) differential 1-form and integrated over each edge vector.
-    // The the Hodge star is then applied to convert to a dual 1-form. This amounts to scaling by
-    // the ratio of dual to primal edge length (i.e. the cotangent weight).
+    // Compute integrated 1-form over each edge
+    Covec3<Real> const fe = f.transpose() * as_mat<3>(e);
 
-    // NOTE: If t is the angle bw vectors u and v then the cotangent weight is given by
-    // cot(t) = cos(t) / sin(t) = dot(u, v) / |cross(u, v)|
-
-    Real const inv_sin = Real{-0.5} / e[0].cross(e[1]).norm();
-    Real const hodge_fe0 = (e[1].dot(e[2]) * inv_sin) * f.dot(e[0]);
-    Real const hodge_fe1 = (e[2].dot(e[0]) * inv_sin) * f.dot(e[1]);
-    Real const hodge_fe2 = (e[0].dot(e[1]) * inv_sin) * f.dot(e[2]);
+    // Apply Hodge star to get dual 1-form
+    Vec3<Real> const hodge = cotan_weights(e[0], e[1], e[2]);
+    Covec3<Real> const dual_fe = fe * hodge.asDiagonal();
 
     // Integrate the dual 1-form over boundary of each vertex dual cell
-    return {
-        hodge_fe0 - hodge_fe2,
-        hodge_fe1 - hodge_fe0,
-        hodge_fe2 - hodge_fe1,
-    };
+    return dual_fe - dual_fe({2, 0, 1});
+}
+
+/// Evaluates the Laplacian of a scalar function defined on vertices of a triangle. Returns an
+/// integrated quantity associated with each vertex.
+template <typename Real>
+Vec3<Real> eval_laplacian(
+    Vec3<Real> const& p0,
+    Vec3<Real> const& p1,
+    Vec3<Real> const& p2,
+    Real const f0,
+    Real const f1,
+    Real const f2)
+{
+    static_assert(is_real<Real>);
+
+    // Compute integrated 1-form over each edge
+    Real const df[]{f1 - f0, f2 - f1, f0 - f2};
+
+    // Apply Hodge star to get dual 1-forms
+    Vec3<Real> const hodge = cotan_weights<Real>(p1 - p0, p2 - p1, p0 - p2);
+    Covec3<Real> const dual_df = as_row<3>(df) * hodge.asDiagonal();
+
+    // Integrate dual 1-forms over boundary of each vertex dual cell
+    return dual_df - dual_df({2, 0, 1});
+}
+
+/// Evaluates the Laplacian of a vector-valued function defined on vertices of a triangle. Returns
+/// an integrated quantity associated with each vertex.
+template <typename Real, int dim>
+Mat<Real, dim, 3> eval_laplacian(
+    Vec3<Real> const& p0,
+    Vec3<Real> const& p1,
+    Vec3<Real> const& p2,
+    Vec<Real, dim> const& f0,
+    Vec<Real, dim> const& f1,
+    Vec<Real, dim> const& f2)
+{
+    static_assert(is_real<Real>);
+
+    // Compute integrated 1-form over each edge
+    Vec<Real, dim> const df[]{f1 - f0, f2 - f1, f0 - f2};
+
+    // Apply Hodge star to get dual 1-forms
+    Vec3<Real> const hodge = cotan_weights<Real>(p1 - p0, p2 - p1, p0 - p2);
+    Mat<Real, dim, 3> const dual_df = as_mat<3>(df) * hodge.asDiagonal();
+
+    // Integrate dual 1-forms over boundary of each vertex dual cell
+    return dual_df - dual_df(Eigen::all, {2, 0, 1});
 }
 
 template <typename Scalar, int dim>

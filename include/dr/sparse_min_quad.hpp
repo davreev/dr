@@ -15,9 +15,6 @@ struct SparseMinQuadFixed
     // NOTE: Objective is convex quadratic so matrix is assumed to be positive definite
     using Solver = Eigen::SimplicialLDLT<SparseMat<Scalar, Index>>;
 
-    template <typename Derived>
-    using MatBase = Eigen::MatrixBase<Derived>;
-
     /// Isolates unknown variables and performs decomposition
     template <typename Predicate>
     bool init(SparseMat<Scalar, Index> const& A, Predicate&& is_fixed)
@@ -42,7 +39,7 @@ struct SparseMinQuadFixed
 
     /// Solves Ax = b
     template <typename DerivedB, typename DerivedX>
-    void solve(MatBase<DerivedB> const& b, MatBase<DerivedX>& x)
+    void solve(MatExpr<DerivedB> const& b, MatExpr<DerivedX>& x)
     {
         assert(is_init_);
         auto const P = perm_.asPermutation();
@@ -57,7 +54,7 @@ struct SparseMinQuadFixed
 
     /// Solves Ax = 0
     template <typename Derived>
-    void solve_zero(MatBase<Derived>& x)
+    void solve_zero(MatExpr<Derived>& x)
     {
         assert(is_init_);
         auto const P = perm_.asPermutation();

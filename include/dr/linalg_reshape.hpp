@@ -21,6 +21,20 @@ auto as_vec(Scalar const* const coeffs)
     return Eigen::Map<Vec<Scalar, size> const>{coeffs};
 }
 
+/// Creates a fixed-size column view of the given scalars
+template <int size, typename Scalar>
+auto as_col(Scalar* const coeffs)
+{
+    return Eigen::Map<Vec<Scalar, size>>{coeffs};
+}
+
+/// Creates a fixed-size column view of the given scalars
+template <int size, typename Scalar>
+auto as_col(Scalar const* const coeffs)
+{
+    return Eigen::Map<Vec<Scalar, size> const>{coeffs};
+}
+
 /// Creates a fixed-size covector view of the given scalars
 template <int size, typename Scalar>
 auto as_covec(Scalar* const coeffs)
@@ -31,6 +45,20 @@ auto as_covec(Scalar* const coeffs)
 /// Creates a fixed-size covector view of the given scalars
 template <int size, typename Scalar>
 auto as_covec(Scalar const* const coeffs)
+{
+    return Eigen::Map<Covec<Scalar, size> const>{coeffs};
+}
+
+/// Creates a fixed-size row view of the given scalars
+template <int size, typename Scalar>
+auto as_row(Scalar* const coeffs)
+{
+    return Eigen::Map<Covec<Scalar, size>>{coeffs};
+}
+
+/// Creates a fixed-size row view of the given scalars
+template <int size, typename Scalar>
+auto as_row(Scalar const* const coeffs)
 {
     return Eigen::Map<Covec<Scalar, size> const>{coeffs};
 }

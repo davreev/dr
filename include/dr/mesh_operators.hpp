@@ -39,26 +39,13 @@ void make_cotan_laplacian(
     for (isize i = 0; i < num_faces; ++i)
     {
         auto const& f_v = face_vertices[i];
-        Vec3<Real> const d[]{
-            vertex_positions[f_v[1]] - vertex_positions[f_v[0]],
-            vertex_positions[f_v[2]] - vertex_positions[f_v[1]],
-            vertex_positions[f_v[0]] - vertex_positions[f_v[2]],
-        };
-
-        // NOTE: The cotangent weight of an edge is the ratio of its dual to primal length (aka
-        // Hodge star). This can be computed by taking half the cotangent of the angle opposite each
-        // edge in the triangle.
-        //
-        // If t is the angle bw vectors u and v then
-        //
-        // cot(t) = cos(t) / sin(t)
-        //        = (dot(u, v) |u| |v|) / (|cross(u, v)| |u| |v|)
-        //        = dot(u, v) / |cross(u, v)|
-
-        Real const inv_sin = Real{-0.5} / d[0].cross(d[1]).norm();
-        add_coeffs(f_v[0], f_v[1], d[1].dot(d[2]) * inv_sin);
-        add_coeffs(f_v[1], f_v[2], d[2].dot(d[0]) * inv_sin);
-        add_coeffs(f_v[2], f_v[0], d[0].dot(d[1]) * inv_sin);
+        Vec3<Real> const& p0 = vertex_positions[f_v[0]];
+        Vec3<Real> const& p1 = vertex_positions[f_v[1]];
+        Vec3<Real> const& p2 = vertex_positions[f_v[2]];
+        Vec3<Real> const w = cotan_weights<Real>(p1 - p0, p2 - p1, p0 - p2);
+        add_coeffs(f_v[0], f_v[1], w[0]);
+        add_coeffs(f_v[1], f_v[2], w[1]);
+        add_coeffs(f_v[2], f_v[0], w[2]);
     }
 }
 
@@ -239,20 +226,20 @@ void eval_jacobian(
     }
 }
 
-/// Evaluates the (integrated) divergence of a vector-valued function defined on mesh triangles.
-/// Returns a scalar associated with each vertex dual cell.
-template <typename Real, typename Index, typename FaceFunc>
+/// Evaluates the (integrated) divergence of a vector-valued function defined on mesh faces. Returns
+/// a scalar associated with each vertex dual cell.
+template <typename Real, typename Index>
 void eval_divergence(
     Span<Vec3<Real> const> const& vertex_positions,
     Span<Vec3<Index> const> const& face_vertices,
-    FaceFunc&& face_vectors,
+    Span<Vec3<Real> const> const& face_vectors,
     Span<Real> const& result)
 {
     static_assert(is_real<Real>);
     static_assert(is_integer<Index> || is_natural<Index>);
-    static_assert(std::is_invocable_r_v<Vec3<Real>, FaceFunc, Index>);
 
     assert(result.size() == vertex_positions.size());
+    assert(face_vertices.size() == face_vectors.size());
     as_vec(result).setZero();
 
     for (Index i = 0; i < face_vertices.size(); ++i)
@@ -263,7 +250,7 @@ void eval_divergence(
             vertex_positions[f_v[0]],
             vertex_positions[f_v[1]],
             vertex_positions[f_v[2]],
-            face_vectors(i));
+            face_vectors[i]);
 
         result[f_v[0]] += f_v_div[0];
         result[f_v[1]] += f_v_div[1];
@@ -271,24 +258,8 @@ void eval_divergence(
     }
 }
 
-/// Evaluates the (integrated) divergence of a vector-valued function defined on mesh triangles.
-/// Returns a scalar associated with each vertex dual cell.
-template <typename Real, typename Index>
-void eval_divergence(
-    Span<Vec3<Real> const> const& vertex_positions,
-    Span<Vec3<Index> const> const& face_vertices,
-    Span<Vec3<Real> const> const& face_vectors,
-    Span<Real> const& result)
-{
-    return eval_divergence(
-        vertex_positions,
-        face_vertices,
-        [&](Index const i) { return face_vectors[i]; },
-        result);
-}
-
-/// Evaluates the Laplacian of a scalar-valued function defined on vertices. Returns a scalar
-/// associated with each vertex dual cell.
+/// Evaluates the Laplacian of a scalar function defined on vertices. Returns a scalar associated
+/// with each vertex dual cell.
 template <typename Real, typename Index>
 void eval_laplacian(
     Span<Vec3<Real> const> const& vertex_positions,
@@ -296,19 +267,61 @@ void eval_laplacian(
     Span<Vec3<Index> const> const& face_vertices,
     Span<Real> const& result)
 {
-    auto eval_face_grad = [&](Index const face) {
-        auto const& f_v = face_vertices[face];
+    static_assert(is_real<Real>);
+    static_assert(is_integer<Index> || is_natural<Index>);
 
-        return eval_gradient(
+    assert(result.size() == vertex_positions.size());
+    as_vec(result).setZero();
+
+    for (Index i = 0; i < face_vertices.size(); ++i)
+    {
+        auto const& f_v = face_vertices[i];
+
+        Vec3<Real> const f_v_lap = eval_laplacian(
             vertex_positions[f_v[0]],
             vertex_positions[f_v[1]],
             vertex_positions[f_v[2]],
             vertex_scalars[f_v[0]],
             vertex_scalars[f_v[1]],
             vertex_scalars[f_v[2]]);
-    };
 
-    eval_divergence(vertex_positions, face_vertices, eval_face_grad, result);
+        result[f_v[0]] += f_v_lap[0];
+        result[f_v[1]] += f_v_lap[1];
+        result[f_v[2]] += f_v_lap[2];
+    }
+}
+
+/// Evaluates the Laplacian of a vector-valued function defined on vertices. Returns a vector
+/// associated with each vertex dual cell.
+template <typename Real, typename Index, int dim>
+void eval_laplacian(
+    Span<Vec3<Real> const> const& vertex_positions,
+    Span<Vec<Real, dim> const> const& vertex_vectors,
+    Span<Vec3<Index> const> const& face_vertices,
+    Span<Vec<Real, dim>> const& result)
+{
+    static_assert(is_real<Real>);
+    static_assert(is_integer<Index> || is_natural<Index>);
+
+    assert(result.size() == vertex_positions.size());
+    as_vec(result).setZero();
+
+    for (Index i = 0; i < face_vertices.size(); ++i)
+    {
+        auto const& f_v = face_vertices[i];
+
+        Mat<Real, dim, 3> const f_v_lap = eval_laplacian(
+            vertex_positions[f_v[0]],
+            vertex_positions[f_v[1]],
+            vertex_positions[f_v[2]],
+            vertex_vectors[f_v[0]],
+            vertex_vectors[f_v[1]],
+            vertex_vectors[f_v[2]]);
+
+        result[f_v[0]] += f_v_lap.col(0);
+        result[f_v[1]] += f_v_lap.col(1);
+        result[f_v[2]] += f_v_lap.col(2);
+    }
 }
 
 } // namespace dr

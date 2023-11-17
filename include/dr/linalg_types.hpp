@@ -43,6 +43,9 @@ template <
     int options = default_mat_options<rows, cols>>
 using Mat = Eigen::Matrix<Scalar, rows, cols, options>;
 
+template <typename Derived>
+using MatExpr = Eigen::MatrixBase<Derived>;
+
 template <typename Scalar, int size = Eigen::Dynamic>
 using Vec = Mat<Scalar, size, 1, Eigen::ColMajor>;
 
