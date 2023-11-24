@@ -69,7 +69,7 @@ void make_cotan_laplacian(
 
 /// Creates the coefficients of the incidence matrix for the given mesh elements
 template <typename Scalar, typename Index, int size>
-void make_incidence(
+void make_incidence_matrix(
     Span<Vec<Index, size> const> const& elements,
     DynamicArray<Triplet<Scalar, Index>>& result)
 {
@@ -91,16 +91,19 @@ void make_incidence(
 
 /// Creates the incidence matrix for the given elements
 template <typename Scalar, typename Index, int size>
-void make_incidence(
+void make_incidence_matrix(
     Span<Vec<Index, size> const> const& elements,
-    Index const rows,
     SparseMat<Scalar, Index>& result,
+    Index rows = -1,
     Allocator alloc = {})
 {
     static_assert(is_integer<Index> || is_natural<Index>);
 
     DynamicArray<Triplet<Scalar, Index>> coeffs{alloc};
-    make_incidence(elements, coeffs);
+    make_incidence_matrix(elements, coeffs);
+
+    if(rows == -1)
+        rows = as_mat(elements).maxCoeff();
 
     result.resize(rows, elements.size());
     result.setFromTriplets(coeffs.begin(), coeffs.end());
@@ -108,10 +111,10 @@ void make_incidence(
 
 /// Creates the coefficients of the vector area matrix from given boundary edges
 template <typename Real, typename Index>
-void make_vector_area(
+void make_vector_area_matrix(
     Span<Vec2<Index> const> const& boundary_edge_vertices,
-    Index const num_vertices,
-    DynamicArray<Triplet<Real, Index>>& result)
+    DynamicArray<Triplet<Real, Index>>& result,
+    Index num_vertices = -1)
 {
     static_assert(is_real<Real>);
     static_assert(is_integer<Index> || is_natural<Index>);
@@ -120,6 +123,9 @@ void make_vector_area(
 
     isize const num_edges = boundary_edge_vertices.size();
     result.reserve(num_edges * 2);
+
+    if(num_vertices == -1)
+        num_vertices = as_mat(boundary_edge_vertices).maxCoeff();
 
     for (auto const& e_v : boundary_edge_vertices)
     {
@@ -130,17 +136,20 @@ void make_vector_area(
 
 /// Creates the vector area matrix from given boundary edges
 template <typename Real, typename Index>
-void make_vector_area(
+void make_vector_area_matrix(
     Span<Vec2<Index> const> const& boundary_edge_vertices,
-    Index const num_vertices,
     SparseMat<Real, Index>& result,
+    Index num_vertices = -1,
     Allocator alloc = {})
 {
     static_assert(is_real<Real>);
     static_assert(is_integer<Index> || is_natural<Index>);
 
+    if(num_vertices == -1)
+        num_vertices = as_mat(boundary_edge_vertices).maxCoeff();
+
     DynamicArray<Triplet<Real, Index>> coeffs{alloc};
-    make_vector_area(boundary_edge_vertices, num_vertices, coeffs);
+    make_vector_area_matrix(boundary_edge_vertices, coeffs, num_vertices);
 
     result.resize(num_vertices * 2, num_vertices * 2);
     result.setFromTriplets(coeffs.begin(), coeffs.end());
