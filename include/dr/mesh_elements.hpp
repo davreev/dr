@@ -80,65 +80,58 @@ struct ElementEqual
 template <typename Index, int size>
 using IncidenceMap = HashMap<Vec<Index, size>, Index, ElementHash, ElementEqual>;
 
-/// Creates a map from vertex pairs to directed edges. By convention, oppositely oriented edges are
+/// Creates a map from vertex pairs to oriented edges. By convention, oppositely oriented edges are
 /// given consecutive indices.
 template <typename Index>
 void make_vertex_to_edge(
     Span<Vec3<Index> const> const& face_vertices,
     IncidenceMap<Index, 2>& result)
 {
-    isize const num_faces = face_vertices.size();
-
     result.clear();
-    result.reserve(num_faces * 3); // Avoids further allocs if mesh is genus 0
-
-    Index index = 0;
+    result.reserve(face_vertices.size() * 3); // Avoids further allocs if mesh is genus 0
+    Index n_e = 0;
 
     // Inserts a pair of directed edges between the given pair of vertices if they're not already
     // connected
-    auto try_insert = [&](Index const v0, Index const v1) -> bool {
-        // Ensures oppositely oriented edges have consecutive indices
-        if (result.insert({{v0, v1}, index}).second)
+    auto try_insert = [&](Vec2<Index> const& e_v, Index const e) -> bool {
+        if (result.emplace(e_v, e).second)
         {
-            result[{v1, v0}] = index + 1;
+            // Ensure oppositely oriented edges have consecutive indices
+            result[e_v.reverse()] = e + 1;
             return true;
         }
 
         return false;
     };
 
-    for (isize i = 0; i < num_faces; ++i)
+    for (isize f = 0; f < face_vertices.size(); ++f)
     {
-        auto const& f_v = face_vertices[i];
+        auto const& f_v = face_vertices[f];
 
-        if (try_insert(f_v[0], f_v[1]))
-            index += 2;
+        if (try_insert(f_v({0, 1}), n_e))
+            n_e += 2;
 
-        if (try_insert(f_v[1], f_v[2]))
-            index += 2;
+        if (try_insert(f_v({1, 2}), n_e))
+            n_e += 2;
 
-        if (try_insert(f_v[2], f_v[0]))
-            index += 2;
+        if (try_insert(f_v({2, 0}), n_e))
+            n_e += 2;
     }
 }
 
-/// Returns the vertex at the start of each directed edge
+/// Returns the vertex at the start of each oriented edge
 template <typename Index>
 void collect_edge_start_vertices(
     IncidenceMap<Index, 2> const& vertex_to_edge,
     Span<Index> const result)
 {
-    // NOTE: For some reason, calling size() here without namespace qualification results in a
-    // compilation error on Windows (comparison of integers of different signs).
-
-    // assert(result.size() == size(vertex_to_edge));
-    assert(result.size() == dr::size(vertex_to_edge));
+    assert(result.size() == size(vertex_to_edge));
 
     for (auto const& [e_v, e] : vertex_to_edge)
         result[e] = e_v[0];
 }
 
-/// Returns the vertex opposite to each directed edge
+/// Returns the vertex opposite to each oriented edge
 template <typename Index>
 void collect_edge_opposite_vertices(
     IncidenceMap<Index, 2> const& vertex_to_edge,
@@ -146,33 +139,24 @@ void collect_edge_opposite_vertices(
     Span<Index> const result)
 {
     assert(result.size() == size(vertex_to_edge));
-
     as_vec(result).setConstant(-1);
 
-    auto try_assign = [&](Vec2<Index> const& e_v, Index const v) -> bool {
-        auto const it = vertex_to_edge.find(e_v);
-
-        if (it != vertex_to_edge.end())
-        {
-            result[it->second] = v;
-            return true;
-        }
-
-        return false;
-    };
-
-    isize const num_faces = face_vertices.size();
-
-    for (isize i = 0; i < num_faces; ++i)
+    for (isize f = 0; f < face_vertices.size(); ++f)
     {
-        auto const& f_v = face_vertices[i];
-        try_assign({f_v[0], f_v[1]}, f_v[2]);
-        try_assign({f_v[1], f_v[2]}, f_v[0]);
-        try_assign({f_v[2], f_v[0]}, f_v[1]);
+        auto const& f_v = face_vertices[f];
+
+        if (auto const it = vertex_to_edge.find(f_v({0, 1})); it != vertex_to_edge.end())
+            result[it->second] = f_v[2];
+
+        if (auto const it = vertex_to_edge.find(f_v({1, 2})); it != vertex_to_edge.end())
+            result[it->second] = f_v[0];
+
+        if (auto const it = vertex_to_edge.find(f_v({2, 0})); it != vertex_to_edge.end())
+            result[it->second] = f_v[1];
     }
 }
 
-/// Returns the face incident to each directed edge
+/// Returns the face incident to each oriented edge
 template <typename Index>
 void collect_edge_faces(
     IncidenceMap<Index, 2> const& vertex_to_edge,
@@ -180,29 +164,45 @@ void collect_edge_faces(
     Span<Index> const result)
 {
     assert(result.size() == size(vertex_to_edge));
-
     as_vec(result).setConstant(-1);
 
-    auto try_assign = [&](Vec2<Index> const& e_v, Index const f) -> bool {
-        auto const it = vertex_to_edge.find(e_v);
-
-        if (it != vertex_to_edge.end())
-        {
-            result[it->second] = f;
-            return true;
-        }
-
-        return false;
-    };
-
-    isize const num_faces = face_vertices.size();
-
-    for (isize i = 0; i < num_faces; ++i)
+    for (isize f = 0; f < face_vertices.size(); ++f)
     {
-        auto const& f_v = face_vertices[i];
-        try_assign({f_v[0], f_v[1]}, i);
-        try_assign({f_v[1], f_v[2]}, i);
-        try_assign({f_v[2], f_v[0]}, i);
+        auto const& f_v = face_vertices[f];
+
+        if (auto const it = vertex_to_edge.find(f_v({0, 1})); it != vertex_to_edge.end())
+            result[it->second] = f;
+
+        if (auto const it = vertex_to_edge.find(f_v({1, 2})); it != vertex_to_edge.end())
+            result[it->second] = f;
+
+        if (auto const it = vertex_to_edge.find(f_v({2, 0})); it != vertex_to_edge.end())
+            result[it->second] = f;
+    }
+}
+
+/// Returns the oriented edges incident to each face
+template <typename Index>
+void collect_face_edges(
+    IncidenceMap<Index, 2> const& vertex_to_edge,
+    Span<Vec3<Index> const> const& face_vertices,
+    Span<Vec3<Index>> const result)
+{
+    assert(result.size() == face_vertices.size());
+    as_mat(result).setConstant(-1);
+
+    for (isize f = 0; f < face_vertices.size(); ++f)
+    {
+        auto const& f_v = face_vertices[f];
+
+        if (auto const it = vertex_to_edge.find(f_v({0, 1})); it != vertex_to_edge.end())
+            result[f][0] = it->second;
+
+        if (auto const it = vertex_to_edge.find(f_v({1, 2})); it != vertex_to_edge.end())
+            result[f][1] = it->second;
+
+        if (auto const it = vertex_to_edge.find(f_v({2, 0})); it != vertex_to_edge.end())
+            result[f][2] = it->second;
     }
 }
 
