@@ -9,20 +9,32 @@
 
 namespace dr
 {
-
-/// Returns the number of elements in the given array
-template <typename T, isize n>
-constexpr isize size(T (& /*array*/)[n])
+namespace impl
 {
-    return n;
-}
 
-/// Returns the number of elements in the given container
-template <typename Container>
-constexpr isize size(Container&& container)
+struct Size
 {
-    return static_cast<isize>(container.size());
-}
+    // NOTE: This is implemented as a function object to avoid ADL insanity
+    // (https://quuxplusone.github.io/blog/2018/06/17/std-size/)
+
+    /// Returns the number of elements in the given array
+    template <typename T, isize n>
+    constexpr isize operator()(T (& /*array*/)[n]) const
+    {
+        return n;
+    }
+
+    /// Returns the number of elements in the given container
+    template <typename Container>
+    constexpr isize operator()(Container&& container) const
+    {
+        return static_cast<isize>(container.size());
+    }
+};
+
+} // namespace impl
+
+inline constexpr impl::Size size{};
 
 /// Returns the number of elements in the given array using a specified size type
 template <typename Size, typename T, Size n>

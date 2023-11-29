@@ -176,7 +176,7 @@ UTEST(mesh_repair, gather_points)
                 unique_pts,
                 as_span(pt_to_unique));
 
-            ASSERT_EQ(dr::size(unique_pts), result.num_unique_before);
+            ASSERT_EQ(size(unique_pts), result.num_unique_before);
         }
 
         points = points_in;
@@ -191,7 +191,7 @@ UTEST(mesh_repair, gather_points)
                 unique_pts,
                 as_span(pt_to_unique));
 
-            ASSERT_EQ(dr::size(unique_pts), result.num_unique_after);
+            ASSERT_EQ(size(unique_pts), result.num_unique_after);
         }
     }
 }

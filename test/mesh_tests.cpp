@@ -25,7 +25,7 @@ UTEST(mesh, append)
     append_elements<i32>(src_faces, dst_verts.size(), dst_faces);
     append_attributes(src_verts, dst_verts);
 
-    ASSERT_EQ(dr::size(dst_verts), src_verts.size() * 2);
+    ASSERT_EQ(size(dst_verts), src_verts.size() * 2);
     for (isize i = 0, j = src_verts.size(); i < src_verts.size(); ++i, ++j)
     {
         Vec3<f32> const& v0 = dst_verts[i];
@@ -36,7 +36,7 @@ UTEST(mesh, append)
         ASSERT_EQ(v0[2], v1[2]);
     }
 
-    ASSERT_EQ(dr::size(dst_faces), src_faces.size() * 2);
+    ASSERT_EQ(size(dst_faces), src_faces.size() * 2);
     for (isize i = 0, j = src_faces.size(); i < src_faces.size(); ++i, ++j)
     {
         Vec3<i32> const& f0 = dst_faces[i];

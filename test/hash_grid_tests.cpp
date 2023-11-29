@@ -96,7 +96,7 @@ UTEST(hash_grid, insert_find)
         for (auto const& p : points)
             grid.insert(p, index++);
 
-        ASSERT_EQ(grid.size(), dr::size(points));
+        ASSERT_EQ(grid.size(), size(points));
 
         DynamicArray<i32> found_indices{};
         grid.find(interval, found_indices);
