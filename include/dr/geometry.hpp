@@ -383,7 +383,13 @@ Vec3<Real> vector_area(Span<Vec3<Real> const> const& polygon)
     }
     else
     {
-        auto eval_edge = [&](isize const i, isize const j) { return polygon[i].cross(polygon[j]); };
+        // NOTE: The vector area of any closed surface is zero so by adding up the vector area of
+        // the extrusion from the polygon boundary to any point, we're left with the vector area of
+        // the polygon.
+
+        auto const eval_edge = [&](isize const i, isize const j) {
+            return polygon[i].cross(polygon[j]);
+        };
 
         auto sum = vec<3, Real>(0.0);
         isize const last = n - 1;
@@ -432,7 +438,7 @@ Real signed_area(Span<Vec2<Real> const> const& polygon)
     }
     else
     {
-        auto eval_edge = [&](isize const i, isize const j) {
+        auto const eval_edge = [&](isize const i, isize const j) {
             return cross(polygon[i], polygon[j]);
         };
 
@@ -481,7 +487,7 @@ Covec3<Real> eval_gradient(
     norm /= norm.squaredNorm();
     Covec3<Real> const g[]{dp[1].cross(norm), norm.cross(dp[0])};
 
-    // Result is a linear combo of basis grads
+    // NOTE: The result is a linear combo of basis grads
     // | df0  df1 | * | g0 |
     //                | g1 |
     return as_row<2>(df) * as_mat<2>(g);
@@ -508,7 +514,7 @@ Mat<Real, dim, 3> eval_jacobian(
     norm /= norm.squaredNorm();
     Covec3<Real> const g[]{dp[1].cross(norm), norm.cross(dp[0])};
 
-    // Each row of the result is a linear combo of basis grads
+    // NOTE: Each row of the result is a linear combo of basis grads
     // | df0  df1 | * | g0 |
     //                | g1 |
     return as_mat<2>(df) * as_mat<2>(g);
