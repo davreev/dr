@@ -23,9 +23,9 @@ void vertex_vector_areas(
     assert(result.size() == vertex_positions.size());
     std::fill(begin(result), end(result), Vec3<Real>::Zero());
 
-    for (isize i = 0; i < face_vertices.size(); ++i)
+    for (isize f = 0; f < face_vertices.size(); ++f)
     {
-        auto const& f_v = face_vertices[i];
+        auto const& f_v = face_vertices[f];
         constexpr Real inv3{1.0 / 3.0};
 
         // clang-format off
@@ -63,9 +63,9 @@ void vertex_areas_barycentric(
     assert(result.size() == vertex_positions.size());
     std::fill(begin(result), end(result), Real{0.0});
 
-    for (isize i = 0; i < face_vertices.size(); ++i)
+    for (isize f = 0; f < face_vertices.size(); ++f)
     {
-        auto const& f_v = face_vertices[i];
+        auto const& f_v = face_vertices[f];
         constexpr Real inv3{1.0 / 3.0};
 
         // clang-format off
@@ -87,9 +87,9 @@ void vertex_degrees(Span<Vec3<Index> const> const& face_vertices, Span<Scalar> c
 {
     std::fill(begin(result), end(result), Scalar{0});
 
-    for (isize i = 0; i < face_vertices.size(); ++i)
+    for (isize f = 0; f < face_vertices.size(); ++f)
     {
-        auto const& f_v = face_vertices[i];
+        auto const& f_v = face_vertices[f];
         result[f_v[0]] += Scalar{1};
         result[f_v[1]] += Scalar{1};
         result[f_v[2]] += Scalar{1};
@@ -107,9 +107,9 @@ void face_vector_areas(
     assert(result.size() == face_vertices.size());
     assert(num_threads > 0);
 
-    auto const body = [&](isize const i) {
-        auto const& f_v = face_vertices[i];
-        result[i] = vector_area(
+    auto const loop_body = [&](isize const f) {
+        auto const& f_v = face_vertices[f];
+        result[f] = vector_area(
             vertex_positions[f_v[0]],
             vertex_positions[f_v[1]],
             vertex_positions[f_v[2]]);
@@ -118,13 +118,13 @@ void face_vector_areas(
     if (num_threads > 1)
     {
 #pragma omp parallel for num_threads(num_threads) schedule(static)
-        for (isize i = 0; i < face_vertices.size(); ++i)
-            body(i);
+        for (isize f = 0; f < face_vertices.size(); ++f)
+            loop_body(f);
     }
     else
     {
-        for (isize i = 0; i < face_vertices.size(); ++i)
-            body(i);
+        for (isize f = 0; f < face_vertices.size(); ++f)
+            loop_body(f);
     }
 }
 
@@ -143,115 +143,109 @@ void face_normals(
 
 /// Returns the integral of a function defined on vertices of a discretized volume
 template <typename Real, typename Value, typename Index>
-Value eval_vertex_integral(
+Value integrate_vertex_values(
     Span<Vec3<Real> const> const& vertex_positions,
     Span<Value const> const& vertex_values,
-    Span<Vec4<Index> const> const& element_vertices,
+    Span<Vec4<Index> const> const& cell_vertices,
     Real& volume)
 {
     Value result{};
     volume = Real{0.0};
 
-    for (isize i = 0; i < element_vertices.size(); ++i)
+    for (isize c = 0; c < cell_vertices.size(); ++c)
     {
-        auto const& e_v = element_vertices[i];
+        auto const& c_v = cell_vertices[c];
 
         // clang-format off
-        Value const e_val = Real{0.25} * (
-            vertex_values[e_v[0]] + 
-            vertex_values[e_v[1]] + 
-            vertex_values[e_v[2]] + 
-            vertex_values[e_v[3]]);
+        Value const c_val = Real{0.25} * (
+            vertex_values[c_v[0]] + 
+            vertex_values[c_v[1]] + 
+            vertex_values[c_v[2]] + 
+            vertex_values[c_v[3]]);
         // clang-format on
 
-        Real const e_vol = signed_volume(
-            vertex_positions[e_v[0]],
-            vertex_positions[e_v[1]],
-            vertex_positions[e_v[2]],
-            vertex_positions[e_v[3]]);
+        Real const c_vol = signed_volume(
+            vertex_positions[c_v[0]],
+            vertex_positions[c_v[1]],
+            vertex_positions[c_v[2]],
+            vertex_positions[c_v[3]]);
 
         // NOTE: Scaling each vertex value by the volume of its dual cell gives an integrated dual
         // 3-form
-
-        result += e_val * e_vol;
-        volume += e_vol;
+        result += c_val * c_vol;
+        volume += c_vol;
     }
 
     // NOTE: Result is a dual 3-form integrated over all vertex dual cells. Caller can divide by the
     // returned volume to convert back to primal 0-form.
-
     return result;
 }
 
 /// Returns the integral of a function defined on vertices of a discretized surface
 template <typename Real, typename Value, typename Index>
-Value eval_vertex_integral(
+Value integrate_vertex_values(
     Span<Vec3<Real> const> const& vertex_positions,
     Span<Value const> const& vertex_values,
-    Span<Vec3<Index> const> const& element_vertices,
+    Span<Vec3<Index> const> const& face_vertices,
     Real& area)
 {
     Value result{};
     area = Real{0.0};
 
-    for (isize i = 0; i < element_vertices.size(); ++i)
+    for (isize f = 0; f < face_vertices.size(); ++f)
     {
-        auto const& e_v = element_vertices[i];
+        auto const& f_v = face_vertices[f];
         constexpr Real inv3{1.0 / 3.0};
 
         // clang-format off
-        Value const e_val = inv3 * (
-            vertex_values[e_v[0]] + 
-            vertex_values[e_v[1]] + 
-            vertex_values[e_v[2]]);
+        Value const f_val = inv3 * (
+            vertex_values[f_v[0]] + 
+            vertex_values[f_v[1]] + 
+            vertex_values[f_v[2]]);
 
-        Real const e_area = vector_area(
-            vertex_positions[e_v[0]],
-            vertex_positions[e_v[1]],
-            vertex_positions[e_v[2]]).norm();
+        Real const f_area = vector_area(
+            vertex_positions[f_v[0]],
+            vertex_positions[f_v[1]],
+            vertex_positions[f_v[2]]).norm();
         // clang-format on
 
         // NOTE: Scaling each vertex value by the area of its dual cell gives an integrated dual
         // 2-form
-
-        result += e_val * e_area;
-        area += e_area;
+        result += f_val * f_area;
+        area += f_area;
     }
 
     // NOTE: Result is a dual 2-form integrated over all vertex dual cells. Caller can divide by the
     // returned area to convert back to primal 0-form.
-
     return result;
 }
 
 /// Returns the integral of a function defined on vertices of a discretized curve
 template <typename Real, typename Value, typename Index>
-Value eval_vertex_integral(
+Value integrate_vertex_values(
     Span<Vec3<Real> const> const& vertex_positions,
     Span<Value const> const& vertex_values,
-    Span<Vec2<Index> const> const& element_vertices,
+    Span<Vec2<Index> const> const& edge_vertices,
     Real& length)
 {
     Value result{};
     length = Real{0.0};
 
-    for (isize i = 0; i < element_vertices.size(); ++i)
+    for (isize e = 0; e < edge_vertices.size(); ++e)
     {
-        auto const& e_v = element_vertices[i];
+        auto const& e_v = edge_vertices[e];
 
         Value const e_val = Real{0.5} * (vertex_values[e_v[0]] + vertex_values[e_v[1]]);
         Real const e_len = (vertex_positions[e_v[0]] - vertex_positions[e_v[1]]).norm();
 
         // NOTE: Scaling each vertex value by the length of its dual cell gives an integrated dual
         // 1-form
-
         result += e_val * e_len;
         length += e_len;
     }
 
     // NOTE: Result is a dual 1-form integrated over all vertex dual cells. Caller can divide by the
     // returned length to convert back to primal 0-form.
-
     return result;
 }
 
@@ -259,11 +253,11 @@ Value eval_vertex_integral(
 template <typename Real, typename Index>
 Vec3<Real> area_centroid(
     Span<Vec3<Real> const> const& vertex_positions,
-    Span<Vec3<Index> const> const& element_vertices)
+    Span<Vec3<Index> const> const& face_vertices)
 {
     Real area{};
     Vec3<Real> const sum =
-        eval_vertex_integral(vertex_positions, vertex_positions, element_vertices, area);
+        integrate_vertex_values(vertex_positions, vertex_positions, face_vertices, area);
 
     return sum / area;
 }
@@ -272,11 +266,11 @@ Vec3<Real> area_centroid(
 template <typename Real, typename Index>
 Vec3<Real> length_centroid(
     Span<Vec3<Real> const> const& vertex_positions,
-    Span<Vec2<Index> const> const& element_vertices)
+    Span<Vec2<Index> const> const& edge_vertices)
 {
     Real length{};
     Vec3<Real> const sum =
-        eval_vertex_integral(vertex_positions, vertex_positions, element_vertices, length);
+        integrate_vertex_values(vertex_positions, vertex_positions, edge_vertices, length);
 
     return sum / length;
 }

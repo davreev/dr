@@ -36,9 +36,9 @@ void make_cotan_laplacian(
         result.emplace_back(j, j, -w);
     };
 
-    for (isize i = 0; i < num_faces; ++i)
+    for (isize f = 0; f < num_faces; ++f)
     {
-        auto const& f_v = face_vertices[i];
+        auto const& f_v = face_vertices[f];
         Vec3<Real> const& p0 = vertex_positions[f_v[0]];
         Vec3<Real> const& p1 = vertex_positions[f_v[1]];
         Vec3<Real> const& p2 = vertex_positions[f_v[2]];
@@ -76,11 +76,9 @@ void make_incidence_matrix(
     static_assert(is_integer<Index> || is_natural<Index>);
 
     result.clear();
+    result.reserve(elements.size() * size);
 
-    Index const num_elems = static_cast<Index>(elements.size());
-    result.reserve(num_elems * size);
-
-    for (Index i = 0; i < num_elems; ++i)
+    for (isize i = 0; i < elements.size(); ++i)
     {
         auto const& e = elements[i];
 
@@ -171,9 +169,9 @@ void eval_gradient(
     assert(result.size() == face_vertices.size());
     assert(num_threads > 0);
 
-    auto const body = [&](isize const i) {
-        auto const f_v = face_vertices[i];
-        result[i] = eval_gradient(
+    auto const loop_body = [&](isize const f) {
+        auto const f_v = face_vertices[f];
+        result[f] = eval_gradient(
             vertex_positions[f_v[0]],
             vertex_positions[f_v[1]],
             vertex_positions[f_v[2]],
@@ -185,13 +183,13 @@ void eval_gradient(
     if (num_threads > 1)
     {
 #pragma omp parallel for num_threads(num_threads) schedule(static)
-        for (isize i = 0; i < face_vertices.size(); ++i)
-            body(i);
+        for (isize f = 0; f < face_vertices.size(); ++f)
+            loop_body(f);
     }
     else
     {
-        for (isize i = 0; i < face_vertices.size(); ++i)
-            body(i);
+        for (isize f = 0; f < face_vertices.size(); ++f)
+            loop_body(f);
     }
 }
 
@@ -211,9 +209,9 @@ void eval_jacobian(
     assert(result.size() == face_vertices.size());
     assert(num_threads > 0);
 
-    auto const body = [&](isize const i) {
-        auto const& f_v = face_vertices[i];
-        result[i] = eval_jacobian(
+    auto const loop_body = [&](isize const f) {
+        auto const& f_v = face_vertices[f];
+        result[f] = eval_jacobian(
             vertex_positions[f_v[0]],
             vertex_positions[f_v[1]],
             vertex_positions[f_v[2]],
@@ -225,13 +223,13 @@ void eval_jacobian(
     if (num_threads > 1)
     {
 #pragma omp parallel for num_threads(num_threads) schedule(static)
-        for (isize i = 0; i < face_vertices.size(); ++i)
-            body(i);
+        for (isize f = 0; f < face_vertices.size(); ++f)
+            loop_body(f);
     }
     else
     {
-        for (isize i = 0; i < face_vertices.size(); ++i)
-            body(i);
+        for (isize f = 0; f < face_vertices.size(); ++f)
+            loop_body(f);
     }
 }
 
@@ -251,15 +249,15 @@ void eval_divergence(
     assert(face_vertices.size() == face_vectors.size());
     as_vec(result).setZero();
 
-    for (Index i = 0; i < face_vertices.size(); ++i)
+    for (isize f = 0; f < face_vertices.size(); ++f)
     {
-        auto const& f_v = face_vertices[i];
+        auto const& f_v = face_vertices[f];
 
         Vec3<Real> const f_v_div = eval_divergence(
             vertex_positions[f_v[0]],
             vertex_positions[f_v[1]],
             vertex_positions[f_v[2]],
-            face_vectors[i]);
+            face_vectors[f]);
 
         result[f_v[0]] += f_v_div[0];
         result[f_v[1]] += f_v_div[1];
@@ -282,9 +280,9 @@ void eval_laplacian(
     assert(result.size() == vertex_positions.size());
     as_vec(result).setZero();
 
-    for (Index i = 0; i < face_vertices.size(); ++i)
+    for (isize f = 0; f < face_vertices.size(); ++f)
     {
-        auto const& f_v = face_vertices[i];
+        auto const& f_v = face_vertices[f];
 
         Vec3<Real> const f_v_lap = eval_laplacian(
             vertex_positions[f_v[0]],
@@ -315,9 +313,9 @@ void eval_laplacian(
     assert(result.size() == vertex_positions.size());
     as_vec(result).setZero();
 
-    for (Index i = 0; i < face_vertices.size(); ++i)
+    for (isize f = 0; f < face_vertices.size(); ++f)
     {
-        auto const& f_v = face_vertices[i];
+        auto const& f_v = face_vertices[f];
 
         Mat<Real, dim, 3> const f_v_lap = eval_laplacian(
             vertex_positions[f_v[0]],
