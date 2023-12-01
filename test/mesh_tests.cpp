@@ -60,7 +60,7 @@ UTEST(mesh, fan_triangulator)
         {
             Vec3<i32> tris[16];
             i32 num_tris;
-        } result;
+        } expect;
     };
 
     TestCase const test_cases[] = {
@@ -94,7 +94,7 @@ UTEST(mesh, fan_triangulator)
         },
     };
 
-    for (auto const& [num_indices, result] : test_cases)
+    for (auto const& [num_indices, expect] : test_cases)
     {
         DynamicArray<i32> poly(num_indices);
 
@@ -106,14 +106,14 @@ UTEST(mesh, fan_triangulator)
 
         for (; tri_it.is_valid(); tri_it.advance(), ++tri_count)
         {
-            Vec3<i32> const a = result.tris[tri_count];
+            Vec3<i32> const a = expect.tris[tri_count];
             Vec3<i32> const b = tri_it.current();
             ASSERT_EQ(a[0], b[0]);
             ASSERT_EQ(a[1], b[1]);
             ASSERT_EQ(a[2], b[2]);
         }
 
-        ASSERT_EQ(result.num_tris, tri_count);
+        ASSERT_EQ(expect.num_tris, tri_count);
     }
 }
 
@@ -128,7 +128,7 @@ UTEST(mesh, strip_triangulator)
         {
             Vec3<i32> tris[16];
             i32 num_tris;
-        } result;
+        } expect;
     };
 
     TestCase const test_cases[] = {
@@ -162,7 +162,7 @@ UTEST(mesh, strip_triangulator)
         },
     };
 
-    for (auto const& [num_indices, result] : test_cases)
+    for (auto const& [num_indices, expect] : test_cases)
     {
         DynamicArray<i32> poly(num_indices);
 
@@ -174,14 +174,14 @@ UTEST(mesh, strip_triangulator)
 
         for (; tri_it.is_valid(); tri_it.advance(), ++tri_count)
         {
-            Vec3<i32> const a = result.tris[tri_count];
+            Vec3<i32> const a = expect.tris[tri_count];
             Vec3<i32> const b = tri_it.current();
             ASSERT_EQ(a[0], b[0]);
             ASSERT_EQ(a[1], b[1]);
             ASSERT_EQ(a[2], b[2]);
         }
 
-        ASSERT_EQ(result.num_tris, tri_count);
+        ASSERT_EQ(expect.num_tris, tri_count);
     }
 }
 
@@ -223,7 +223,7 @@ UTEST(mesh, make_vertex_to_edge)
         struct
         {
             i32 num_edges;
-        } result;
+        } expect;
     };
 
     TestCase const test_cases[] = {
@@ -242,27 +242,208 @@ UTEST(mesh, make_vertex_to_edge)
     };
 
     IncidenceMap<i32, 2> verts_to_edge{};
-    DynamicArray<i32> edge_verts{};
 
-    for (auto const& [f_v, result] : test_cases)
+    for (auto const& [face_verts, expect] : test_cases)
     {
-        make_vertex_to_edge(f_v, verts_to_edge);
+        make_vertex_to_edge(face_verts, verts_to_edge);
+        ASSERT_EQ(expect.num_edges * 2, size(verts_to_edge));
 
-        edge_verts.resize(verts_to_edge.size());
-        collect_edge_start_vertices(verts_to_edge, as_span(edge_verts));
-
-        ASSERT_EQ(result.num_edges * 2, size_as<i32>(edge_verts));
-
+        // Check that opposite edges are consecutive
         for (auto const& [e_v, e] : verts_to_edge)
         {
-            ASSERT_EQ(e_v[0], edge_verts[e]);
-
-            i32 const e_op = verts_to_edge[{e_v[1], e_v[0]}];
-
+            i32 const e_op = verts_to_edge[e_v({1, 0})];
             if (e_op != -1)
-            {
-                ASSERT_EQ(e_v[1], edge_verts[e_op]);
                 ASSERT_EQ(e ^ 1, e_op);
+        }
+    }
+}
+
+UTEST(mesh, collect_edge_opposite_vertices)
+{
+    using namespace dr;
+
+    struct TestCase
+    {
+        Span<Vec3<i32> const> face_vertices;
+        struct
+        {
+            i32 num_edges;
+        } expect;
+    };
+
+    TestCase const test_cases[] = {
+        {
+            MeshTetrahedron::face_vertices(),
+            {6},
+        },
+        {
+            MeshCube::face_vertices(),
+            {18},
+        },
+        {
+            MeshIcosahedron::face_vertices(),
+            {30},
+        },
+    };
+
+    IncidenceMap<i32, 2> verts_to_edge{};
+    DynamicArray<i32> edge_op_verts{};
+
+    for (auto const& [face_verts, expect] : test_cases)
+    {
+        make_vertex_to_edge(face_verts, verts_to_edge);
+        ASSERT_EQ(expect.num_edges * 2, size(verts_to_edge));
+
+        edge_op_verts.resize(verts_to_edge.size());
+        collect_edge_opposite_vertices(verts_to_edge, face_verts, as_span(edge_op_verts));
+
+        for (auto const& f_v : face_verts)
+        {
+            {
+                auto const it = verts_to_edge.find(f_v({0, 1}));
+                ASSERT_TRUE(it != verts_to_edge.end());
+                ASSERT_EQ(f_v[2], edge_op_verts[it->second]);
+            }
+
+            {
+                auto const it = verts_to_edge.find(f_v({1, 2}));
+                ASSERT_TRUE(it != verts_to_edge.end());
+                ASSERT_EQ(f_v[0], edge_op_verts[it->second]);
+            }
+
+            {
+                auto const it = verts_to_edge.find(f_v({2, 0}));
+                ASSERT_TRUE(it != verts_to_edge.end());
+                ASSERT_EQ(f_v[1], edge_op_verts[it->second]);
+            }
+        }
+    }
+}
+
+UTEST(mesh, collect_edge_faces)
+{
+    using namespace dr;
+
+    struct TestCase
+    {
+        Span<Vec3<i32> const> face_vertices;
+        struct
+        {
+            i32 num_edges;
+        } expect;
+    };
+
+    TestCase const test_cases[] = {
+        {
+            MeshTetrahedron::face_vertices(),
+            {6},
+        },
+        {
+            MeshCube::face_vertices(),
+            {18},
+        },
+        {
+            MeshIcosahedron::face_vertices(),
+            {30},
+        },
+    };
+
+    IncidenceMap<i32, 2> verts_to_edge{};
+    DynamicArray<i32> edge_faces{};
+
+    for (auto const& [face_verts, expect] : test_cases)
+    {
+        make_vertex_to_edge(face_verts, verts_to_edge);
+        ASSERT_EQ(expect.num_edges * 2, size(verts_to_edge));
+
+        edge_faces.resize(verts_to_edge.size());
+        collect_edge_faces(verts_to_edge, face_verts, as_span(edge_faces));
+
+        for (isize f = 0; f < face_verts.size(); ++f)
+        {
+            Vec3<i32> const f_v = face_verts[f];
+
+            {
+                auto const it = verts_to_edge.find(f_v({0, 1}));
+                ASSERT_TRUE(it != verts_to_edge.end());
+                ASSERT_EQ(f, edge_faces[it->second]);
+            }
+
+            {
+                auto const it = verts_to_edge.find(f_v({1, 2}));
+                ASSERT_TRUE(it != verts_to_edge.end());
+                ASSERT_EQ(f, edge_faces[it->second]);
+            }
+
+            {
+                auto const it = verts_to_edge.find(f_v({2, 0}));
+                ASSERT_TRUE(it != verts_to_edge.end());
+                ASSERT_EQ(f, edge_faces[it->second]);
+            }
+        }
+    }
+}
+
+UTEST(mesh, collect_face_edges)
+{
+    using namespace dr;
+
+    struct TestCase
+    {
+        Span<Vec3<i32> const> face_vertices;
+        struct
+        {
+            i32 num_edges;
+        } expect;
+    };
+
+    TestCase const test_cases[] = {
+        {
+            MeshTetrahedron::face_vertices(),
+            {6},
+        },
+        {
+            MeshCube::face_vertices(),
+            {18},
+        },
+        {
+            MeshIcosahedron::face_vertices(),
+            {30},
+        },
+    };
+
+    IncidenceMap<i32, 2> verts_to_edge{};
+    DynamicArray<Vec3<i32>> face_edges{};
+
+    for (auto const& [face_verts, expect] : test_cases)
+    {
+        make_vertex_to_edge(face_verts, verts_to_edge);
+        ASSERT_EQ(expect.num_edges * 2, size(verts_to_edge));
+
+        face_edges.resize(face_verts.size());
+        collect_face_edges(verts_to_edge, face_verts, as_span(face_edges));
+
+        for (isize f = 0; f < face_verts.size(); ++f)
+        {
+            Vec3<i32> const f_v = face_verts[f];
+            Vec3<i32> const f_e = face_edges[f];
+
+            {
+                auto const it = verts_to_edge.find(f_v({0, 1}));
+                ASSERT_TRUE(it != verts_to_edge.end());
+                ASSERT_EQ(f_e[0], it->second);
+            }
+
+            {
+                auto const it = verts_to_edge.find(f_v({1, 2}));
+                ASSERT_TRUE(it != verts_to_edge.end());
+                ASSERT_EQ(f_e[1], it->second);
+            }
+
+            {
+                auto const it = verts_to_edge.find(f_v({2, 0}));
+                ASSERT_TRUE(it != verts_to_edge.end());
+                ASSERT_EQ(f_e[2], it->second);
             }
         }
     }
@@ -345,10 +526,7 @@ UTEST(mesh, vertex_normals_area_weighted)
         isize const num_verts = vertex_positions.size();
         DynamicArray<Vec3<f32>> vertex_normals(num_verts);
 
-        vertex_normals_area_weighted(
-            vertex_positions,
-            face_vertices,
-            as_span(vertex_normals));
+        vertex_normals_area_weighted(vertex_positions, face_vertices, as_span(vertex_normals));
 
         for (isize i = 0; i < num_verts; ++i)
         {
