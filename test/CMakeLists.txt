@@ -15,13 +15,16 @@ add_executable(
     main.cpp
     math_tests.cpp
     memory_tests.cpp
-    mesh_tests.cpp
+    mesh_attributes_tests.cpp
+    mesh_elements_tests.cpp
     mesh_repair_tests.cpp
+    mesh_utils_tests.cpp
     meta_tests.cpp
     random_tests.cpp
     slot_map_tests.cpp
     span_tests.cpp
     transform_tests.cpp
+    triangulate_tests.cpp
 )
 
 include(deps/utest)

@@ -1,11 +1,10 @@
 #pragma once
 
 #include <dr/bitwise.hpp>
+#include <dr/dynamic_array.hpp>
 #include <dr/linalg_reshape.hpp>
 #include <dr/math.hpp>
 #include <dr/span.hpp>
-
-#include <dr/shim/pmr/vector.hpp>
 
 namespace dr
 {
@@ -46,7 +45,7 @@ template <typename Index, int dim>
 void append_elements(
     Span<Vec<Index, dim> const> const& src,
     Index const offset,
-    std::pmr::vector<Vec<Index, dim>>& dst)
+    DynamicArray<Vec<Index, dim>>& dst)
 {
     usize const num_faces = dst.size() + src.size();
     dst.reserve(next_pow2(num_faces));
@@ -57,7 +56,7 @@ void append_elements(
 template <typename Real, int dim>
 void append_attributes(
     Span<Vec<Real, dim> const> const& src,
-    std::pmr::vector<Vec<Real, dim>>& dst)
+    DynamicArray<Vec<Real, dim>>& dst)
 {
     usize const num_verts = dst.size() + src.size();
     dst.reserve(next_pow2(num_verts));

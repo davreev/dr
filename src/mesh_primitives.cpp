@@ -95,6 +95,19 @@ Span<Vec3<i32> const> MeshCube::face_vertices()
     return as_span(result);
 }
 
+Span<Vec4<i32> const> MeshCube::cell_vertices()
+{
+    static Vec4<i32> const result[5] = {
+        {0, 3, 5, 6},
+        {0, 1, 5, 3},
+        {3, 2, 6, 0},
+        {4, 6, 0, 5},
+        {7, 5, 3, 6},
+    };
+
+    return as_span(result);
+}
+
 Span<Vec3<f32> const> MeshIcosahedron::vertex_positions()
 {
     static constexpr f64 x = 0.525731112119133606;

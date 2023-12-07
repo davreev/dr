@@ -22,6 +22,7 @@ struct MeshCube
 {
     static Span<Vec3<f32> const> vertex_positions();
     static Span<Vec3<i32> const> face_vertices();
+    static Span<Vec4<i32> const> cell_vertices();
 };
 
 struct MeshIcosahedron
