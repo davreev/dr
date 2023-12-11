@@ -17,6 +17,9 @@ list(
     "${CMAKE_CURRENT_LIST_DIR}/cmake/"
 )
 
+# Show FetchContent download progress
+set(FETCHCONTENT_QUIET FALSE)
+
 #
 # Library target
 #

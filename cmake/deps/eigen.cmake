@@ -3,7 +3,6 @@ if(TARGET Eigen3::Eigen)
 endif()
 
 include(FetchContent)
-set(FETCHCONTENT_QUIET FALSE) # Show download progress
 
 FetchContent_Declare(
     eigen

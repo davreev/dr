@@ -3,7 +3,6 @@ if(TARGET utest::utest)
 endif()
 
 include(FetchContent)
-set(FETCHCONTENT_QUIET FALSE) # Show download progress
 
 FetchContent_Declare(
     utest
