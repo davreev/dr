@@ -10,17 +10,17 @@ namespace dr
 namespace impl
 {
 
-template <typename Scalar, typename _ = Scalar>
+template <typename Scalar, typename Enable = void>
 struct UniformDistribution;
 
 template <typename Real>
-struct UniformDistribution<Real, std::enable_if_t<is_real<Real>, Real>>
+struct UniformDistribution<Real, std::enable_if_t<is_real<Real>>>
 {
     using Type = std::uniform_real_distribution<Real>;
 };
 
 template <typename Int>
-struct UniformDistribution<Int, std::enable_if_t<(is_integer<Int> || is_natural<Int>), Int>>
+struct UniformDistribution<Int, std::enable_if_t<(is_integer<Int> || is_natural<Int>)>>
 {
     using Type = std::uniform_int_distribution<Int>;
 };
