@@ -16,21 +16,25 @@ UTEST(slot_map, insert_remove)
 
     SlotMap map{};
 
-    Handle const h0 = map.insert("One");
+    Handle h0{};
     ASSERT_EQ(0u, h0.index);
     ASSERT_EQ(0u, h0.version);
+    
+    h0 = map.insert("One");
+    ASSERT_EQ(0u, h0.index);
+    ASSERT_EQ(1u, h0.version);
     ASSERT_TRUE(map.is_valid(h0));
     ASSERT_TRUE(map[h0]->compare("One") == 0);
 
     Handle const h1 = map.insert("Two");
     ASSERT_EQ(1u, h1.index);
-    ASSERT_EQ(0u, h1.version);
+    ASSERT_EQ(1u, h1.version);
     ASSERT_TRUE(map.is_valid(h1));
     ASSERT_TRUE(map[h1]->compare("Two") == 0);
 
     Handle const h2 = map.insert("Three");
     ASSERT_EQ(2u, h2.index);
-    ASSERT_EQ(0u, h2.version);
+    ASSERT_EQ(1u, h2.version);
     ASSERT_TRUE(map.is_valid(h2));
     ASSERT_TRUE(map[h2]->compare("Three") == 0);
 
@@ -41,7 +45,7 @@ UTEST(slot_map, insert_remove)
 
     Handle const h3 = map.insert("Four");
     ASSERT_EQ(1u, h3.index);
-    ASSERT_EQ(1u, h3.version);
+    ASSERT_EQ(2u, h3.version);
     ASSERT_TRUE(map.is_valid(h3));
     ASSERT_TRUE(map[h3]->compare("Four") == 0);
 }

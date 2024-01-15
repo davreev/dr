@@ -19,33 +19,17 @@ struct SlotMap : AllocatorAware
 
     struct Handle
     {
-        Index const index : index_bits;
-        Index const version : version_bits;
-    };
-
-    struct Item
-    {
-        T data;
+        Index index : index_bits;
         Index version : version_bits;
-
-        Item(T&& data) :
-            data(std::move(data)), version{0} {}
     };
 
-    SlotMap(Allocator const alloc = {}) :
-        items_(alloc),
-        free_indices_(alloc)
-    {
-    }
+    SlotMap(Allocator const alloc = {}) : items_(alloc), free_indices_(alloc) {}
 
     SlotMap(SlotMap const& other) = delete;
     SlotMap& operator=(SlotMap const& other) = delete;
 
     /// Returns the allocator used by this container
-    Allocator allocator() const
-    {
-        return items_.get_allocator();
-    }
+    Allocator allocator() const { return items_.get_allocator(); }
 
     /// Inserts a new item into the map by constructing it in-place. Returns a valid handle to the
     /// new item.
@@ -55,7 +39,7 @@ struct SlotMap : AllocatorAware
         if (free_indices_.empty())
         {
             items_.emplace_back(make_t(std::forward<Args>(args)...));
-            return {static_cast<Index>(items_.size() - 1), 0};
+            return {static_cast<Index>(items_.size() - 1), 1};
         }
         else
         {
@@ -90,10 +74,7 @@ struct SlotMap : AllocatorAware
     }
 
     /// Returns true if the handle refers to a valid item
-    bool is_valid(Handle const handle)
-    {
-        return (items_[handle.index].version == handle.version);
-    }
+    bool is_valid(Handle const handle) { return (items_[handle.index].version == handle.version); }
 
     /// Returns the item associated with the given handle or null if the handle isn't valid
     T const* operator[](Handle const handle) const
@@ -105,10 +86,7 @@ struct SlotMap : AllocatorAware
     }
 
     /// Returns the item associated with the given handle or null if the handle isn't valid
-    T* operator[](Handle const handle)
-    {
-        return const_cast<T*>(std::as_const(*this)[handle]);
-    }
+    T* operator[](Handle const handle) { return const_cast<T*>(std::as_const(*this)[handle]); }
 
     /// Returns the number of items in the map
     isize size() { return static_cast<isize>(items_.size()); }
@@ -117,6 +95,13 @@ struct SlotMap : AllocatorAware
     bool empty() { return items_.empty(); }
 
   private:
+    struct Item
+    {
+        T data;
+        Index version{1};
+        Item(T&& data) : data{std::move(data)} {}
+    };
+
     DynamicArray<Item> items_;
     DynamicArray<Index> free_indices_;
 
