@@ -8,7 +8,8 @@ Human readable log of all notable changes to this project
 -
 
 ### Changed
-- The version of handles returned from `SlotMap::insert` now starts at 1. Version 0 is reserved for default initialized handles which are considered to be invalid.
+- The `version` of handles returned from `SlotMap::insert` now starts at 1, allowing 0 to be reserved for default initialized (i.e. invalid) handles
+- Deprecated `Grid<*>::extents`
 
 ### Fixed
 -

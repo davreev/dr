@@ -71,6 +71,7 @@ struct Grid
         return to_world(grid_pt.template cast<Scalar>().eval());
     }
 
+    [[deprecated]]
     Vec<Scalar, dim> const& extents() const
     {
         return spacing.array() * (count.array() - 1).template cast<Scalar>();
