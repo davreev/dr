@@ -116,7 +116,7 @@ struct HashGrid : AllocatorAware
                     find_impl({i, j}, result);
             }
         }
-        else if constexpr (dim == 3)
+        else if (dim == 3)
         {
             for (Index i = key_from[0]; i <= key_to[0]; ++i)
             {
@@ -126,10 +126,6 @@ struct HashGrid : AllocatorAware
                         find_impl({i, j, k}, result);
                 }
             }
-        }
-        else
-        {
-            static_assert(dim != dim, "Unsupported value");
         }
     }
 
