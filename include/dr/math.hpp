@@ -61,6 +61,20 @@ constexpr Scalar sign(Scalar const x)
     return (x > Scalar{0}) ? Scalar{1} : ((x < Scalar{0}) ? Scalar{-1} : Scalar{0});
 }
 
+template <typename Scalar>
+constexpr Scalar min(Scalar const a, Scalar const b)
+{
+    static_assert(is_real<Scalar> || is_integer<Scalar>);
+    return (b < a) ? b : a;
+}
+
+template <typename Scalar>
+constexpr Scalar max(Scalar const a, Scalar const b)
+{
+    static_assert(is_real<Scalar> || is_integer<Scalar>);
+    return (b > a) ? b : a;
+}
+
 template <typename Real>
 constexpr Real saturate(Real const x)
 {
@@ -100,8 +114,8 @@ constexpr bool near_equal(Real const a, Real const b, Real const abs_tol, Real c
     static_assert(is_real<Real>);
     assert(abs_tol >= Real{0.0} && rel_tol >= Real{0.0});
 
-    Real const max_abs = std::max(abs(a), abs(b));
-    return abs(a - b) <= std::max(abs_tol, rel_tol * max_abs);
+    Real const max_abs = max(abs(a), abs(b));
+    return abs(a - b) <= max(abs_tol, rel_tol * max_abs);
 }
 
 template <typename Scalar>
@@ -275,8 +289,8 @@ bool near_equal(Vec<Real, dim> const& a, Vec<Real, dim> const& b, Real const abs
     static_assert(is_real<Real>);
     assert(abs_tol >= Real{0.0} && rel_tol >= Real{0.0});
 
-    Real const max_abs = std::max(a.cwiseAbs().maxCoeff(), b.cwiseAbs().maxCoeff());
-    return (a - b).cwiseAbs().maxCoeff() <= std::max(abs_tol, rel_tol * max_abs);
+    Real const max_abs = max(a.cwiseAbs().maxCoeff(), b.cwiseAbs().maxCoeff());
+    return (a - b).cwiseAbs().maxCoeff() <= max(abs_tol, rel_tol * max_abs);
 }
 
 /// Returns true if two vectors are within an absolute tolerance of being parallel
@@ -297,8 +311,8 @@ bool near_parallel(Vec<Real, dim> const& a, Vec<Real, dim> const& b, Real const 
     static_assert(is_real<Real>);
     assert(abs_tol >= Real{0.0} && rel_tol >= Real{0.0});
 
-    Real const max_abs = std::max(a.cwiseAbs().maxCoeff(), b.cwiseAbs().maxCoeff());
-    return reject(a, b).cwiseAbs().maxCoeff() <= std::max(abs_tol, rel_tol * max_abs);
+    Real const max_abs = max(a.cwiseAbs().maxCoeff(), b.cwiseAbs().maxCoeff());
+    return reject(a, b).cwiseAbs().maxCoeff() <= max(abs_tol, rel_tol * max_abs);
 }
 
 /// Returns the normalized linear interpolation between two quaternions
@@ -321,7 +335,7 @@ template <typename Real>
 Real sqrt_safe(Real const x)
 {
     static_assert(is_real<Real>);
-    return std::sqrt(std::max(x, Real{0.0}));
+    return std::sqrt(max(x, Real{0.0}));
 }
 
 template <typename Real>

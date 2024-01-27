@@ -64,7 +64,7 @@ bool gather_points(
             }
 
             Vec<Real, dim> const p_new = p_sum / w_sum;
-            max_sqr_dist = std::max(max_sqr_dist, (p_new - p).squaredNorm());
+            max_sqr_dist = max(max_sqr_dist, (p_new - p).squaredNorm());
             points[i] = p_new;
         }
 

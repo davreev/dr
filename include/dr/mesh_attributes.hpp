@@ -284,7 +284,7 @@ Real bounding_radius(Span<Vec3<Real> const> const& points, Vec3<Real> const& cen
     for (isize i = 0; i < points.size(); ++i)
     {
         auto const& p = points[i];
-        sqr_rad = std::max((centroid - p).squaredNorm(), sqr_rad);
+        sqr_rad = max((centroid - p).squaredNorm(), sqr_rad);
     }
 
     return std::sqrt(sqr_rad);

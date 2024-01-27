@@ -10,7 +10,6 @@ add_executable(
     grid_tests.cpp
     halfedge_tests.cpp
     hash_grid_tests.cpp
-    sliced_array_tests.cpp
     linalg_tests.cpp
     main.cpp
     math_tests.cpp
@@ -21,6 +20,7 @@ add_executable(
     mesh_utils_tests.cpp
     meta_tests.cpp
     random_tests.cpp
+    sliced_array_tests.cpp
     slot_map_tests.cpp
     span_tests.cpp
     transform_tests.cpp

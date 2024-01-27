@@ -18,9 +18,9 @@ Vec<Index, dim> grid_stride(Vec<Index, dim> const& count)
 }
 
 template <typename Index, int dim>
-Index grid_to_index(Vec<Index, dim> const& id, Vec<Index, dim> const& stride)
+Index grid_to_index(Vec<Index, dim> const& point, Vec<Index, dim> const& stride)
 {
-    return id.dot(stride);
+    return point.dot(stride);
 }
 
 template <typename Index, int dim>
