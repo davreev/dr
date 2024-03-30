@@ -42,17 +42,14 @@ target_compile_options(
         -Wall -Wextra -Wpedantic -Werror
 )
 
-target_compile_definitions(
-    dr-test
-    PRIVATE 
-        # ...
-)
-
-target_link_options(
-    dr-test
-    PRIVATE
-        # ...
-)
+# Allow std::fopen on Windows builds
+if(WIN32)
+    target_compile_options(
+        dr-test
+        PRIVATE 
+            -Wno-deprecated-declarations
+    )
+endif()
 
 add_test(
     NAME dr-test

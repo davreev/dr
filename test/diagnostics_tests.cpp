@@ -14,7 +14,7 @@ UTEST(diagnostics, scoped_timer)
     fs::path const tmp_dir = std::filesystem::temp_directory_path();
     fs::path const path = tmp_dir / "scoped_timer_test.txt";
 
-    std::FILE* out = std::fopen(path.c_str(), "w+");
+    std::FILE* out = std::fopen(path.string().c_str(), "w+");
     ASSERT_TRUE(out != nullptr);
 
     {
