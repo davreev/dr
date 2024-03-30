@@ -7,9 +7,8 @@ namespace dr
 
 template <
     typename Key,
-    typename Value,
     typename KeyHash = Hash<Key>,
     typename KeyEqual = std::equal_to<Key>>
-using HashMap = ankerl::unordered_dense::pmr::map<Key, Value, KeyHash, KeyEqual>;
+using HashSet = ankerl::unordered_dense::pmr::set<Key, KeyHash, KeyEqual>;
 
 } // namespace dr

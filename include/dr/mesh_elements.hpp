@@ -15,27 +15,12 @@ struct ElementHash
     template <typename Index, int size>
     constexpr usize operator()(Vec<Index, size> const& indices) const
     {
-        static_assert(size != Eigen::Dynamic);
-        usize result{17};
-
-        for (int i = 0; i < size; ++i)
-            result = 31 * result + static_cast<usize>(indices[i]);
-
-        return result;
-    }
-};
-
-struct ElementEqual
-{
-    template <typename Index, int size>
-    bool operator()(Vec<Index, size> const& a, Vec<Index, size> const& b) const
-    {
-        return a == b;
+        return hash(as_bytes(indices));
     }
 };
 
 template <typename Index, int size>
-using IncidenceMap = HashMap<Vec<Index, size>, Index, ElementHash, ElementEqual>;
+using IncidenceMap = HashMap<Vec<Index, size>, Index, ElementHash>;
 
 template <typename Index>
 constexpr Index invalid_element = ~Index{};

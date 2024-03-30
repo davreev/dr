@@ -42,6 +42,7 @@ target_include_directories(
 include(deps/eigen)
 include(deps/fmt)
 include(deps/openmp)
+include(deps/unordered-dense)
 
 target_link_libraries(
     dr
@@ -49,6 +50,7 @@ target_link_libraries(
         Eigen3::Eigen
         fmt::fmt
         $<TARGET_NAME_IF_EXISTS:OpenMP::OpenMP_CXX>
+        unordered_dense::unordered_dense
 )
 
 target_compile_options(

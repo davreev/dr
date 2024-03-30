@@ -63,7 +63,7 @@ struct HashGrid : AllocatorAware
     /// Clears all buckets in the grid
     void clear()
     {
-        constexpr usize max_version = 0xFFFFFFFFFFFFFFFF;
+        constexpr usize max_version = ~0;
 
         // NOTE: Buckets are cleared lazily on insertion
         if (version_ < max_version)
@@ -156,19 +156,21 @@ struct HashGrid : AllocatorAware
         // Impl ref
         // http://matthias-mueller-fischer.ch/publications/tetraederCollision.pdf
 
+        static constexpr usize primes[]{73856093, 19349663, 83492791};
+
         usize operator()(Vec<Index, 2> const& key) const
         {
             // Multiply each coord with a large prime and xor together
-            return static_cast<usize>(key[0]) * 73856093
-                ^ static_cast<usize>(key[1]) * 19349663;
+            return static_cast<usize>(key[0]) * primes[0]
+                ^ static_cast<usize>(key[1]) * primes[1];
         }
 
         usize operator()(Vec<Index, 3> const& key) const
         {
             // Multiply each coord with a large prime and xor together
-            return static_cast<usize>(key[0]) * 73856093
-                ^ static_cast<usize>(key[1]) * 19349663
-                ^ static_cast<usize>(key[2]) * 83492791;
+            return static_cast<usize>(key[0]) * primes[0]
+                ^ static_cast<usize>(key[1]) * primes[1]
+                ^ static_cast<usize>(key[2]) * primes[2];
         }
     };
 
