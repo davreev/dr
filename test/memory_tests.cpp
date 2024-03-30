@@ -40,7 +40,7 @@ UTEST(memory, as_bytes)
     Vec3i const vec{0, 1, 2};
     i32 const arr[]{0, 1, 2};
 
-    ASSERT_TRUE(equal(as_bytes(vec), as<u8>(as_span(arr))));
+    ASSERT_TRUE(all_equal(as_bytes(vec), as<u8>(as_span(arr))));
 }
 
 UTEST(memory, scoped_alloc)

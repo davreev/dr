@@ -3,8 +3,6 @@
 #include <dr/halfedge.hpp>
 #include <dr/memory.hpp>
 
-#include "test_utils.hpp"
-
 UTEST(halfedge, allocator_propagation)
 {
     using namespace dr;

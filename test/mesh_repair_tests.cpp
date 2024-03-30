@@ -101,8 +101,8 @@ UTEST(mesh_repair, find_unique_points)
         pt_to_unique.assign(points.size(), -1);
         find_unique_points(as_span(points), grid, tol, unique_pts, as_span(pt_to_unique));
 
-        ASSERT_TRUE(equal(as_span(pt_to_unique), as_span(result.point_to_unique)));
-        ASSERT_TRUE(equal(as_span(unique_pts), as_span(result.unique_points)));
+        ASSERT_TRUE(all_equal(as_span(pt_to_unique), as_span(result.point_to_unique)));
+        ASSERT_TRUE(all_equal(as_span(unique_pts), as_span(result.unique_points)));
     }
 }
 
@@ -284,6 +284,6 @@ UTEST(mesh_repair, merge_vertices)
             as_span(vert_to_unique));
 
         auto merged_faces = reindex_faces(as_span(faces), as_span(vert_to_unique).as_const(), true);
-        ASSERT_TRUE(equal(merged_faces, as_span(result.merged_faces)));
+        ASSERT_TRUE(all_equal(merged_faces, as_span(result.merged_faces)));
     }
 }

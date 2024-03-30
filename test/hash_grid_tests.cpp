@@ -104,6 +104,6 @@ UTEST(hash_grid, insert_find)
         std::sort(found_indices.begin(), found_indices.end());
 
         ASSERT_TRUE(found_indices.size() == result.size());
-        ASSERT_TRUE(equal(as_span(found_indices), as_span(result)));
+        ASSERT_TRUE(all_equal(as_span(found_indices), as_span(result)));
     }
 }

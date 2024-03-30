@@ -242,8 +242,8 @@ UTEST(affine3, apply_inverse_self)
 
         Affine3<f64> const b = a.inverse().apply(a);
 
-        ASSERT_TRUE(near_equal(as_span(b.linear), as_span(identity.linear), eps));
-        ASSERT_TRUE(near_equal(as_span(b.translation), as_span(identity.translation), eps));
+        ASSERT_TRUE(all_near_equal(as_span(b.linear), as_span(identity.linear), eps));
+        ASSERT_TRUE(all_near_equal(as_span(b.translation), as_span(identity.translation), eps));
     }
 }
 
@@ -264,7 +264,7 @@ UTEST(affine2, apply_inverse_self)
 
         Affine2<f64> const b = a.inverse().apply(a);
 
-        ASSERT_TRUE(near_equal(as_span(b.linear), as_span(identity.linear), eps));
-        ASSERT_TRUE(near_equal(as_span(b.translation), as_span(identity.translation), eps));
+        ASSERT_TRUE(all_near_equal(as_span(b.linear), as_span(identity.linear), eps));
+        ASSERT_TRUE(all_near_equal(as_span(b.translation), as_span(identity.translation), eps));
     }
 }
