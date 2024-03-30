@@ -1,4 +1,4 @@
-#include <utest.h>
+#include <utest/utest.h>
 
 #include <dr/dynamic_array.hpp>
 #include <dr/mesh_repair.hpp>

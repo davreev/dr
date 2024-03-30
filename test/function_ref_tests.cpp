@@ -1,4 +1,4 @@
-#include <utest.h>
+#include <utest/utest.h>
 
 #include <dr/basic_types.hpp>
 #include <dr/function_ref.hpp>

@@ -1,4 +1,4 @@
-#include <utest.h>
+#include <utest/utest.h>
 
 #include <dr/linalg_reshape.hpp>
 #include <dr/math.hpp>
