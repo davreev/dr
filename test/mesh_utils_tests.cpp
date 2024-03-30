@@ -7,8 +7,9 @@ UTEST(mesh, append)
 {
     using namespace dr;
 
-    auto const src_verts = MeshCube::vertex_positions();
-    auto const src_faces = MeshCube::face_vertices();
+    using Prim = MeshPrimitives::Cube;
+    auto const src_verts = Prim::vert_coords();
+    auto const src_faces = Prim::tri_verts();
 
     DynamicArray<Vec3<f32>> dst_verts{};
     DynamicArray<Vec3<i32>> dst_faces{};

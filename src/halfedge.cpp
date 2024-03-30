@@ -1,5 +1,6 @@
 #include <dr/halfedge.hpp>
 
+#include <dr/linalg_reshape.hpp>
 #include <dr/math_traits.hpp>
 #include <dr/meta.hpp>
 
@@ -111,8 +112,8 @@ Builder::Error Builder::make_from_face_vertex_impl(
 
             // Try inserting a halfedge between the vertex pair. If one already exists, then we have
             // a non-manifold edge.
-            auto const [it0, inserted] = v_to_he_.insert({{v0, v1}, invalid_index_});
-            if (!inserted)
+            auto const [it0, ok] = v_to_he_.try_emplace({v0, v1}, invalid_index_);
+            if (!ok)
                 return Error_NonManifoldEdge;
 
             // Infer the index of the new halfedge if its twin already exists. Otherwise, treat it
@@ -308,11 +309,11 @@ Builder::Error Builder::make_from_face_vertex_impl(
 
 // Explicit template instantiation
 
-#define DR_INSTANTIATE(SrcIndex)                            \
-    template Builder::Error Builder::make_from_face_vertex( \
-        SlicedArray<SrcIndex> const& face_vertices,         \
-        HalfedgeMesh& result,                               \
-        bool include_previous,                              \
+#define DR_INSTANTIATE(SrcIndex)                                                                   \
+    template Builder::Error Builder::make_from_face_vertex(                                        \
+        SlicedArray<SrcIndex> const& face_vertices,                                                \
+        HalfedgeMesh& result,                                                                      \
+        bool include_previous,                                                                     \
         bool include_holes);
 
 DR_INSTANTIATE(i16)
@@ -325,11 +326,11 @@ DR_INSTANTIATE(u64)
 
 #undef DR_INSTANTIATE
 
-#define DR_INSTANTIATE(SrcIndex, size)                        \
-    template Builder::Error Builder::make_from_face_vertex(   \
-        Span<Vec<SrcIndex, size> const> const& face_vertices, \
-        HalfedgeMesh& result,                                 \
-        bool include_previous,                                \
+#define DR_INSTANTIATE(SrcIndex, size)                                                             \
+    template Builder::Error Builder::make_from_face_vertex(                                        \
+        Span<Vec<SrcIndex, size> const> const& face_vertices,                                      \
+        HalfedgeMesh& result,                                                                      \
+        bool include_previous,                                                                     \
         bool include_holes);
 
 DR_INSTANTIATE(i16, 3)

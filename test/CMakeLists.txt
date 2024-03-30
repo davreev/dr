@@ -15,7 +15,7 @@ add_executable(
     math_tests.cpp
     memory_tests.cpp
     mesh_attributes_tests.cpp
-    mesh_elements_tests.cpp
+    mesh_incidence_tests.cpp
     mesh_repair_tests.cpp
     mesh_utils_tests.cpp
     meta_tests.cpp

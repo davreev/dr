@@ -6,29 +6,33 @@
 namespace dr
 {
 
-struct MeshTetrahedron
+struct MeshPrimitives
 {
-    static Span<Vec3<f32> const> vertex_positions();
-    static Span<Vec3<i32> const> face_vertices();
+    struct Tetrahedron
+    {
+        static Span<Vec3<f32> const> vert_coords();
+        static Span<Vec3<i32> const> tri_verts();
+    };
+
+    struct Octahedron
+    {
+        static Span<Vec3<f32> const> vert_coords();
+        static Span<Vec3<i32> const> tri_verts();
+    };
+
+    struct Cube
+    {
+        static Span<Vec3<f32> const> vert_coords();
+        static Span<Vec3<i32> const> tri_verts();
+        static Span<Vec4<i32> const> quad_verts();
+        static Span<Vec4<i32> const> tet_verts();
+    };
+
+    struct Icosahedron
+    {
+        static Span<Vec3<f32> const> vert_coords();
+        static Span<Vec3<i32> const> tri_verts();
+    };
 };
 
-struct MeshOctahedron
-{
-    static Span<Vec3<f32> const> vertex_positions();
-    static Span<Vec3<i32> const> face_vertices();
-};
-
-struct MeshCube
-{
-    static Span<Vec3<f32> const> vertex_positions();
-    static Span<Vec3<i32> const> face_vertices();
-    static Span<Vec4<i32> const> cell_vertices();
-};
-
-struct MeshIcosahedron
-{
-    static Span<Vec3<f32> const> vertex_positions();
-    static Span<Vec3<i32> const> face_vertices();
-};
-
-}
+} // namespace dr

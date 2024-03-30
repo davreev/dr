@@ -5,8 +5,9 @@
 #include <dr/basic_types.hpp>
 #include <dr/container_utils.hpp>
 #include <dr/dynamic_array.hpp>
+#include <dr/hash_map.hpp>
+#include <dr/math_types.hpp>
 #include <dr/memory.hpp>
-#include <dr/mesh_elements.hpp>
 #include <dr/sliced_array.hpp>
 #include <dr/span.hpp>
 
@@ -23,8 +24,7 @@ struct HalfedgeMesh : AllocatorAware
 
         constexpr Element() = default;
 
-        constexpr explicit Element(Index const index) :
-            index{index} {}
+        constexpr explicit Element(Index const index) : index{index} {}
 
         constexpr operator Index() const { return index; }
 
@@ -60,9 +60,7 @@ struct HalfedgeMesh : AllocatorAware
     struct VertexCirculator
     {
         VertexCirculator(HalfedgeMesh const& mesh, Halfedge const start) :
-            halfedge_next_{as_span(mesh.halfedge_next_)},
-            start_{start.index},
-            current_{start.index}
+            halfedge_next_{as_span(mesh.halfedge_next_)}, start_{start.index}, current_{start.index}
         {
         }
 
@@ -92,9 +90,7 @@ struct HalfedgeMesh : AllocatorAware
     struct FaceCirculator
     {
         FaceCirculator(HalfedgeMesh const& mesh, Halfedge const start) :
-            halfedge_next_{as_span(mesh.halfedge_next_)},
-            start_{start.index},
-            current_{start.index}
+            halfedge_next_{as_span(mesh.halfedge_next_)}, start_{start.index}, current_{start.index}
         {
         }
 
@@ -137,13 +133,9 @@ struct HalfedgeMesh : AllocatorAware
             _Error_Count
         };
 
-        Builder(Allocator const alloc = {}) :
-            v_to_he_(alloc)
-        {
-        }
+        Builder(Allocator const alloc = {}) : v_to_he_(alloc) {}
 
-        Builder(Builder const& other, Allocator const alloc = {}) :
-            v_to_he_(other.v_to_he_, alloc)
+        Builder(Builder const& other, Allocator const alloc = {}) : v_to_he_(other.v_to_he_, alloc)
         {
         }
 
@@ -171,7 +163,17 @@ struct HalfedgeMesh : AllocatorAware
             bool include_holes = true);
 
       private:
-        IncidenceMap<Index, 2> v_to_he_;
+        struct VertsToHalfedge
+        {
+            struct Hash
+            {
+                usize operator()(Vec2<Index> const& key) const { return hash(as_bytes(key)); }
+            };
+
+            using Map = HashMap<Vec2<Index>, Index, Hash>;
+        };
+
+        VertsToHalfedge::Map v_to_he_;
 
         template <typename SrcIndex, typename FaceVertexSrc>
         Error make_from_face_vertex_impl(

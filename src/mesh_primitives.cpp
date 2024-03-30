@@ -5,7 +5,7 @@
 namespace dr
 {
 
-Span<Vec3<f32> const> MeshTetrahedron::vertex_positions()
+Span<Vec3<f32> const> MeshPrimitives::Tetrahedron::vert_coords()
 {
     static Vec3<f32> const result[] = {
         {-0.5, -0.5, -0.5},
@@ -17,7 +17,7 @@ Span<Vec3<f32> const> MeshTetrahedron::vertex_positions()
     return as_span(result);
 }
 
-Span<Vec3<i32> const> MeshTetrahedron::face_vertices()
+Span<Vec3<i32> const> MeshPrimitives::Tetrahedron::tri_verts()
 {
     static Vec3<i32> const result[] = {
         {0, 1, 2},
@@ -29,7 +29,7 @@ Span<Vec3<i32> const> MeshTetrahedron::face_vertices()
     return as_span(result);
 }
 
-Span<Vec3<f32> const> MeshOctahedron::vertex_positions()
+Span<Vec3<f32> const> MeshPrimitives::Octahedron::vert_coords()
 {
     static Vec3<f32> const result[] = {
         {-0.5, -0.5, 0.0},
@@ -43,7 +43,7 @@ Span<Vec3<f32> const> MeshOctahedron::vertex_positions()
     return as_span(result);
 }
 
-Span<Vec3<i32> const> MeshOctahedron::face_vertices()
+Span<Vec3<i32> const> MeshPrimitives::Octahedron::tri_verts()
 {
     static Vec3<i32> const result[] = {
         {0, 1, 5},
@@ -59,7 +59,7 @@ Span<Vec3<i32> const> MeshOctahedron::face_vertices()
     return as_span(result);
 }
 
-Span<Vec3<f32> const> MeshCube::vertex_positions()
+Span<Vec3<f32> const> MeshPrimitives::Cube::vert_coords()
 {
     static Vec3<f32> const result[8] = {
         {-0.5, -0.5, -0.5},
@@ -75,7 +75,7 @@ Span<Vec3<f32> const> MeshCube::vertex_positions()
     return as_span(result);
 }
 
-Span<Vec3<i32> const> MeshCube::face_vertices()
+Span<Vec3<i32> const> MeshPrimitives::Cube::tri_verts()
 {
     static Vec3<i32> const result[12] = {
         {0, 1, 4},
@@ -95,7 +95,23 @@ Span<Vec3<i32> const> MeshCube::face_vertices()
     return as_span(result);
 }
 
-Span<Vec4<i32> const> MeshCube::cell_vertices()
+
+
+Span<Vec4<i32> const> MeshPrimitives::Cube::quad_verts()
+{
+    static Vec4<i32> const result[6] = {
+        {0, 1, 5, 4},
+        {3, 2, 6, 7},
+        {2, 0, 4, 6},
+        {1, 3, 7, 5},
+        {0, 2, 3, 1},
+        {7, 6, 4, 5},
+    };
+
+    return as_span(result);
+}
+
+Span<Vec4<i32> const> MeshPrimitives::Cube::tet_verts()
 {
     static Vec4<i32> const result[5] = {
         {0, 3, 5, 6},
@@ -108,7 +124,7 @@ Span<Vec4<i32> const> MeshCube::cell_vertices()
     return as_span(result);
 }
 
-Span<Vec3<f32> const> MeshIcosahedron::vertex_positions()
+Span<Vec3<f32> const> MeshPrimitives::Icosahedron::vert_coords()
 {
     static constexpr f64 x = 0.525731112119133606;
     static constexpr f64 z = 0.850650808352039932;
@@ -131,7 +147,7 @@ Span<Vec3<f32> const> MeshIcosahedron::vertex_positions()
     return as_span(result);
 }
 
-Span<Vec3<i32> const> MeshIcosahedron::face_vertices()
+Span<Vec3<i32> const> MeshPrimitives::Icosahedron::tri_verts()
 {
     static Vec3<i32> const result[] = {
         {1, 4, 0},
