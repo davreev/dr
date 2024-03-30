@@ -12,6 +12,22 @@
 namespace dr
 {
 
+/// Returns the number of ones in the binary representation of an unsigned integer
+template <typename Nat>
+constexpr u8 bit_sum(Nat x)
+{
+    static_assert(is_natural<Nat>);
+
+    u8 sum{};
+    while(x != 0)
+    {
+        x &= x - 1;
+        ++sum;
+    }
+
+    return sum;
+}
+
 /// Returns true if the given value is a power of 2
 template <typename Nat>
 constexpr bool is_pow2(Nat const x)

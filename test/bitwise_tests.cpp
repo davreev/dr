@@ -2,6 +2,31 @@
 
 #include <dr/bitwise.hpp>
 
+UTEST(bitwise, bit_sum)
+{
+    using namespace dr;
+
+    struct TestCase
+    {
+        u8 value;
+        u8 expect;
+    };
+
+    TestCase test_cases[]{
+        {0b00000001, 1u},
+        {0b10000000, 1u},
+        {0b00001111, 4u},
+        {0b11110000, 4u},
+        {0b01010101, 4u},
+        {0b11111111, 8u},
+    };
+
+    for (auto& [value, expect] : test_cases)
+    {
+        ASSERT_EQ(expect, bit_sum(value));
+    }
+}
+
 UTEST(bitwise, is_pow2)
 {
     using namespace dr;
@@ -36,7 +61,7 @@ UTEST(bitwise, next_pow2)
 UTEST(bitwise, prev_pow2)
 {
     using namespace dr;
-    
+
     ASSERT_EQ(0u, prev_pow2(0u));
 
     for (u8 i = 0; i < 63; ++i)
@@ -46,4 +71,3 @@ UTEST(bitwise, prev_pow2)
         ASSERT_EQ(x >> 1, prev_pow2(x - 1));
     }
 }
-
