@@ -53,11 +53,7 @@ bool gather_points(
                 {
                     Vec<Real, dim> const p_adj = points[j];
                     Real const dist = (p - p_adj).norm();
-
-                    // TODO(dr): Test different weighting functions
-                    // Real const w = ramp(radius, Real{0.5} * radius, dist);
                     Real const w = smooth_step(radius, Real{0.5} * radius, dist);
-
                     p_sum += p_adj * w;
                     w_sum += w;
                 }
