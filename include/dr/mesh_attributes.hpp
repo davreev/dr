@@ -313,7 +313,7 @@ Real winding_number(
 
 /// Returns the interpolated value at a point inside a triangle mesh using mean value coordinates
 template <typename Real, typename Value, typename Index>
-Value interpolate_mean_value(
+Value interp_mean_value(
     Span<Vec3<Real> const> const& vertex_positions,
     Span<Value const> const& vertex_values,
     Span<Vec3<Index> const> const& face_vertices,
@@ -410,7 +410,7 @@ Value interpolate_mean_value(
 /// The naive implementation is faster but less numerically robust particularly when evaluated near
 /// the boundary.
 template <typename Real, typename Value, typename Index>
-Value interpolate_mean_value_naive(
+Value interp_mean_value_naive(
     Span<Vec3<Real> const> const& vertex_positions,
     Span<Value const> const& vertex_values,
     Span<Vec3<Index> const> const& face_vertices,
