@@ -192,13 +192,20 @@ struct DebugMemoryResource : public std::pmr::memory_resource
     usize bytes_allocated{};
     usize max_bytes_allocated{};
 
-    DebugMemoryResource();
-    DebugMemoryResource(std::pmr::memory_resource* upstream);
-    ~DebugMemoryResource();
+    DebugMemoryResource() : upstream{std::pmr::get_default_resource()} {}
+
+    DebugMemoryResource(std::pmr::memory_resource* const upstream) : upstream{upstream} {}
+
+    ~DebugMemoryResource() { assert(bytes_allocated == 0); }
 
     void* do_allocate(std::size_t bytes, std::size_t alignment) override;
+
     void do_deallocate(void* ptr, std::size_t bytes, std::size_t alignment) override;
-    bool do_is_equal(std::pmr::memory_resource const& other) const noexcept override;
+
+    bool do_is_equal(std::pmr::memory_resource const& other) const noexcept override
+    {
+        return this == &other;
+    };
 };
 
 } // namespace dr
