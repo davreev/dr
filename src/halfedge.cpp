@@ -153,8 +153,6 @@ Builder::Error Builder::make_from_face_vertex_impl(
     // Connect faces to halfedges and halfedges to vertices, faces, and next
     for (Index f = 0; f < num_faces; ++f)
     {
-        // NOTE(dr): This can safely be done in parallel
-
         Span<SrcIndex const> const f_v = face_vertices[f];
 
         auto v0 = static_cast<Index>(f_v[0]);
@@ -225,8 +223,6 @@ Builder::Error Builder::make_from_face_vertex_impl(
     // Optionally connect halfedges to previous halfedges
     if (include_previous)
     {
-        // NOTE(dr): This can safely be done in parallel
-
         auto& he_prev = result.halfedge_prev_;
         he_prev.assign(num_hedges, invalid_index_);
 

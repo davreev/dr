@@ -18,49 +18,46 @@ struct HalfedgeMesh : AllocatorAware
 {
     using Index = i32;
 
+    enum Tag : u8
+    {
+        Tag_Halfedge = 0,
+        Tag_Vertex,
+        Tag_Edge,
+        Tag_Face,
+        Tag_Hole,
+    };
+
+    template <Tag>
     struct Element
     {
-        Index index{invalid_index_};
-
         constexpr Element() = default;
 
         constexpr explicit Element(Index const index) : index{index} {}
 
+        constexpr bool is_valid() const { return index != invalid_index_; }
+
         constexpr operator Index() const { return index; }
 
-        constexpr bool is_valid() const { return index != invalid_index_; }
+        constexpr Element& operator++() { return ++index, *this; }
+        constexpr Element& operator--() { return --index, *this; }
+
+        constexpr Element operator++(int) { return {index++}; }
+        constexpr Element operator--(int) { return {index--}; }
+
+        Index index{invalid_index_};
     };
 
-    struct Halfedge : public Element
-    {
-        using Element::Element;
-    };
-
-    struct Vertex : public Element
-    {
-        using Element::Element;
-    };
-
-    struct Edge : public Element
-    {
-        using Element::Element;
-    };
-
-    struct Face : public Element
-    {
-        using Element::Element;
-    };
-
-    struct Hole : public Element
-    {
-        using Element::Element;
-    };
+    using Halfedge = Element<Tag_Halfedge>;
+    using Vertex = Element<Tag_Vertex>;
+    using Edge = Element<Tag_Edge>;
+    using Face = Element<Tag_Face>;
+    using Hole = Element<Tag_Hole>;
 
     /// Iterates over the outgoing halfedges around a vertex
     struct VertexCirculator
     {
         VertexCirculator(HalfedgeMesh const& mesh, Halfedge const start) :
-            halfedge_next_{as_span(mesh.halfedge_next_)}, start_{start.index}, current_{start.index}
+            halfedge_next_{as_span(mesh.halfedge_next_)}, start_{start}, current_{start}
         {
         }
 
@@ -90,7 +87,7 @@ struct HalfedgeMesh : AllocatorAware
     struct FaceCirculator
     {
         FaceCirculator(HalfedgeMesh const& mesh, Halfedge const start) :
-            halfedge_next_{as_span(mesh.halfedge_next_)}, start_{start.index}, current_{start.index}
+            halfedge_next_{as_span(mesh.halfedge_next_)}, start_{start}, current_{start}
         {
         }
 
