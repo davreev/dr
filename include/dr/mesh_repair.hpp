@@ -18,17 +18,14 @@ bool gather_points(
     HashGrid<Real, dim>& grid,
     Real const radius_start,
     Real const radius_end,
-    isize const max_iters = 5,
-    Allocator const alloc = {})
+    isize const max_iters = 5)
 {
     static_assert(is_real<Real>);
-
-    DynamicArray<i32> found{alloc};
 
     // Returns true if converged
     auto const step = [&](Real const radius) -> bool {
         constexpr Real rad_scale{8.0};
-        grid.set_grid_scale(radius * rad_scale);
+        grid.set_cell_size(radius * rad_scale);
 
         // Insert points
         for (isize i = 0; i < points.size(); ++i)
@@ -41,23 +38,19 @@ bool gather_points(
         {
             Vec<Real, dim> const p = points[i];
 
-            found.clear();
-            grid.find({p.array() - radius, p.array() + radius}, found);
-
             Vec<Real, dim> p_sum{p};
             Real w_sum = Real{1.0};
 
-            for (i32 const j : found)
-            {
-                if (j != i)
-                {
-                    Vec<Real, dim> const p_adj = points[j];
-                    Real const dist = (p - p_adj).norm();
-                    Real const w = smooth_step(radius, Real{0.5} * radius, dist);
-                    p_sum += p_adj * w;
-                    w_sum += w;
-                }
-            }
+            grid.find({p.array() - radius, p.array() + radius}, [&](i32 const j) {
+                if (j == i)
+                    return;
+
+                Vec<Real, dim> const p_adj = points[j];
+                Real const dist = (p - p_adj).norm();
+                Real const w = smooth_step(radius, Real{0.5} * radius, dist);
+                p_sum += p_adj * w;
+                w_sum += w;
+            });
 
             Vec<Real, dim> const p_new = p_sum / w_sum;
             max_sqr_dist = max(max_sqr_dist, (p_new - p).squaredNorm());
@@ -89,18 +82,16 @@ void find_unique_points(
     HashGrid<Real, dim>& grid,
     Real const tolerance,
     DynamicArray<Index>& unique_points,
-    Span<Index> const& point_to_unique,
-    Allocator const alloc = {})
+    Span<Index> const& point_to_unique)
 {
     static_assert(is_real<Real>);
     static_assert(is_integer<Index> || is_natural<Index>);
 
     constexpr Real tol_scale{8.0};
-    grid.set_grid_scale(tolerance * tol_scale);
+    grid.set_cell_size(tolerance * tol_scale);
 
     unique_points.clear();
 
-    DynamicArray<i32> found{alloc};
     Real const sqr_tol = tolerance * tolerance;
     isize num_unique = 0;
 
@@ -108,21 +99,21 @@ void find_unique_points(
     {
         Vec<Real, dim> const p = points[i];
 
-        // Search for existing points within range
-        grid.find({p.array() - tolerance, p.array() + tolerance}, found);
-        Index unique_idx = -1;
+        constexpr Index invalid_idx{~0};
+        Index unique_idx = invalid_idx;
 
-        for (i32 const j : found)
-        {
+        // Search for existing points within range
+        grid.find({p.array() - tolerance, p.array() + tolerance}, [&](i32 const j) -> bool {
             if ((points[j] - p).squaredNorm() <= sqr_tol)
             {
                 unique_idx = point_to_unique[j];
-                break;
+                return false;
             }
-        }
+            return true;
+        });
 
         // If the point is unique, store its index and add it to the grid
-        if (unique_idx == -1)
+        if (unique_idx == invalid_idx)
         {
             unique_idx = num_unique++;
             unique_points.push_back(i);
@@ -130,7 +121,6 @@ void find_unique_points(
         }
 
         point_to_unique[i] = unique_idx;
-        found.clear();
     }
 }
 

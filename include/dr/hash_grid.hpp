@@ -1,5 +1,7 @@
 #pragma once
 
+#include <type_traits>
+
 #include <dr/container_utils.hpp>
 #include <dr/dynamic_array.hpp>
 #include <dr/geometry_types.hpp>
@@ -15,21 +17,17 @@ struct HashGrid : AllocatorAware
 {
     using Index = i32;
 
-    HashGrid(Allocator const alloc = {}) :
-        buckets_(alloc)
-    {
-    }
+    HashGrid(Allocator const alloc = {}) : buckets_(alloc) {}
 
-    HashGrid(Real const grid_scale, Allocator const alloc = {}) :
-        buckets_(alloc)
+    HashGrid(Real const cell_size, Allocator const alloc = {}) : buckets_(alloc)
     {
-        set_grid_scale(grid_scale);
+        set_cell_size(cell_size);
     }
 
     HashGrid(HashGrid const& other, Allocator const alloc = {}) :
         buckets_(other.buckets_, alloc),
-        grid_scale_{other.grid_scale_},
-        inv_grid_scale_{other.inv_grid_scale_},
+        cell_size_{other.cell_size_},
+        inv_cell_size_{other.inv_cell_size_},
         size_{other.size_},
         version_{other.version_}
     {
@@ -40,23 +38,20 @@ struct HashGrid : AllocatorAware
     HashGrid& operator=(HashGrid&& other) noexcept = default;
 
     /// Returns the allocator used by this container
-    Allocator allocator() const
-    {
-        return buckets_.get_allocator();
-    }
+    Allocator allocator() const { return buckets_.get_allocator(); }
 
     /// Number of values in the grid
     isize size() const { return size_; }
 
-    /// Scale of the grid
-    Real grid_scale() const { return grid_scale_; }
+    /// Grid cell size
+    Real cell_size() const { return cell_size_; }
 
-    /// Sets the scale of the grid. Calling this also clears the grid.
-    void set_grid_scale(Real const value)
+    /// Sets the grid cell size. Calling this also clears the grid.
+    void set_cell_size(Real const value)
     {
         assert(value > Real{0.0});
-        grid_scale_ = value;
-        inv_grid_scale_ = Real{1.0} / value;
+        cell_size_ = value;
+        inv_cell_size_ = Real{1.0} / value;
         clear();
     }
 
@@ -101,31 +96,19 @@ struct HashGrid : AllocatorAware
     }
 
     /// Finds all values over the given interval
-    void find(Interval<Real, dim> const& interval, DynamicArray<Index>& result) const
+    template <typename Callback>
+    void find(Interval<Real, dim> const& interval, Callback&& callback) const
     {
         static_assert(dim == 2 || dim == 3);
 
-        Vec<Index, dim> const key_from = to_key(interval.from);
-        Vec<Index, dim> const key_to = to_key(interval.to);
-
-        if constexpr (dim == 2)
+        if constexpr (std::is_invocable_r_v<void, Callback, Index>)
         {
-            for (Index i = key_from[0]; i <= key_to[0]; ++i)
-            {
-                for (Index j = key_from[1]; j <= key_to[1]; ++j)
-                    find_impl({i, j}, result);
-            }
+            find_impl(interval, [&](Index const i) -> bool { return (callback(i), true); });
         }
-        else if (dim == 3)
+        else
         {
-            for (Index i = key_from[0]; i <= key_to[0]; ++i)
-            {
-                for (Index j = key_from[1]; j <= key_to[1]; ++j)
-                {
-                    for (Index k = key_from[2]; k <= key_to[2]; ++k)
-                        find_impl({i, j, k}, result);
-                }
-            }
+            static_assert(std::is_invocable_r_v<bool, Callback, Index>);
+            find_impl(interval, callback);
         }
     }
 
@@ -135,14 +118,10 @@ struct HashGrid : AllocatorAware
         DynamicArray<Index> values;
         usize version;
 
-        Bucket(Allocator const alloc = {}) :
-            values(alloc)
-        {
-        }
+        Bucket(Allocator const alloc = {}) : values(alloc) {}
 
         Bucket(Bucket const& other, Allocator const alloc = {}) :
-            values(other.values, alloc),
-            version{other.version}
+            values(other.values, alloc), version{other.version}
         {
         }
 
@@ -161,28 +140,29 @@ struct HashGrid : AllocatorAware
         usize operator()(Vec<Index, 2> const& key) const
         {
             // Multiply each coord with a large prime and xor together
-            return static_cast<usize>(key[0]) * primes[0]
-                ^ static_cast<usize>(key[1]) * primes[1];
+            return static_cast<usize>(key[0]) * primes[0] ^ static_cast<usize>(key[1]) * primes[1];
         }
 
         usize operator()(Vec<Index, 3> const& key) const
         {
             // Multiply each coord with a large prime and xor together
-            return static_cast<usize>(key[0]) * primes[0]
-                ^ static_cast<usize>(key[1]) * primes[1]
+            return static_cast<usize>(key[0]) * primes[0] ^ static_cast<usize>(key[1]) * primes[1]
                 ^ static_cast<usize>(key[2]) * primes[2];
         }
     };
 
+    HashMap<Vec<Index, dim>, Bucket, KeyHash> buckets_;
+    Real cell_size_{1.0};
+    Real inv_cell_size_{1.0};
+    isize size_{};
+    usize version_{};
+
     Vec<Index, dim> to_key(Vec<Real, dim> const& point) const
     {
-        return (point.array() * inv_grid_scale_).floor().template cast<Index>();
+        return (point.array() * inv_cell_size_).floor().template cast<Index>();
     }
 
-    Bucket& get_bucket(Vec<Index, dim> const& key)
-    {
-        return buckets_[key];
-    }
+    Bucket& get_bucket(Vec<Index, dim> const& key) { return buckets_[key]; }
 
     Bucket const* get_bucket(Vec<Index, dim> const& key) const
     {
@@ -190,22 +170,60 @@ struct HashGrid : AllocatorAware
         return (it != buckets_.end()) ? &it->second : nullptr;
     }
 
-    void find_impl(Vec<Index, dim> const& key, DynamicArray<Index>& result) const
+    template <typename Callback>
+    void find_impl(Interval<Real, 2> const& interval, Callback&& callback) const
     {
-        Bucket const* bucket = get_bucket(key);
+        Vec<Index, 2> const key_from = to_key(interval.from);
+        Vec<Index, 2> const key_to = to_key(interval.to);
 
-        // Skip if bucket doesn't exist or is out of date
-        if (bucket == nullptr || bucket->version != version_)
-            return;
+        for (Index i = key_from[0]; i <= key_to[0]; ++i)
+        {
+            for (Index j = key_from[1]; j <= key_to[1]; ++j)
+            {
+                Bucket const* bucket = get_bucket({i, j});
 
-        result.insert(result.end(), bucket->values.begin(), bucket->values.end());
+                // Skip if bucket doesn't exist or is out of date
+                if (bucket == nullptr || bucket->version != version_)
+                    continue;
+
+                for (auto const& val : bucket->values)
+                {
+                    // Early out if callback returns false
+                    if (!callback(val))
+                        return;
+                }
+            }
+        }
     }
 
-    HashMap<Vec<Index, dim>, Bucket, KeyHash> buckets_;
-    Real grid_scale_{1.0};
-    Real inv_grid_scale_{1.0};
-    isize size_{};
-    usize version_{};
+    template <typename Callback>
+    void find_impl(Interval<Real, 3> const& interval, Callback&& callback) const
+    {
+        Vec<Index, 3> const key_from = to_key(interval.from);
+        Vec<Index, 3> const key_to = to_key(interval.to);
+
+        for (Index i = key_from[0]; i <= key_to[0]; ++i)
+        {
+            for (Index j = key_from[1]; j <= key_to[1]; ++j)
+            {
+                for (Index k = key_from[2]; k <= key_to[2]; ++k)
+                {
+                    Bucket const* bucket = get_bucket({i, j, k});
+
+                    // Skip if bucket doesn't exist or is out of date
+                    if (bucket == nullptr || bucket->version != version_)
+                        continue;
+
+                    for (auto const& val : bucket->values)
+                    {
+                        // Early out if callback returns false
+                        if (!callback(val))
+                            return;
+                    }
+                }
+            }
+        }
+    }
 };
 
 template <typename Real>

@@ -99,7 +99,7 @@ UTEST(hash_grid, insert_find)
         ASSERT_EQ(grid.size(), size(points));
 
         DynamicArray<i32> found_indices{};
-        grid.find(interval, found_indices);
+        grid.find(interval, [&](i32 const i) { found_indices.push_back(i); });
 
         std::sort(found_indices.begin(), found_indices.end());
 
