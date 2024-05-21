@@ -40,10 +40,17 @@ bool is_aligned(void const* const ptr)
 template <typename T>
 T* as(void* const ptr)
 {
-    if (is_aligned<T>(ptr))
+    if constexpr(alignof(T) == 1)
+    {
         return static_cast<T*>(ptr);
+    }
     else
-        return nullptr;
+    {
+        if (is_aligned<T>(ptr))
+            return static_cast<T*>(ptr);
+        else
+            return nullptr;
+    }
 }
 
 /// Interprets an opaque pointer as a pointer to T if it meets T's alignment requirements.
@@ -51,10 +58,17 @@ T* as(void* const ptr)
 template <typename T>
 T const* as(void const* const ptr)
 {
-    if (is_aligned<T>(ptr))
+    if constexpr(alignof(T) == 1)
+    {
         return static_cast<T const*>(ptr);
+    }
     else
-        return nullptr;
+    {
+        if (is_aligned<T>(ptr))
+            return static_cast<T const*>(ptr);
+        else
+            return nullptr;
+    }
 }
 
 /// Reinterprets a pointer to one type as a pointer to another
