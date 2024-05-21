@@ -17,9 +17,15 @@ struct Allocator : impl::AllocatorBase
     // Expose constructors of base type for compatibility with pmr containers
     using impl::AllocatorBase::AllocatorBase;
 
-    void* allocate(usize size, usize alignment) const;
+    void* allocate(usize size, usize alignment) const
+    {
+        return resource()->allocate(size, alignment);
+    }
 
-    void deallocate(void* ptr, usize size, usize alignment) const;
+    void deallocate(void* ptr, usize size, usize alignment) const
+    {
+        return resource()->deallocate(ptr, size, alignment);
+    }
 
     template <typename T>
     T* allocate(usize const count = 1) const

@@ -26,7 +26,6 @@ set(FETCHCONTENT_QUIET FALSE)
 
 add_library(
     dr STATIC
-    "src/allocator.cpp"
     "src/halfedge.cpp"
     "src/memory.cpp"
     "src/mesh_primitives.cpp"
