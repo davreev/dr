@@ -4,7 +4,6 @@
     Convenience aliases for commonly used primitive types
 */
 
-#include <cstddef>
 #include <cstdint>
 
 namespace dr

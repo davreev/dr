@@ -1,8 +1,6 @@
 #pragma once
 
 #include <algorithm>
-#include <cerrno>
-#include <cstdio>
 
 #include <dr/math.hpp>
 #include <dr/span.hpp>

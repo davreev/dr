@@ -1,7 +1,6 @@
 #pragma once
 
 #include <cmath>
-#include <cstddef>
 #include <optional>
 
 #include <dr/geometry_types.hpp>

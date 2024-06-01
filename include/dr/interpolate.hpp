@@ -1,7 +1,5 @@
 #pragma once
 
-#include <cmath>
-
 #include <dr/math.hpp>
 #include <dr/math_traits.hpp>
 

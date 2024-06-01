@@ -1,7 +1,6 @@
 #pragma once
 
 #include <cassert>
-#include <type_traits>
 
 #include <dr/dynamic_array.hpp>
 #include <dr/geometry.hpp>
