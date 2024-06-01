@@ -82,7 +82,7 @@ constexpr Nat prev_pow2(Nat x)
 }
 
 template <typename Scalar>
-void unit_square_corner(u8 const index, Scalar result[2])
+constexpr void unit_square_corner(u8 const index, Scalar result[2])
 {
     static_assert(is_real<Scalar> || is_integer<Scalar> || is_natural<Scalar>);
 
@@ -92,7 +92,7 @@ void unit_square_corner(u8 const index, Scalar result[2])
 }
 
 template <typename Scalar>
-void unit_cube_corner(u8 const index, Scalar result[3])
+constexpr void unit_cube_corner(u8 const index, Scalar result[3])
 {
     static_assert(is_real<Scalar> || is_integer<Scalar> || is_natural<Scalar>);
 
