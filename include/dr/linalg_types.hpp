@@ -61,8 +61,6 @@ using CovecArray = Mat<Scalar, Eigen::Dynamic, size, Eigen::RowMajor>;
 enum MatHint : u8
 {
     MatHint_None = 0,
-    MatHint_Rectangular,
-    MatHint_Square,
     MatHint_Symmetric,
     MatHint_Semidefinite,
     MatHint_Definite,
