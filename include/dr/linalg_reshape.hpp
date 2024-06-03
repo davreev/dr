@@ -1,5 +1,7 @@
 #pragma once
 
+#include <array>
+
 #include <dr/container_utils.hpp>
 #include <dr/linalg_types.hpp>
 #include <dr/memory.hpp>
@@ -9,14 +11,14 @@ namespace dr
 
 /// Creates a fixed-size vector view of the given scalars
 template <typename Scalar, int size>
-auto as_vec(Scalar (& coeffs)[size])
+auto as_vec(Scalar (&coeffs)[size])
 {
     return Eigen::Map<Vec<Scalar, size>>{coeffs};
 }
 
 /// Creates a fixed-size vector view of the given scalars
 template <typename Scalar, int size>
-auto as_vec(Scalar const (& coeffs)[size])
+auto as_vec(Scalar const (&coeffs)[size])
 {
     return Eigen::Map<Vec<Scalar, size> const>{coeffs};
 }
@@ -37,14 +39,14 @@ auto as_vec(Scalar const* const coeffs)
 
 /// Creates a fixed-size column view of the given scalars
 template <typename Scalar, int size>
-auto as_col(Scalar (& coeffs)[size])
+auto as_col(Scalar (&coeffs)[size])
 {
     return Eigen::Map<Vec<Scalar, size>>{coeffs};
 }
 
 /// Creates a fixed-size column view of the given scalars
 template <typename Scalar, int size>
-auto as_col(Scalar const (& coeffs)[size])
+auto as_col(Scalar const (&coeffs)[size])
 {
     return Eigen::Map<Vec<Scalar, size> const>{coeffs};
 }
@@ -65,14 +67,14 @@ auto as_col(Scalar const* const coeffs)
 
 /// Creates a fixed-size vector view of the given scalars
 template <typename Scalar, int size>
-auto as_covec(Scalar (& coeffs)[size])
+auto as_covec(Scalar (&coeffs)[size])
 {
     return Eigen::Map<Covec<Scalar, size>>{coeffs};
 }
 
 /// Creates a fixed-size vector view of the given scalars
 template <typename Scalar, int size>
-auto as_covec(Scalar const (& coeffs)[size])
+auto as_covec(Scalar const (&coeffs)[size])
 {
     return Eigen::Map<Covec<Scalar, size> const>{coeffs};
 }
@@ -93,14 +95,14 @@ auto as_covec(Scalar const* const coeffs)
 
 /// Creates a fixed-size vector view of the given scalars
 template <typename Scalar, int size>
-auto as_row(Scalar (& coeffs)[size])
+auto as_row(Scalar (&coeffs)[size])
 {
     return Eigen::Map<Covec<Scalar, size>>{coeffs};
 }
 
 /// Creates a fixed-size vector view of the given scalars
 template <typename Scalar, int size>
-auto as_row(Scalar const (& coeffs)[size])
+auto as_row(Scalar const (&coeffs)[size])
 {
     return Eigen::Map<Covec<Scalar, size> const>{coeffs};
 }
@@ -228,10 +230,7 @@ auto as_mat(Span<Covec<Scalar, size>> const& covecs)
 template <typename Scalar, int size>
 auto as_mat(Span<Covec<Scalar, size> const> const& covecs)
 {
-    return Eigen::Map<CovecArray<Scalar, size> const>{
-        covecs.data()->data(),
-        covecs.size(),
-        size};
+    return Eigen::Map<CovecArray<Scalar, size> const>{covecs.data()->data(), covecs.size(), size};
 }
 
 /// Creates a span of scalars from the given matrix
@@ -287,5 +286,20 @@ Span<Covec<Scalar, size> const> as_span(CovecArray<Scalar, size> const& mat)
 /// Deleted to avoid creating a span over a temporary
 template <typename Scalar, int size>
 Span<Covec<Scalar, size> const> as_span(CovecArray<Scalar, size> const&& mat) = delete;
+
+/// Allows decomposition of fixed-size matrix types into their coeffs via structured binding
+template <typename Derived>
+auto expand(MatExpr<Derived> const& expr)
+{
+    using Scalar = typename Derived::Scalar;
+
+    constexpr usize m = Derived::RowsAtCompileTime;
+    constexpr usize n = Derived::ColsAtCompileTime;
+    static_assert(m != Eigen::Dynamic && n != Eigen::Dynamic);
+
+    std::array<Scalar, m * n> result{};
+    as_mat<m, n>(result.data()) = expr;
+    return result;
+}
 
 } // namespace dr

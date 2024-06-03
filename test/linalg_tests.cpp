@@ -2,6 +2,7 @@
 
 #include <dr/linalg_reshape.hpp>
 #include <dr/linalg_types.hpp>
+#include <dr/math_ctors.hpp>
 #include <dr/math_types.hpp>
 
 UTEST(linalg, default_mat_options)
@@ -161,5 +162,35 @@ UTEST(linalg_reshape, vecs_to_mat)
         ASSERT_EQ(2, mat.rows());
         ASSERT_EQ(3, mat.cols());
         ASSERT_EQ(covecs[1].z(), mat(1, 2));
+    }
+}
+
+UTEST(linalg_reshape, expand)
+{
+    using namespace dr;
+
+    {
+        Vec2<i32> const a{1, 2};
+        Vec2<i32> const b{3, 4};
+        auto const [x, y] = expand(a + b);
+        ASSERT_EQ(4, x);
+        ASSERT_EQ(6, y);
+    }
+
+    {
+        Covec2<i32> const a{1, 2};
+        Covec2<i32> const b{3, 4};
+        auto const [x, y] = expand(a + b);
+        ASSERT_EQ(4, x);
+        ASSERT_EQ(6, y);
+    }
+
+    {
+        Mat<i32, 2, 2> const A = mat(vec(1, 2), vec(3, 4));
+        auto const [a00, a10, a01, a11] = expand(A + A);
+        ASSERT_EQ(2, a00);
+        ASSERT_EQ(4, a10);
+        ASSERT_EQ(6, a01);
+        ASSERT_EQ(8, a11);
     }
 }
