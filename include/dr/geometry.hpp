@@ -637,10 +637,11 @@ Interval<Scalar, dim> as_interval(Box<Scalar, dim> const& box)
     return {box.center - box.extent, box.center + box.extent};
 }
 
-template <typename Scalar, int dim>
-Box<Scalar, dim> as_box(Interval<Scalar, dim> const& interval)
+template <typename Real, int dim>
+Box<Real, dim> as_box(Interval<Real, dim> const& interval)
 {
-    auto const d = interval.delta() * Scalar{0.5};
+    static_assert(is_real<Real>);
+    Vec<Real, dim> const d = interval.delta() * Real{0.5};
     return {interval.from + d, d};
 }
 
