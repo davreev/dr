@@ -10,6 +10,7 @@ add_executable(
     grid_tests.cpp
     halfedge_tests.cpp
     hash_grid_tests.cpp
+    interpolate_tests.cpp
     linalg_tests.cpp
     main.cpp
     math_tests.cpp
