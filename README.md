@@ -2,14 +2,11 @@
 
 ![](https://github.com/davreev/dr/actions/workflows/test.yml/badge.svg)
 
-Assorted utilities
-
-> ⚠️ This library exists mainly to improve code reuse in personal projects. It's likely to undergo
-> frequent breaking changes.
+Base library for personal projects and consulting work
 
 ## Build
 
-Build with CMake
+Use CMake to build
 
 > ⚠️ Currently only tested with Clang and GCC. MSVC is not supported.
 
