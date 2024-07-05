@@ -15,14 +15,6 @@ if(NOT ${utest_POPULATED})
     FetchContent_Populate(utest)
 endif()
 
-# Copy header to the expected include dir
-file(
-    COPY 
-        "${utest_SOURCE_DIR}/utest.h" 
-    DESTINATION 
-        "${utest_SOURCE_DIR}/include/utest"
-)
-
 add_library(utest INTERFACE)
 add_library(utest::utest ALIAS utest)
 
@@ -30,7 +22,7 @@ target_include_directories(
     utest 
     SYSTEM # Suppresses warnings from third party headers
     INTERFACE 
-        "${utest_SOURCE_DIR}/include"
+        "${utest_SOURCE_DIR}"
 )
 
 # Avoid windows.h min/max macro clash

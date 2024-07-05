@@ -1,4 +1,4 @@
-#include <utest/utest.h>
+#include <utest.h>
 
 #include <dr/math_types.hpp>
 #include <dr/meta.hpp>

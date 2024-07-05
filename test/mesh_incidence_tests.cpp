@@ -1,4 +1,4 @@
-#include <utest/utest.h>
+#include <utest.h>
 
 #include <dr/dynamic_array.hpp>
 #include <dr/mesh_incidence.hpp>

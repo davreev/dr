@@ -1,4 +1,4 @@
-#include <utest/utest.h>
+#include <utest.h>
 
 #include <dr/mesh_primitives.hpp>
 #include <dr/mesh_utils.hpp>

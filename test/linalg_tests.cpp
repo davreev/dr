@@ -1,4 +1,4 @@
-#include <utest/utest.h>
+#include <utest.h>
 
 #include <dr/linalg_reshape.hpp>
 #include <dr/linalg_types.hpp>
