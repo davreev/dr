@@ -38,10 +38,10 @@ target_include_directories(
         "${CMAKE_CURRENT_LIST_DIR}/include"
 )
 
-include(deps/eigen)
-include(deps/fmt)
-include(deps/openmp)
-include(deps/unordered-dense)
+include("deps/eigen")
+include("deps/fmt")
+include("deps/openmp")
+include("deps/unordered-dense")
 
 target_link_libraries(
     dr
@@ -62,12 +62,6 @@ target_compile_definitions(
     dr
     PUBLIC
         EIGEN_INITIALIZE_MATRICES_BY_ZERO
-)
-
-target_link_options(
-    dr
-    PRIVATE
-        # ...
 )
 
 #
