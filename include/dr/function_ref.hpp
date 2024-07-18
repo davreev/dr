@@ -16,7 +16,7 @@ struct FunctionRef<Return(Args...)>
 {
     constexpr FunctionRef() = default;
 
-    /// Creates a function reference from a function object
+    /// Creates an instance from a function object
     template <typename Src>
     constexpr FunctionRef(Src* src)
     {
@@ -35,7 +35,7 @@ struct FunctionRef<Return(Args...)>
         }
     }
 
-    /// Creates a function reference from a function pointer
+    /// Creates an instance from a function pointer
     constexpr FunctionRef(Return (*src)(Args...))
     {
         using Src = decltype(src);

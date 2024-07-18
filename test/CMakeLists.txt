@@ -6,6 +6,7 @@ add_executable(
     defer_tests.cpp
     diagnostics_tests.cpp
     function_ref_tests.cpp
+    function_tests.cpp
     geometry_tests.cpp
     grid_tests.cpp
     halfedge_tests.cpp
@@ -28,7 +29,7 @@ add_executable(
     triangulate_tests.cpp
 )
 
-include(deps/utest)
+include("deps/utest")
 
 target_link_libraries(
     dr-test 
