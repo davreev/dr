@@ -22,6 +22,7 @@ add_executable(
     mesh_utils_tests.cpp
     meta_tests.cpp
     random_tests.cpp
+    result_tests.cpp
     sliced_array_tests.cpp
     slot_map_tests.cpp
     span_tests.cpp
