@@ -1,9 +1,8 @@
 #include <utest.h>
 
-#include <optional>
-
 #include <dr/dynamic_array.hpp>
 #include <dr/geometry.hpp>
+#include <dr/result.hpp>
 
 UTEST(geometry, eval_gradient)
 {
@@ -439,7 +438,7 @@ UTEST(geometry, intersect_line_line)
         Vec2<f64> a_delta;
         Vec2<f64> b_start;
         Vec2<f64> b_delta;
-        std::optional<Vec2<f64>> result;
+        Maybe<Vec2<f64>> result;
     };
 
     TestCase const test_cases[] = {
@@ -476,7 +475,7 @@ UTEST(geometry, intersect_line_line)
             vec(1.0, 0.0),
             vec(0.0, 1.0),
             vec(1.0, 0.0),
-            std::nullopt,
+            {},
         },
     };
 
@@ -484,15 +483,10 @@ UTEST(geometry, intersect_line_line)
     {
         auto const t = intersect_line_line(a_start, a_delta, b_start, b_delta);
 
-        if (t.has_value())
+        if (t.has_value)
         {
-            ASSERT_TRUE(result.has_value());
-            ASSERT_NEAR(result.value()[0], t.value()[0], eps);
-            ASSERT_NEAR(result.value()[1], t.value()[1], eps);
-        }
-        else
-        {
-            ASSERT_FALSE(result.has_value());
+            ASSERT_NEAR(result.value[0], t.value[0], eps);
+            ASSERT_NEAR(result.value[1], t.value[1], eps);
         }
     }
 }
@@ -509,7 +503,7 @@ UTEST(geometry, intersect_line_plane)
         Vec3<f64> line_delta;
         Vec3<f64> plane_orig;
         Vec3<f64> plane_norm;
-        std::optional<f64> result;
+        Maybe<f64> result;
     };
 
     TestCase const test_cases[] = {
@@ -539,7 +533,7 @@ UTEST(geometry, intersect_line_plane)
             vec(1.0, 0.0, 0.0),
             vec(0.0, 0.0, 0.0),
             vec(0.0, 1.0, 0.0),
-            std::nullopt,
+            {},
         },
     };
 
@@ -547,14 +541,10 @@ UTEST(geometry, intersect_line_plane)
     {
         auto const t = intersect_line_plane(ln_start, ln_delta, pl_orig, pl_norm);
 
-        if (t.has_value())
+        if (t.has_value)
         {
-            ASSERT_TRUE(result.has_value());
-            ASSERT_NEAR(result.value(), t.value(), eps);
-        }
-        else
-        {
-            ASSERT_FALSE(result.has_value());
+            ASSERT_TRUE(result.has_value);
+            ASSERT_NEAR(result.value, t.value, eps);
         }
     }
 }
@@ -572,7 +562,7 @@ UTEST(geometry, intersect_line_sphere)
         Vec3<f64> line_delta;
         Vec3<f64> sphere_orig;
         f64 sphere_rad;
-        std::optional<Vec2<f64>> result;
+        Maybe<Vec2<f64>> result;
     };
 
     TestCase const test_cases[] = {
@@ -617,15 +607,10 @@ UTEST(geometry, intersect_line_sphere)
     {
         auto const t = intersect_line_sphere(ln_start, ln_delta, sp_orig, sp_rad);
 
-        if (t.has_value())
+        if (t.has_value)
         {
-            ASSERT_TRUE(result.has_value());
-            ASSERT_NEAR(result.value()[0], t.value()[0], eps);
-            ASSERT_NEAR(result.value()[1], t.value()[1], eps);
-        }
-        else
-        {
-            ASSERT_FALSE(result.has_value());
+            ASSERT_NEAR(result.value[0], t.value[0], eps);
+            ASSERT_NEAR(result.value[1], t.value[1], eps);
         }
     }
 }

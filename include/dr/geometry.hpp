@@ -1,12 +1,12 @@
 #pragma once
 
 #include <cmath>
-#include <optional>
 
 #include <dr/geometry_types.hpp>
 #include <dr/linalg_reshape.hpp>
 #include <dr/math.hpp>
 #include <dr/math_types.hpp>
+#include <dr/result.hpp>
 
 namespace dr
 {
@@ -94,7 +94,7 @@ Vec2<Real> nearest_segment_segment(
 
 /// Returns parameters of the intersection between the given lines
 template <typename Real>
-std::optional<Vec2<Real>> intersect_line_line(
+Maybe<Vec2<Real>> intersect_line_line(
     Vec2<Real> const& a_start,
     Vec2<Real> const& a_delta,
     Vec2<Real> const& b_start,
@@ -106,14 +106,14 @@ std::optional<Vec2<Real>> intersect_line_line(
     Vec2<Real> const x = mat(a_delta, b_delta).inverse() * b;
 
     if (std::isnan(x[0]))
-        return std::nullopt;
+        return {};
     else
         return vec(x[0], -x[1]);
 }
 
 /// Returns the line parameter of the intersection with a plane
 template <typename Real>
-std::optional<Real> intersect_line_plane(
+Maybe<Real> intersect_line_plane(
     Vec3<Real> const& line_start,
     Vec3<Real> const& line_delta,
     Vec3<Real> const& plane_origin,
@@ -128,12 +128,12 @@ std::optional<Real> intersect_line_plane(
         return d1 / d0;
     }
 
-    return std::nullopt;
+    return {};
 }
 
 /// Returns the line parameter of the intersection with a disk
 template <typename Real>
-std::optional<Real> intersect_line_disk(
+Maybe<Real> intersect_line_disk(
     Vec3<Real> const& line_start,
     Vec3<Real> const& line_delta,
     Vec3<Real> const& disk_origin,
@@ -149,12 +149,12 @@ std::optional<Real> intersect_line_disk(
             return t;
     }
 
-    return std::nullopt;
+    return {};
 }
 
 /// Returns the line parameters of the intersections with a sphere
 template <typename Real>
-std::optional<Vec2<Real>> intersect_line_sphere(
+Maybe<Vec2<Real>> intersect_line_sphere(
     Vec3<Real> const& line_start,
     Vec3<Real> const& line_delta,
     Vec3<Real> const& sphere_origin,
@@ -175,10 +175,10 @@ std::optional<Vec2<Real>> intersect_line_sphere(
     if (b_sqr <= c_sqr)
     {
         Real const dt = std::sqrt(c_sqr - b_sqr) / std::sqrt(len_sqr);
-        return std::make_optional<Vec2<Real>>(t - dt, t + dt);
+        return vec(t - dt, t + dt);
     }
 
-    return std::nullopt;
+    return {};
 }
 
 /// Returns true if the point is inside the triangle
@@ -230,7 +230,7 @@ bool is_nearest_in_triangle(
 
 /// Returns the line parameter of the intersection with a triangle
 template <typename Real>
-std::optional<Real> intersect_line_triangle(
+Maybe<Real> intersect_line_triangle(
     Vec3<Real> const& line_start,
     Vec3<Real> const& line_delta,
     Vec3<Real> const& tri_a,
@@ -247,7 +247,7 @@ std::optional<Real> intersect_line_triangle(
             return t;
     }
 
-    return std::nullopt;
+    return {};
 }
 
 /// Returns the barycentric coords of a point with respect to a triangle
