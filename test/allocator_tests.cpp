@@ -38,18 +38,14 @@ UTEST(allocator, wink_out)
         Allocator alloc{&mem};
 
         using Pool = DynamicArray<i32>;
-        Pool* pools[]{
+        [[maybe_unused]] Pool* pools[]{
             alloc.new_object<Pool>(128, 1), // 40 + 16 + 512 = 568
             alloc.new_object<Pool>(64, 1), // 40 + 16 + 256 = 312
             alloc.new_object<Pool>(32, 1), // 40 + 16 + 128 = 184
             alloc.new_object<Pool>(16, 1), // 40 + 16 + 64 = 120
         };
 
-        // This is just to prevent unused variable warnings
-        auto const no_op = [](Pool**) {};
-        no_op(pools);
-
-        // No need to destroy individual pools here since memory is cleaned up by the Arena
+        // NOTE: No need to destroy individual pools here since memory is cleaned up by the Arena
         // destructor. Individual allocations are "magically winked out".
     }
 
