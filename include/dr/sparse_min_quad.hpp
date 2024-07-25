@@ -32,7 +32,7 @@ struct SparseMinQuadFixed
             A_ = A.twistedBy(perm_.asPermutation().transpose());
         }
 
-        // Prefactor block of A_ corresponding with unknown variables
+        // Factorize block of A_ corresponding with unknown variables
         solver_.compute(A_.topLeftCorner(n_[0], n_[0]));
         return is_init_ = (solver_.info() == Eigen::Success);
     }
@@ -82,7 +82,7 @@ struct SparseMinQuadFixed
     Mat<Scalar> x_{};
     Mat<Scalar> b_{};
     Vec<Index> perm_{};
-    Index n_[2];
+    Index n_[2]{};
     bool is_init_{};
 
     template <typename Predicate>
