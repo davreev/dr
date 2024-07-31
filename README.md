@@ -13,13 +13,13 @@ Use CMake to build
 ```sh
 mkdir build
 
-# If using a single-config generator (e.g. Unix Makefiles, Ninja)
-cmake -S . -B ./build -DCMAKE_BUILD_TYPE=(Debug|Release|RelWithDebInfo) [-DDR_TEST=ON]
+# If using a single-config generator (e.g. Ninja, Unix Makefiles)
+cmake -S . -B ./build -G <generator> -DCMAKE_BUILD_TYPE=<config> [-DDR_TEST=ON]
 cmake --build ./build
 
 # If using a multi-config generator (e.g. Ninja Multi-Config, Xcode)
-cmake -S . -B ./build [-DDR_TEST=ON]
-cmake --build ./build --config (Debug|Release|RelWithDebInfo)
+cmake -S . -B ./build -G <generator> [-DDR_TEST=ON]
+cmake --build ./build --config <config>
 ```
 
 ## Usage
