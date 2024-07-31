@@ -41,20 +41,18 @@ Vec<Index, dim> index_to_grid(Index index, Vec<Index, dim> const& stride)
 template <typename Scalar, int dim>
 struct Grid
 {
-    using Index = isize;
-
-    Vec<Index, dim> count{};
+    Vec<isize, dim> count{};
     Vec<Scalar, dim> spacing{Vec<Scalar, dim>::Ones()};
     Vec<Scalar, dim> origin{};
 
-    Vec<Index, dim> stride() const { return grid_stride(count); }
+    Vec<isize, dim> stride() const { return grid_stride(count); }
 
-    Index to_index(Vec<Index, dim> const& grid_pt) const
+    isize to_index(Vec<isize, dim> const& grid_pt) const
     {
         return grid_to_index(grid_pt, stride());
     }
 
-    Vec<Index, dim> to_grid(Index const index) const { return index_to_grid(index, stride()); }
+    Vec<isize, dim> to_grid(isize const index) const { return index_to_grid(index, stride()); }
 
     Vec<Scalar, dim> to_grid(Vec<Scalar, dim> const& world_pt) const
     {
@@ -66,7 +64,7 @@ struct Grid
         return grid_pt.array() * spacing.array() + origin.array();
     }
 
-    Vec<Scalar, dim> to_world(Vec<Index, dim> const& grid_pt) const
+    Vec<Scalar, dim> to_world(Vec<isize, dim> const& grid_pt) const
     {
         return to_world(grid_pt.template cast<Scalar>().eval());
     }
