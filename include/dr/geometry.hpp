@@ -632,13 +632,13 @@ Interval<Scalar, dim> bounding_interval(Span<Vec<Scalar, dim> const> const& poin
 }
 
 template <typename Scalar, int dim>
-Interval<Scalar, dim> as_interval(Box<Scalar, dim> const& box)
+Interval<Scalar, dim> to_interval(Box<Scalar, dim> const& box)
 {
     return {box.center - box.extent, box.center + box.extent};
 }
 
 template <typename Real, int dim>
-Box<Real, dim> as_box(Interval<Real, dim> const& interval)
+Box<Real, dim> to_box(Interval<Real, dim> const& interval)
 {
     static_assert(is_real<Real>);
     Vec<Real, dim> const d = interval.delta() * Real{0.5};
