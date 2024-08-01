@@ -99,7 +99,7 @@ void make_incidence_matrix(
     DynamicArray<Triplet<Scalar, Index>> coeffs{alloc};
     make_incidence_matrix(elements, coeffs);
 
-    if(rows == -1)
+    if (rows == -1)
         rows = as_mat(elements).maxCoeff();
 
     result.resize(rows, elements.size());
@@ -121,7 +121,7 @@ void make_vector_area_matrix(
     isize const num_edges = boundary_edge_vertices.size();
     result.reserve(num_edges * 2);
 
-    if(num_vertices == -1)
+    if (num_vertices == -1)
         num_vertices = as_mat(boundary_edge_vertices).maxCoeff();
 
     for (auto const& e_v : boundary_edge_vertices)
@@ -142,7 +142,7 @@ void make_vector_area_matrix(
     static_assert(is_real<Real>);
     static_assert(is_integer<Index> || is_natural<Index>);
 
-    if(num_vertices == -1)
+    if (num_vertices == -1)
         num_vertices = as_mat(boundary_edge_vertices).maxCoeff();
 
     DynamicArray<Triplet<Real, Index>> coeffs{alloc};
@@ -232,8 +232,8 @@ void eval_jacobian(
     }
 }
 
-/// Evaluates the (integrated) divergence of a vector-valued function defined on mesh faces. Returns
-/// a scalar associated with each vertex dual cell.
+/// Evaluates the divergence of a vector-valued function defined on mesh faces. Returns an
+/// integrated scalar quantity associated with each vertex dual cell.
 template <typename Real, typename Index>
 void eval_divergence(
     Span<Vec3<Real> const> const& vertex_positions,
@@ -264,8 +264,8 @@ void eval_divergence(
     }
 }
 
-/// Evaluates the Laplacian of a scalar function defined on vertices. Returns a scalar associated
-/// with each vertex dual cell.
+/// Evaluates the Laplacian of a scalar function defined on mesh vertices. Returns an integrated
+/// scalar quantity associated with each vertex dual cell.
 template <typename Real, typename Index>
 void eval_laplacian(
     Span<Vec3<Real> const> const& vertex_positions,
@@ -297,8 +297,8 @@ void eval_laplacian(
     }
 }
 
-/// Evaluates the Laplacian of a vector-valued function defined on vertices. Returns a vector
-/// associated with each vertex dual cell.
+/// Evaluates the Laplacian of a vector-valued function defined on mesh vertices. Returns an
+/// integrated vector quantity associated with each vertex dual cell.
 template <typename Real, typename Index, int dim>
 void eval_laplacian(
     Span<Vec3<Real> const> const& vertex_positions,

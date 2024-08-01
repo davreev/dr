@@ -543,34 +543,55 @@ Vec3<Real> cotan_weights(Vec3<Real> const& e0, Vec3<Real> const& e1, Vec3<Real> 
     };
 }
 
-/// Evaluates the divergence of a constant vector field on a triangle. Returns an integrated
-/// quantity associated with each vertex.
-template <typename Real>
-Vec3<Real> eval_divergence(
+/// Evaluates a single triangle's contributions to the divergence of n vector-valued functions
+/// defined on mesh faces. Returns n integrated scalar quantities associated with each vertex.
+template <typename Real, int n>
+Mat<Real, n, 3> eval_divergence(
     Vec3<Real> const& p0,
     Vec3<Real> const& p1,
     Vec3<Real> const& p2,
-    Vec3<Real> const& f)
+    Mat<Real, 3, n> const& f)
 {
     static_assert(is_real<Real>);
 
-    Vec3<Real> const e[]{p1 - p0, p2 - p1, p0 - p2};
-
     // Compute integrated 1-form over each edge
-    Covec3<Real> const fe = f.transpose() * as_mat<3>(e);
+    Vec3<Real> const e[]{p1 - p0, p2 - p1, p0 - p2};
+    Mat<Real, n, 3> const fe = f.transpose() * as_mat<3>(e);
 
     // Apply Hodge star to get dual 1-form
     Vec3<Real> const hodge = cotan_weights(e[0], e[1], e[2]);
-    Covec3<Real> const dual_fe = fe * hodge.asDiagonal();
+    Mat<Real, n, 3> const dual_fe = fe * hodge.asDiagonal();
 
     // Integrate the dual 1-form over boundary of each vertex dual cell
     return dual_fe - dual_fe({2, 0, 1});
 }
 
-/// Evaluates the Laplacian of a scalar function defined on vertices of a triangle. Returns an
-/// integrated quantity associated with each vertex.
+namespace impl
+{
+
+template <typename Real, int n>
+Mat<Real, n, 3> eval_laplacian(
+    Vec3<Real> const& p0,
+    Vec3<Real> const& p1,
+    Vec3<Real> const& p2,
+    Mat<Real, n, 3> const& fe)
+{
+    static_assert(is_real<Real>);
+
+    // Apply Hodge star to get dual 1-forms
+    Vec3<Real> const hodge = cotan_weights<Real>(p1 - p0, p2 - p1, p0 - p2);
+    Mat<Real, n, 3> const dual_fe = fe * hodge.asDiagonal();
+
+    // Integrate dual 1-forms over boundary of each vertex dual cell
+    return dual_fe - dual_fe(Eigen::all, {2, 0, 1});
+}
+
+} // namespace impl
+
+/// Evaluates a single triangle's contributions to the Laplacian of a scalar function defined on
+/// mesh vertices. Returns an integrated scalar quantity associated with each vertex.
 template <typename Real>
-Vec3<Real> eval_laplacian(
+Mat<Real, 1, 3> eval_laplacian(
     Vec3<Real> const& p0,
     Vec3<Real> const& p1,
     Vec3<Real> const& p2,
@@ -578,41 +599,25 @@ Vec3<Real> eval_laplacian(
     Real const f1,
     Real const f2)
 {
-    static_assert(is_real<Real>);
-
     // Compute integrated 1-form over each edge
-    Real const df[]{f1 - f0, f2 - f1, f0 - f2};
-
-    // Apply Hodge star to get dual 1-forms
-    Vec3<Real> const hodge = cotan_weights<Real>(p1 - p0, p2 - p1, p0 - p2);
-    Covec3<Real> const dual_df = as_row<3>(df) * hodge.asDiagonal();
-
-    // Integrate dual 1-forms over boundary of each vertex dual cell
-    return dual_df - dual_df({2, 0, 1});
+    auto const fe = row(f1 - f0, f2 - f1, f0 - f2);
+    return impl::eval_laplacian(p0, p1, p2, fe);
 }
 
-/// Evaluates the Laplacian of a vector-valued function defined on vertices of a triangle. Returns
-/// an integrated quantity associated with each vertex.
-template <typename Real, int dim>
-Mat<Real, dim, 3> eval_laplacian(
+/// Evaluates a single triangle's contributions to the Laplacian of a n scalar functions defined on
+/// mesh vertices. Returns n integrated scalar quantities associated with each vertex.
+template <typename Real, int n>
+Mat<Real, n, 3> eval_laplacian(
     Vec3<Real> const& p0,
     Vec3<Real> const& p1,
     Vec3<Real> const& p2,
-    Vec<Real, dim> const& f0,
-    Vec<Real, dim> const& f1,
-    Vec<Real, dim> const& f2)
+    Vec<Real, n> const& f0,
+    Vec<Real, n> const& f1,
+    Vec<Real, n> const& f2)
 {
-    static_assert(is_real<Real>);
-
     // Compute integrated 1-form over each edge
-    Vec<Real, dim> const df[]{f1 - f0, f2 - f1, f0 - f2};
-
-    // Apply Hodge star to get dual 1-forms
-    Vec3<Real> const hodge = cotan_weights<Real>(p1 - p0, p2 - p1, p0 - p2);
-    Mat<Real, dim, 3> const dual_df = as_mat<3>(df) * hodge.asDiagonal();
-
-    // Integrate dual 1-forms over boundary of each vertex dual cell
-    return dual_df - dual_df(Eigen::all, {2, 0, 1});
+    auto const fe = mat(col(f1 - f0), col(f2 - f1), col(f0 - f2));
+    return impl::eval_laplacian(p0, p1, p2, fe);
 }
 
 template <typename Scalar, int dim>
