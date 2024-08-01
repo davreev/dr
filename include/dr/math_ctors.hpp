@@ -36,10 +36,7 @@ Mat<Scalar, rows, rows> mat(Covec<Scalar, rows> const& diag)
 template <typename Scalar, int rows>
 Mat<Scalar, rows, 2> mat(Vec<Scalar, rows> const& col0, Vec<Scalar, rows> const& col1)
 {
-    Mat<Scalar, rows, 2> m;
-    m.col(0) = col0;
-    m.col(1) = col1;
-    return m;
+    return (Mat<Scalar, rows, 2>() << col0, col1).finished();
 }
 
 template <typename Scalar, int rows>
@@ -48,11 +45,7 @@ Mat<Scalar, rows, 3> mat(
     Vec<Scalar, rows> const& col1,
     Vec<Scalar, rows> const& col2)
 {
-    Mat<Scalar, rows, 3> m;
-    m.col(0) = col0;
-    m.col(1) = col1;
-    m.col(2) = col2;
-    return m;
+    return (Mat<Scalar, rows, 3>() << col0, col1, col2).finished();
 }
 
 template <typename Scalar, int rows>
@@ -62,21 +55,13 @@ Mat<Scalar, rows, 4> mat(
     Vec<Scalar, rows> const& col2,
     Vec<Scalar, rows> const& col3)
 {
-    Mat<Scalar, rows, 4> m;
-    m.col(0) = col0;
-    m.col(1) = col1;
-    m.col(2) = col2;
-    m.col(3) = col3;
-    return m;
+    return (Mat<Scalar, rows, 4>() << col0, col1, col2, col3).finished();
 }
 
 template <typename Scalar, int cols>
 Mat<Scalar, 2, cols> mat(Covec<Scalar, cols> const& row0, Covec<Scalar, cols> const& row1)
 {
-    Mat<Scalar, 2, cols> m;
-    m.row(0) = row0;
-    m.row(1) = row1;
-    return m;
+    return (Mat<Scalar, 2, cols>() << row0, row1).finished();
 }
 
 template <typename Scalar, int cols>
@@ -85,11 +70,7 @@ Mat<Scalar, 3, cols> mat(
     Covec<Scalar, cols> const& row1,
     Covec<Scalar, cols> const& row2)
 {
-    Mat<Scalar, 3, cols> m;
-    m.row(0) = row0;
-    m.row(1) = row1;
-    m.row(2) = row2;
-    return m;
+    return (Mat<Scalar, 3, cols>() << row0, row1, row2).finished();
 }
 
 template <typename Scalar, int cols>
@@ -99,12 +80,7 @@ Mat<Scalar, 4, cols> mat(
     Covec<Scalar, cols> const& row2,
     Covec<Scalar, cols> const& row3)
 {
-    Mat<Scalar, 4, cols> m;
-    m.row(0) = row0;
-    m.row(1) = row1;
-    m.row(2) = row2;
-    m.row(3) = row3;
-    return m;
+    return (Mat<Scalar, 4, cols>() << row0, row1, row2, row3).finished();
 }
 
 template <int size, typename Scalar>
