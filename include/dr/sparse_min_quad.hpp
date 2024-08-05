@@ -1,5 +1,8 @@
 #pragma once
 
+#include <type_traits>
+
+#include <Eigen/IterativeLinearSolvers>
 #include <Eigen/SparseCholesky>
 
 #include <dr/linalg_reshape.hpp>
@@ -9,17 +12,21 @@ namespace dr
 {
 
 /// Minimizes a convex quadratic objective with fixed value constraints
-template <typename Scalar, typename Index = i32>
+template <typename Scalar, typename Index = i32, bool use_iterative_solver = false>
 struct SparseMinQuadFixed
 {
-    // NOTE: Objective is convex quadratic so matrix is assumed to be positive definite
-    using Solver = Eigen::SimplicialLDLT<SparseMat<Scalar, Index>>;
+    using DirectSolver = Eigen::SimplicialLDLT<SparseMat<Scalar, Index>>;
+    using IterativeSolver = Eigen::ConjugateGradient<
+        SparseMat<Scalar, Index>,
+        Eigen::Lower | Eigen::Upper,
+        Eigen::IncompleteCholesky<Scalar>>;
+    using Solver = std::conditional_t<use_iterative_solver, IterativeSolver, DirectSolver>;
 
-    /// Isolates unknown variables and performs decomposition
+    /// Isolates unknown variables and factorizes/preconditions the linear system
     template <typename Predicate>
     bool init(SparseMat<Scalar, Index> const& A, Predicate&& is_fixed)
     {
-        // A should be square
+        static_assert(std::is_invocable_r_v<bool, Predicate, Index>);
         assert(A.rows() == A.cols());
 
         // Isolate unknown variables
@@ -28,44 +35,48 @@ struct SparseMinQuadFixed
             n_[0] = make_permutation(is_fixed, as_span(perm_));
             n_[1] = A.cols() - n_[0];
 
-            // A_ = Pt A P
+            // A_ = PᵀAP
             A_ = A.twistedBy(perm_.asPermutation().transpose());
         }
 
-        // Factorize block of A_ corresponding with unknown variables
+        // Factorize/precondition the block of A_ corresponding with unknown variables
         solver_.compute(A_.topLeftCorner(n_[0], n_[0]));
         return is_init_ = (solver_.info() == Eigen::Success);
     }
 
-    /// Solves Ax = b
+    /// Minimizes xᵀAx + bᵀx (i.e. solves Ax = b)
     template <typename DerivedB, typename DerivedX>
     void solve(MatExpr<DerivedB> const& b, MatExpr<DerivedX>& x)
     {
-        assert(is_init_);
-        auto const P = perm_.asPermutation();
-
-        x_.noalias() = P.transpose() * x;
-
-        b_.noalias() = (P.transpose() * b).topRows(n_[0]) - A_.topRightCorner(n_[0], n_[1]) * x_.bottomRows(n_[1]);
-        x_.topRows(n_[0]) = solver_.solve(b_);
-
-        x.noalias() = P * x_;
+        solve_impl(b, x);
     }
 
-    /// Solves Ax = 0
-    template <typename Derived>
-    void solve_zero(MatExpr<Derived>& x)
+    /// Minimizes xᵀAx + bᵀx (i.e. solves Ax = b)
+    template <typename DerivedB>
+    void solve(MatExpr<DerivedB> const& b, Eigen::Map<Mat<Scalar>> x)
     {
-        assert(is_init_);
-        auto const P = perm_.asPermutation();
-
-        x_.noalias() = P.transpose() * x;
-        b_.noalias() = A_.topRightCorner(n_[0], n_[1]) * x_.bottomRows(n_[1]);
-
-        x_.topRows(n_[0]) = solver_.solve(-b_);
-
-        x.noalias() = P * x_;
+        solve_impl(b, x);
     }
+
+    /// Minimizes xᵀAx + bᵀx (i.e. solves Ax = b)
+    template <typename DerivedB>
+    void solve(MatExpr<DerivedB> const& b, Eigen::Map<Vec<Scalar>> x)
+    {
+        solve_impl(b, x);
+    }
+
+    /// Minimizes xᵀAx (i.e. solves Ax = 0)
+    template <typename Derived>
+    void solve(MatExpr<Derived>& x)
+    {
+        solve_impl(x);
+    }
+
+    /// Minimizes xᵀAx (i.e. solves Ax = 0)
+    void solve(Eigen::Map<Mat<Scalar>> x) { solve_impl(x); }
+
+    /// Minimizes xᵀAx (i.e. solves Ax = 0)
+    void solve(Eigen::Map<Vec<Scalar>> x) { solve_impl(x); }
 
     /// True if the solver has been successfully initialized
     bool is_init() const { return is_init_; }
@@ -100,6 +111,37 @@ struct SparseMinQuadFixed
         }
 
         return lo;
+    }
+
+    template <typename DerivedB, typename DerivedX>
+    void solve_impl(MatExpr<DerivedB> const& b, MatExpr<DerivedX>& x)
+    {
+        assert(is_init_);
+        auto const P = perm_.asPermutation();
+
+        // Create rhs
+        x_.noalias() = P.transpose() * x;
+        b_.noalias() = (P.transpose() * b).topRows(n_[0])
+            - A_.topRightCorner(n_[0], n_[1]) * x_.bottomRows(n_[1]);
+
+        // Solve
+        x_.topRows(n_[0]) = solver_.solve(b_);
+        x.noalias() = P * x_;
+    }
+
+    template <typename Derived>
+    void solve_impl(MatExpr<Derived>& x)
+    {
+        assert(is_init_);
+        auto const P = perm_.asPermutation();
+
+        // Create rhs
+        x_.noalias() = P.transpose() * x;
+        b_.noalias() = A_.topRightCorner(n_[0], n_[1]) * x_.bottomRows(n_[1]);
+
+        // Solve
+        x_.topRows(n_[0]) = solver_.solve(-b_);
+        x.noalias() = P * x_;
     }
 };
 

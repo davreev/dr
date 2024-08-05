@@ -26,6 +26,7 @@ add_executable(
     sliced_array_tests.cpp
     slot_map_tests.cpp
     span_tests.cpp
+    sparse_min_quad_tests.cpp
     transform_tests.cpp
     triangulate_tests.cpp
 )
