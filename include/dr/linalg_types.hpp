@@ -43,9 +43,6 @@ template <
     int options = default_mat_options<rows, cols>>
 using Mat = Eigen::Matrix<Scalar, rows, cols, options>;
 
-template <typename Derived>
-using MatExpr = Eigen::MatrixBase<Derived>;
-
 template <typename Scalar, int size = Eigen::Dynamic>
 using Vec = Mat<Scalar, size, 1, Eigen::ColMajor>;
 
@@ -57,6 +54,12 @@ using Covec = Mat<Scalar, 1, size, Eigen::RowMajor>;
 
 template <typename Scalar, int size>
 using CovecArray = Mat<Scalar, Eigen::Dynamic, size, Eigen::RowMajor>;
+
+template <typename Derived>
+using MatExpr = Eigen::MatrixBase<Derived>;
+
+template <typename MatType, int options = Eigen::Unaligned, typename Stride = Eigen::Stride<0, 0>>
+using MatView = Eigen::Map<MatType, options, Stride>;
 
 enum MatHint : u8
 {

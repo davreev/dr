@@ -53,14 +53,14 @@ struct SparseMinQuadFixed
 
     /// Minimizes xᵀAx + bᵀx (i.e. solves Ax = b)
     template <typename DerivedB>
-    void solve(MatExpr<DerivedB> const& b, Eigen::Map<Mat<Scalar>> x)
+    void solve(MatExpr<DerivedB> const& b, MatView<Mat<Scalar>> x)
     {
         solve_impl(b, x);
     }
 
     /// Minimizes xᵀAx + bᵀx (i.e. solves Ax = b)
     template <typename DerivedB>
-    void solve(MatExpr<DerivedB> const& b, Eigen::Map<Vec<Scalar>> x)
+    void solve(MatExpr<DerivedB> const& b, MatView<Vec<Scalar>> x)
     {
         solve_impl(b, x);
     }
@@ -73,10 +73,10 @@ struct SparseMinQuadFixed
     }
 
     /// Minimizes xᵀAx (i.e. solves Ax = 0)
-    void solve(Eigen::Map<Mat<Scalar>> x) { solve_impl(x); }
+    void solve(MatView<Mat<Scalar>> x) { solve_impl(x); }
 
     /// Minimizes xᵀAx (i.e. solves Ax = 0)
-    void solve(Eigen::Map<Vec<Scalar>> x) { solve_impl(x); }
+    void solve(MatView<Vec<Scalar>> x) { solve_impl(x); }
 
     /// True if the solver has been successfully initialized
     bool is_init() const { return is_init_; }
