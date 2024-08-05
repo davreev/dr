@@ -38,7 +38,7 @@ struct Affine
     /// Returns the matrix representation of this transformation's inverse
     Mat<Real, dim + 1, dim + 1> inverse_to_matrix() const
     {
-        // L' T'
+        // L⁻¹ T⁻¹
         Mat<Real, dim, dim> const l_inv = linear.inverse();
         Mat<Real, dim + 1, dim + 1> m{};
         m.template topLeftCorner<dim, dim>() = l_inv;
@@ -173,7 +173,7 @@ struct Conformal
     /// Returns the matrix representation of this transformation's inverse
     Mat<Real, dim + 1, dim + 1> inverse_to_matrix() const
     {
-        // S' R' T'
+        // S⁻¹ R⁻¹ T⁻¹
         Mat<Real, dim, dim> const l_inv = rotation.inverse().to_matrix() / scale;
         Mat<Real, dim + 1, dim + 1> m{};
         m.template topLeftCorner<dim, dim>() = l_inv;
@@ -208,7 +208,7 @@ struct Conformal
     /// Applies the inverse of this transformation to the given vector
     Vec<Real, dim> apply_inverse(Vec<Real, dim> const& u) const
     {
-        // S' R' T' u
+        // S⁻¹ R⁻¹ T⁻¹ u
         Real const s_inv = Real{1.0} / scale;
         return s_inv * (rotation.inverse() * (u - translation));
     }
@@ -216,7 +216,7 @@ struct Conformal
     /// Applies the inverse of this transformation to another transformation
     Conformal<Real, dim> apply_inverse(Conformal<Real, dim> const& other) const
     {
-        // Sa' Ra' Ta' Tb Rb Sb
+        // Sa⁻¹ Ra⁻¹ Ta⁻¹ Tb Rb Sb
         Rotation<Real, dim> const r_inv = rotation.inverse();
         Real const s_inv = Real{1.0} / scale;
         return {
@@ -264,7 +264,7 @@ struct Rigid
     /// Returns the matrix representation of this transformation's inverse
     Mat<Real, dim + 1, dim + 1> inverse_to_matrix() const
     {
-        // R' T'
+        // R⁻¹ T⁻¹
         Mat<Real, dim, dim> const r_inv = rotation.inverse().to_matrix();
         Mat<Real, dim + 1, dim + 1> m{};
         m.template topLeftCorner<dim, dim>() = r_inv;
@@ -298,14 +298,14 @@ struct Rigid
     /// Applies the inverse of this transformation to the given vector
     Vec<Real, dim> apply_inverse(Vec<Real, dim> const& u) const
     {
-        // R' T' u
+        // R⁻¹ T⁻¹ u
         return rotation.inverse() * (u - translation);
     }
 
     /// Applies the inverse of this transformation to another transformation
     Rigid<Real, dim> apply_inverse(Rigid<Real, dim> const& other) const
     {
-        // Sa' Ra' Ta' Tb Rb Sb
+        // Sa⁻¹ Ra⁻¹ Ta⁻¹ Tb Rb Sb
         Rotation<Real, dim> const r_inv = rotation.inverse();
         return {
             r_inv * other.rotation,
