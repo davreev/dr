@@ -1,7 +1,6 @@
 #pragma once
 
 #include <array>
-#include <type_traits>
 
 #include <dr/basic_types.hpp>
 
@@ -9,44 +8,101 @@ namespace dr
 {
 
 template <typename... T>
+struct TypePack;
+
+template <typename T, T... vals>
+struct ValuePack;
+
+namespace impl
+{
+
+template <isize index, typename T>
+struct TypeAt;
+
+template <isize index, typename Head, typename... Tail>
+struct TypeAt<index, TypePack<Head, Tail...>> : TypeAt<index - 1, TypePack<Tail...>>
+{
+};
+
+template <typename Head, typename... Tail>
+struct TypeAt<0, TypePack<Head, Tail...>>
+{
+    using Type = Head;
+};
+
+template <isize index, typename T>
+struct ValueAt;
+
+template <isize index, typename T, T head, T... tail>
+struct ValueAt<index, ValuePack<T, head, tail...>> : ValueAt<index - 1, ValuePack<T, tail...>>
+{
+};
+
+template <typename T, T head, T... tail>
+struct ValueAt<0, ValuePack<T, head, tail...>>
+{
+    static constexpr T value = head;
+};
+
+template <typename T, typename U>
+struct Join;
+
+template <typename... T, typename... U>
+struct Join<TypePack<T...>, TypePack<U...>>
+{
+    using Type = TypePack<T..., U...>;
+};
+
+template <typename T, T... a, T... b>
+struct Join<ValuePack<T, a...>, ValuePack<T, b...>>
+{
+    using Type = ValuePack<T, a..., b...>;
+};
+
+} // namespace impl
+
+template <typename... T>
 struct TypePack
 {
-    template <typename U>
-    static constexpr bool includes()
-    {
-        return ((std::is_same_v<U, T>) || ...);
-    }
+    template <typename... U>
+    using append = TypePack<T..., U...>;
 
     template <typename... U>
-    static constexpr TypePack<T..., U...> join(TypePack<U...> /*other*/)
-    {
-        return {};
-    }
+    using prepend = TypePack<U..., T...>;
 
-    static constexpr usize size() { return sizeof...(T); }
+    template <typename Other>
+    using join = typename impl::Join<TypePack<T...>, Other>::Type;
+
+    template <isize index>
+    using at = typename impl::TypeAt<index, TypePack<T...>>::Type;
+
+    template <typename U>
+    static constexpr bool includes = ((std::is_same_v<U, T>) || ...);
+
+    static constexpr isize size = sizeof...(T);
 };
 
 template <typename T, T... vals>
 struct ValuePack
 {
+    template <T... more_vals>
+    using append = ValuePack<T, vals..., more_vals...>;
+
+    template <T... more_vals>
+    using prepend = ValuePack<T, more_vals..., vals...>;
+
+    template <typename Other>
+    using join = typename impl::Join<ValuePack<T, vals...>, Other>::Type;
+
+    template <isize index>
+    static constexpr T at = impl::ValueAt<index, ValuePack<T, vals...>>::value;
+
     template <T val>
-    static constexpr bool includes()
-    {
-        return ((vals == val) || ...);
-    }
+    static constexpr bool includes = ((vals == val) || ...);
 
-    template <T... other_vals>
-    static constexpr ValuePack<T, vals..., other_vals...> join(ValuePack<T, other_vals...> /*other*/)
-    {
-        return {};
-    }
+    static constexpr isize size = sizeof...(vals);
 
-    static constexpr std::array<T, sizeof...(vals)> array()
-    {
-        return {vals...};
-    }
-
-    static constexpr usize size() { return sizeof...(vals); }
+    static constexpr std::array<T, sizeof...(vals)> array = {vals...};
 };
 
 } // namespace dr

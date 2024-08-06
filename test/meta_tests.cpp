@@ -3,67 +3,68 @@
 #include <dr/math_types.hpp>
 #include <dr/meta.hpp>
 
-UTEST(traits, includes_type)
+UTEST(type_pack, append_prepend)
 {
     using namespace dr;
 
-    struct Foo
-    {
-    };
+    using TypesA = TypePack<i16, i32>;
 
-    struct Bar
-    {
-    };
+    using TypesB = TypesA::append<i64>;
+    static_assert(std::is_same_v<TypesB::at<2>, i64>);
+    static_assert(TypesB::size == 3);
 
-    constexpr TypePack<i32, f32, Foo> types{};
-
-    static_assert(types.includes<i32>());
-    static_assert(types.includes<f32>());
-    static_assert(types.includes<Foo>());
-
-    static_assert(!types.includes<u32>());
-    static_assert(!types.includes<f64>());
-    static_assert(!types.includes<Bar>());
+    using TypesC = TypesB::prepend<i8>;
+    static_assert(std::is_same_v<TypesC::at<0>, i8>);
+    static_assert(TypesC::size == 4);
 
     ASSERT_TRUE(true);
 }
 
-UTEST(traits, join_types)
+UTEST(type_pack, join)
 {
     using namespace dr;
 
-    constexpr TypePack<i8, i16> types_a{};
-    constexpr TypePack<i32, i64> types_b{};
-    constexpr auto types = types_a.join(types_b);
+    using TypesA = TypePack<i8, i16>;
+    using TypesB = TypePack<u8, u16>;
 
-    static_assert(types.includes<i8>());
-    static_assert(types.includes<i16>());
-    static_assert(types.includes<i32>());
-    static_assert(types.includes<i64>());
+    using TypesAB = TypesA::join<TypesB>;
+    static_assert(TypesAB::includes<i8>);
+    static_assert(TypesAB::includes<i16>);
+    static_assert(TypesAB::includes<u8>);
+    static_assert(TypesAB::includes<u16>);
 
     ASSERT_TRUE(true);
 }
 
-UTEST(traits, join_values)
+UTEST(value_pack, append_prepend)
 {
     using namespace dr;
 
-    constexpr auto vals_a = ValuePack<int, 0, 1>{};
-    constexpr auto vals_b = ValuePack<int, 2, 3>{};
-    constexpr auto vals = vals_a.join(vals_b);
+    using ValuesA = ValuePack<i32, 1, 2>;
+    
+    using ValuesB = ValuesA::append<3>;
+    static_assert(ValuesB::at<2> == 3);
+    static_assert(ValuesB::size == 3);
 
-    static_assert(vals.includes<0>());
-    static_assert(vals.includes<1>());
-    static_assert(vals.includes<2>());
-    static_assert(vals.includes<3>());
+    using ValuesC = ValuesB::prepend<0>;
+    static_assert(ValuesC::at<0> == 0);
+    static_assert(ValuesC::size == 4);
 
-    constexpr auto arr = vals.array();
-    static_assert(arr.size() == 4);
+    ASSERT_TRUE(true);
+}
 
-    static_assert(arr[0] == 0);
-    static_assert(arr[1] == 1);
-    static_assert(arr[2] == 2);
-    static_assert(arr[3] == 3);
+UTEST(value_pack, join)
+{
+    using namespace dr;
+
+    using TypesA = ValuePack<i32, 0, 1>;
+    using TypesB = ValuePack<i32, 2, 3>;
+
+    using TypesAB = TypesA::join<TypesB>;
+    static_assert(TypesAB::includes<0>);
+    static_assert(TypesAB::includes<1>);
+    static_assert(TypesAB::includes<2>);
+    static_assert(TypesAB::includes<3>);
 
     ASSERT_TRUE(true);
 }

@@ -12,8 +12,8 @@ namespace
 using Index = HalfedgeMesh::Index;
 using Builder = HalfedgeMesh::Builder;
 
-TypePack<i16, i32, i64, u16, u32, u64> supported_index_types{};
-ValuePack<int, 3, 4> supported_face_sizes{};
+using SupportedIndexTypes = TypePack<i16, i32, i64, u16, u32, u64>;
+using SupportedFaceSizes = ValuePack<int, 3, 4>;
 
 } // namespace
 
@@ -40,7 +40,7 @@ Builder::Error Builder::make_from_face_vertex(
     bool const include_previous,
     bool const include_holes)
 {
-    static_assert(supported_index_types.includes<SrcIndex>());
+    static_assert(SupportedIndexTypes::includes<SrcIndex>);
 
     struct FaceVertexSrc
     {
@@ -63,8 +63,8 @@ Builder::Error Builder::make_from_face_vertex(
     bool const include_previous,
     bool const include_holes)
 {
-    static_assert(supported_index_types.includes<SrcIndex>());
-    static_assert(supported_face_sizes.includes<n>());
+    static_assert(SupportedIndexTypes::includes<SrcIndex>);
+    static_assert(SupportedFaceSizes::includes<n>);
 
     struct FaceVertexSrc
     {
