@@ -70,4 +70,11 @@ enum MatHint : u8
     _MatHint_Count,
 };
 
+enum SolverType : u8
+{
+    SolverType_Direct = 0,
+    SolverType_Iterative,
+    _SolverType_Count,
+};
+
 } // namespace dr

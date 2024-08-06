@@ -6,21 +6,25 @@
 #include <Eigen/SparseCholesky>
 
 #include <dr/linalg_reshape.hpp>
+#include <dr/meta.hpp>
 #include <dr/sparse_linalg_types.hpp>
 
 namespace dr
 {
 
 /// Minimizes a convex quadratic objective with fixed value constraints
-template <typename Scalar, typename Index = i32, bool use_iterative_solver = false>
+template <typename Scalar, typename Index = i32, SolverType solver_type = SolverType_Direct>
 struct SparseMinQuadFixed
 {
+  private:
     using DirectSolver = Eigen::SimplicialLDLT<SparseMat<Scalar, Index>>;
     using IterativeSolver = Eigen::ConjugateGradient<
         SparseMat<Scalar, Index>,
         Eigen::Lower | Eigen::Upper,
         Eigen::IncompleteCholesky<Scalar>>;
-    using Solver = std::conditional_t<use_iterative_solver, IterativeSolver, DirectSolver>;
+
+  public:
+    using Solver = typename TypePack<DirectSolver, IterativeSolver>::template at<solver_type>;
 
     /// Isolates unknown variables and factorizes/preconditions the linear system
     template <typename Predicate>

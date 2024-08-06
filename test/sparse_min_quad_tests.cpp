@@ -122,7 +122,7 @@ bool solve_common()
         },
     };
 
-    using Solver = SparseMinQuadFixed<f64, i32, use_iterative_solver>;
+    using Solver = SparseMinQuadFixed<f64, i32, SolverType_Iterative>;
     Solver solver{};
 
     for (auto const& tc : solve_test_cases)
