@@ -9,25 +9,12 @@ UTEST(linalg, default_mat_options)
 {
     using namespace dr;
 
-    {
-        constexpr int options = default_mat_options<3, 3>;
-        ASSERT_EQ(Eigen::ColMajor, options);
-    }
-
-    {
-        constexpr int options = default_mat_options<3, 1>;
-        ASSERT_EQ(Eigen::ColMajor, options);
-    }
-
-    {
-        constexpr int options = default_mat_options<1, 3>;
-        ASSERT_EQ(Eigen::RowMajor, options);
-    }
-
-    {
-        constexpr int options = default_mat_options<1, 1>;
-        ASSERT_EQ(Eigen::ColMajor, options);
-    }
+    static_assert(default_mat_options<3, 3>() == Eigen::ColMajor);
+    static_assert(default_mat_options<3, 1>() == Eigen::ColMajor);
+    static_assert(default_mat_options<1, 3>() == Eigen::RowMajor);
+    static_assert(default_mat_options<1, 1>() == Eigen::ColMajor);
+    
+    ASSERT_TRUE(true);
 }
 
 UTEST(linalg_reshape, alignment)

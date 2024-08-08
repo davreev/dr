@@ -10,37 +10,21 @@
 
 namespace dr
 {
-namespace impl
-{
 
 template <int rows, int cols>
-struct DefaultMatOptions
+constexpr int default_mat_options()
 {
-    static constexpr int value = Eigen::ColMajor;
-};
-
-template <int cols>
-struct DefaultMatOptions<1, cols>
-{
-    static constexpr int value = Eigen::RowMajor;
-};
-
-template <>
-struct DefaultMatOptions<1, 1>
-{
-    static constexpr int value = Eigen::ColMajor;
-};
-
-} // namespace impl
-
-template <int rows, int cols>
-inline constexpr int default_mat_options = impl::DefaultMatOptions<rows, cols>::value;
+    if constexpr(rows == 1 && cols != 1)
+        return Eigen::RowMajor;
+    else
+        return Eigen::ColMajor;
+}
 
 template <
     typename Scalar,
     int rows = Eigen::Dynamic,
     int cols = Eigen::Dynamic,
-    int options = default_mat_options<rows, cols>>
+    int options = default_mat_options<rows, cols>()>
 using Mat = Eigen::Matrix<Scalar, rows, cols, options>;
 
 template <typename Scalar, int size = Eigen::Dynamic>
