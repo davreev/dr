@@ -1,5 +1,6 @@
 #pragma once
 
+#include <dr/basic_types.hpp>
 #include <dr/math_traits.hpp>
 
 namespace dr
@@ -205,11 +206,11 @@ constexpr void spline_eval(
 
 } // namespace impl
 
-template <isize order_>
+template <isize order_, isize size_ = order_ + 1>
 struct SplineBasis
 {
     static constexpr isize order{order_};
-    static constexpr isize size{order_ + 1};
+    static constexpr isize size{size_};
 };
 
 struct LinearBasis : SplineBasis<1>
