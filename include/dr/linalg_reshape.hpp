@@ -289,7 +289,7 @@ Span<Covec<Scalar, size> const> as_span(CovecArray<Scalar, size> const&& mat) = 
 
 /// Allows decomposition of fixed-size matrix types into their coeffs via structured binding
 template <typename Derived>
-auto expand(MatExpr<Derived> const& expr)
+auto unpack(MatExpr<Derived> const& expr)
 {
     using Scalar = typename Derived::Scalar;
 
@@ -300,6 +300,13 @@ auto expand(MatExpr<Derived> const& expr)
     std::array<Scalar, m * n> result{};
     as_mat<m, n>(result.data()) = expr;
     return result;
+}
+
+template <typename Derived>
+[[deprecated("Use unpack instead")]]
+auto expand(MatExpr<Derived> const& expr)
+{
+    unpack(expr);
 }
 
 } // namespace dr

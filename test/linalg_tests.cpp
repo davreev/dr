@@ -152,14 +152,14 @@ UTEST(linalg_reshape, vecs_to_mat)
     }
 }
 
-UTEST(linalg_reshape, expand)
+UTEST(linalg_reshape, unpack)
 {
     using namespace dr;
 
     {
         Vec2<i32> const a{1, 2};
         Vec2<i32> const b{3, 4};
-        auto const [x, y] = expand(a + b);
+        auto const [x, y] = unpack(a + b);
         ASSERT_EQ(4, x);
         ASSERT_EQ(6, y);
     }
@@ -167,14 +167,14 @@ UTEST(linalg_reshape, expand)
     {
         Covec2<i32> const a{1, 2};
         Covec2<i32> const b{3, 4};
-        auto const [x, y] = expand(a + b);
+        auto const [x, y] = unpack(a + b);
         ASSERT_EQ(4, x);
         ASSERT_EQ(6, y);
     }
 
     {
         Mat<i32, 2, 2> const A = mat(vec(1, 2), vec(3, 4));
-        auto const [a00, a10, a01, a11] = expand(A + A);
+        auto const [a00, a10, a01, a11] = unpack(A + A);
         ASSERT_EQ(2, a00);
         ASSERT_EQ(4, a10);
         ASSERT_EQ(6, a01);
