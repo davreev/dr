@@ -46,7 +46,8 @@ IndentExternBlock: NoIndent
 MaxEmptyLinesToKeep: 1
 NamespaceIndentation: None
 PackConstructorInitializers: NextLine
-PenaltyBreakAssignment: 2
+# PenaltyBreakAssignment: 2
+PenaltyBreakAssignment: 200
 PenaltyBreakBeforeFirstCallParameter: 1
 PenaltyBreakComment: 300
 PenaltyBreakFirstLessLess: 120
