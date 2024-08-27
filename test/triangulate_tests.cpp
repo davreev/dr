@@ -1,6 +1,5 @@
 #include <utest.h>
 
-#include <dr/dynamic_array.hpp>
 #include <dr/triangulate.hpp>
 
 UTEST(mesh, fan_triangulator)
@@ -9,7 +8,7 @@ UTEST(mesh, fan_triangulator)
 
     struct TestCase
     {
-        i32 num_indices;
+        i32 num_vertices;
         struct
         {
             Vec3<i32> tris[16];
@@ -48,14 +47,9 @@ UTEST(mesh, fan_triangulator)
         },
     };
 
-    for (auto const& [num_indices, expect] : test_cases)
+    for (auto const& [num_vertices, expect] : test_cases)
     {
-        DynamicArray<i32> poly(num_indices);
-
-        for (i32 i = 0; i < num_indices; ++i)
-            poly[i] = i;
-
-        FanTriangulator<i32> tri_it{as_span(poly)};
+        FanTriangulator<i32> tri_it{num_vertices};
         i32 tri_count = 0;
 
         for (; tri_it.is_valid(); tri_it.advance(), ++tri_count)
@@ -77,7 +71,7 @@ UTEST(mesh, strip_triangulator)
 
     struct TestCase
     {
-        i32 num_indices;
+        i32 num_vertices;
         struct
         {
             Vec3<i32> tris[16];
@@ -116,14 +110,9 @@ UTEST(mesh, strip_triangulator)
         },
     };
 
-    for (auto const& [num_indices, expect] : test_cases)
+    for (auto const& [num_vertices, expect] : test_cases)
     {
-        DynamicArray<i32> poly(num_indices);
-
-        for (i32 i = 0; i < num_indices; ++i)
-            poly[i] = i;
-
-        StripTriangulator<i32> tri_it{as_span(poly)};
+        StripTriangulator<i32> tri_it{num_vertices};
         i32 tri_count = 0;
 
         for (; tri_it.is_valid(); tri_it.advance(), ++tri_count)

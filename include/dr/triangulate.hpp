@@ -1,26 +1,21 @@
 #pragma once
 
-#include <dr/container_utils.hpp>
 #include <dr/math_types.hpp>
-#include <dr/span.hpp>
 
 namespace dr
 {
 
-/// Virtually triangulates a given polygon as a fan
+/// Virtually triangulates a polygon as a fan
 template <typename Index>
 struct FanTriangulator
 {
-    FanTriangulator(Span<Index const> const& polygon) :
-        polygon_{(assert(polygon.size() > 2), polygon)}
-    {
-    }
+    FanTriangulator(Index const size) : size_{(assert(size > 2), size)} {}
 
     /// Returns the current triangle
-    Vec3<Index> current() const { return {polygon_[0], polygon_[curr_ - 1], polygon_[curr_]}; }
+    Vec3<Index> current() const { return {0, curr_ - 1, curr_}; }
 
     /// Returns true if the current triangle is valid
-    bool is_valid() const { return curr_ < polygon_.size(); }
+    bool is_valid() const { return curr_ < size_; }
 
     /// Advances to the next triangle in the polygon
     void advance() { ++curr_; }
@@ -29,27 +24,23 @@ struct FanTriangulator
     void operator++() { advance(); }
 
   private:
-    Span<Index const> polygon_;
+    Index size_;
     Index curr_{2};
 };
 
-/// Virtually triangulates a given polygon as a strip
+/// Virtually triangulates a polygon as a strip
 template <typename Index>
 struct StripTriangulator
 {
-    StripTriangulator(Span<Index const> const& polygon) :
-        polygon_{(assert(polygon.size() > 2), polygon)},
-        c_{size_as<Index>(polygon) - 1}
-    {
-    }
+    StripTriangulator(Index const size) : c_{(assert(size > 2), size - 1)} {}
 
     /// Returns the current triangle
     Vec3<Index> current() const
     {
         if (a_ == b_)
-            return {polygon_[a_], polygon_[c_], polygon_[a_ - 1]};
+            return {a_, c_, a_ - 1};
         else
-            return {polygon_[a_], polygon_[b_], polygon_[c_]};
+            return {a_, b_, c_};
     }
 
     /// Returns true if the current triangle is valid
@@ -68,7 +59,6 @@ struct StripTriangulator
     void operator++() { advance(); }
 
   private:
-    Span<Index const> polygon_;
     Index a_{0};
     Index b_{1};
     Index c_;
