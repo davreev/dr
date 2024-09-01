@@ -11,6 +11,13 @@ namespace dr
 template <typename T, typename Enable = void>
 using Hash = ankerl::unordered_dense::hash<T, Enable>;
 
+/// Allows the return value of derived hash types to be used directly by hash containers
+struct HighQualityHash
+{
+    // See https://github.com/martinus/unordered_dense?tab=readme-ov-file#32-hash
+    using is_avalanching = void;
+};
+
 inline u64 hash(Span<u8 const> const& key)
 {
     return ankerl::unordered_dense::detail::wyhash::hash(
