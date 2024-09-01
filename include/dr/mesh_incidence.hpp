@@ -13,154 +13,74 @@
 
 namespace dr
 {
-
-template <typename Index, int dim>
-struct VertsToSimplex;
-
-template <typename Index>
-struct VertsToSimplex<Index, 1>
+namespace impl
 {
-    static_assert(is_integer<Index> || is_natural<Index>);
 
-    struct Key
+struct ManyToOne
+{
+    template <typename Index, int size>
+    struct Key;
+
+    template <typename Index>
+    struct Key<Index, 2>
     {
-        Key(Vec2<Index> const& v) : v_{v} {}
+        static_assert(is_integer<Index> || is_natural<Index>);
 
-        Vec2<Index> const& verts() const { return v_; }
+        Vec2<Index> indices;
 
-        /// Returns the key associated with the oppositely oriented simplex
-        Key opposite() const { return {v_({1, 0})}; }
+        Key(Vec2<Index> const& indices) : indices{indices} {}
 
-        operator Vec2<Index>() const { return v_; }
+        /// Returns the key associated with the oppositely oriented element
+        Key opposite() const { return {indices({1, 0})}; }
 
-        bool operator==(Key const& other) const { return v_ == other.v_; }
+        bool operator==(Key const& other) const { return indices == other.indices; }
 
-      private:
-        Vec2<Index> v_;
+        operator Vec2<Index>() const { return indices; }
     };
 
-    struct Hash
+    template <typename Index>
+    struct Key<Index, 3>
     {
-        usize operator()(Key const& key) const { return hash(as_bytes(key)); }
-    };
+        static_assert(is_integer<Index> || is_natural<Index>);
 
-    using Map = HashMap<Key, Index, Hash>;
+        Vec3<Index> indices;
 
-    /// Creates a map from vertex pairs to oriented edges. By convention, oppositely oriented
-    /// edges are given consecutive indices.
-    static void make_from_tris(Span<Vec3<Index> const> const& tri_verts, Map& result)
-    {
-        result.clear();
-        result.reserve(tri_verts.size() * 3); // 3 oriented edges per face
-
-        // Inserts a pair of oriented edges if they don't already exist
-        auto const insert = [&](Key const& k, Index const e) {
-            if (result.try_emplace(k, e).second)
-                result[k.opposite()] = e + 1;
-        };
-
-        for (isize f = 0; f < tri_verts.size(); ++f)
+        Key(Vec3<Index> const& indices)
         {
-            auto const& f_v = tri_verts[f];
-            Vec2<Index> const e_v[]{
-                f_v({0, 1}),
-                f_v({1, 2}),
-                f_v({2, 0}),
-            };
+            // Find index of the smallest element
+            Index const p = (indices[0] < indices[1]) //
+                ? (indices[0] < indices[2]) ? 0 : 2
+                : (indices[1] < indices[2]) ? 1 : 2;
 
-            insert(e_v[0], size(result));
-            insert(e_v[1], size(result));
-            insert(e_v[2], size(result));
-        }
-    }
-};
-
-template <typename Index>
-struct VertsToSimplex<Index, 2>
-{
-    static_assert(is_integer<Index> || is_natural<Index>);
-
-    struct Key
-    {
-        Key(Vec3<Index> const& v)
-        {
-            // Find the smallest vertex
-            Index const first = (v[0] < v[1]) //
-                ? (v[0] < v[2]) ? 0 : 2
-                : (v[1] < v[2]) ? 1 : 2;
-
-            // Even permuations for each possible vertex
+            // Even permuations for each possible result
             static constexpr Index perms[][3]{
                 {0, 1, 2},
                 {1, 2, 0},
                 {2, 0, 1},
             };
 
-            v_ = v(perms[first]);
+            this->indices = indices(perms[p]);
         }
 
-        Vec3<Index> const& verts() const { return v_; }
+        /// Returns the key associated with the oppositely oriented element
+        Key opposite() const { return {indices({0, 2, 1})}; }
 
-        /// Returns the key associated with the oppositely oriented simplex
-        Key opposite() const { return {v_({0, 2, 1})}; }
+        bool operator==(Key const& other) const { return indices == other.indices; }
 
-        operator Vec3<Index>() const { return v_; }
-
-        bool operator==(Key const& other) const { return v_ == other.v_; }
-
-      private:
-        Vec3<Index> v_;
+        operator Vec3<Index>() const { return indices; }
     };
 
-    struct Hash
+    template <typename Index>
+    struct Key<Index, 4>
     {
-        usize operator()(Key const& key) const { return hash(as_bytes(key)); }
-    };
+        static_assert(is_integer<Index> || is_natural<Index>);
 
-    using Map = HashMap<Key, Index, Hash>;
+        Vec4<Index> indices;
 
-    /// Creates a map from vertex triples to oriented triangles. By convention, oppositely
-    /// oriented triangles are given consecutive indices.
-    static void make_from_tets(Span<Vec4<Index> const> const& tet_verts, Map& result)
-    {
-        result.clear();
-        result.reserve(tet_verts.size() * 4); // 4 oriented faces per cell
-
-        // Inserts a pair of oriented faces if they don't already exist
-        auto const insert = [&](Key const& k, Index const f) {
-            if (result.try_emplace(k, f).second)
-                result[k.opposite()] = f + 1;
-        };
-
-        for (isize c = 0; c < tet_verts.size(); ++c)
+        Key(Vec4<Index> const& indices)
         {
-            auto const& c_v = tet_verts[c];
-            Vec3<Index> const f_v[]{
-                c_v({0, 1, 2}),
-                c_v({1, 0, 3}),
-                c_v({2, 3, 0}),
-                c_v({3, 2, 1}),
-            };
-
-            insert(f_v[0], size(result));
-            insert(f_v[1], size(result));
-            insert(f_v[2], size(result));
-            insert(f_v[3], size(result));
-        }
-    }
-};
-
-template <typename Index>
-struct VertsToSimplex<Index, 3>
-{
-    static_assert(is_integer<Index> || is_natural<Index>);
-
-    struct Key
-    {
-        Key(Vec4<Index> const& v)
-        {
-            // Find the two smallest vertices
-            auto const comp = [&](Index const i, Index const j) { return v[i] < v[j]; };
+            // Find the indices of the two smallest elements
+            auto const comp = [&](Index const i, Index const j) { return indices[i] < indices[j]; };
             Index p[]{0, 1, 2, 3};
             std::nth_element(p, p + 1, p + 4, comp);
 
@@ -192,38 +112,111 @@ struct VertsToSimplex<Index, 3>
                 },
             };
 
-            v_ = v(perms[p[0]][p[1]]);
+            this->indices = indices(perms[p[0]][p[1]]);
         }
 
-        Vec4<Index> const& verts() const { return v_; }
+        /// Returns the key associated with the oppositely oriented element
+        Key opposite() const { return {indices({0, 1, 3, 2})}; }
 
-        /// Returns the key associated with the oppositely oriented simplex
-        Key opposite() const { return {v_({0, 1, 3, 2})}; }
+        bool operator==(Key const& other) const { return indices == other.v_; }
 
-        operator Vec4<Index>() const { return v_; }
-
-        bool operator==(Key const& other) const { return v_ == other.v_; }
-
-      private:
-        Vec4<Index> v_;
+        operator Vec4<Index>() const { return indices; }
     };
 
-    struct Hash
+    struct KeyHash : HighQualityHash
     {
-        usize operator()(Key const& key) const { return hash(as_bytes(key)); }
+        template <typename Index, int size>
+        usize operator()(Key<Index, size> const& key) const
+        {
+            return hash(as_bytes(key));
+        }
     };
 
-    using Map = HashMap<Key, Index, Hash>;
+    template <typename Index, int size>
+    using Map = HashMap<Key<Index, size>, Index, KeyHash>;
+};
+
+} // namespace impl
+
+template <typename Index>
+struct VertsToEdge
+{
+    using Map = impl::ManyToOne::Map<Index, 2>;
+
+    /// Creates a map from vertex pairs to oriented edges. By convention, oppositely oriented edges
+    /// have consecutive indices.
+    static void make_from_tris(Span<Vec3<Index> const> const& tri_verts, Map& result)
+    {
+        using Key = typename Map::key_type;
+
+        result.clear();
+        result.reserve(tri_verts.size() * 3); // 3 oriented edges per face
+
+        // Inserts a pair of oriented edges if they don't already exist
+        auto const insert = [&](Key const& k, Index const e) {
+            if (result.try_emplace(k, e).second)
+                result[k.opposite()] = e + 1;
+        };
+
+        for (isize f = 0; f < tri_verts.size(); ++f)
+        {
+            auto const& f_v = tri_verts[f];
+            Vec2<Index> const e_v[]{
+                f_v({0, 1}),
+                f_v({1, 2}),
+                f_v({2, 0}),
+            };
+
+            insert(e_v[0], size(result));
+            insert(e_v[1], size(result));
+            insert(e_v[2], size(result));
+        }
+    }
 };
 
 template <typename Index>
-using VertsToEdge = VertsToSimplex<Index, 1>;
+struct VertsToTri
+{
+    using Map = impl::ManyToOne::Map<Index, 3>;
+
+    /// Creates a map from vertex triples to oriented triangles. By convention, oppositely oriented
+    /// triangles have consecutive indices.
+    static void make_from_tets(Span<Vec4<Index> const> const& tet_verts, Map& result)
+    {
+        using Key = typename Map::key_type;
+
+        result.clear();
+        result.reserve(tet_verts.size() * 4); // 4 oriented faces per cell
+
+        // Inserts a pair of oriented faces if they don't already exist
+        auto const insert = [&](Key const& k, Index const f) {
+            if (result.try_emplace(k, f).second)
+                result[k.opposite()] = f + 1;
+        };
+
+        for (isize c = 0; c < tet_verts.size(); ++c)
+        {
+            auto const& c_v = tet_verts[c];
+            Vec3<Index> const f_v[]{
+                c_v({0, 1, 2}),
+                c_v({1, 0, 3}),
+                c_v({2, 3, 0}),
+                c_v({3, 2, 1}),
+            };
+
+            insert(f_v[0], size(result));
+            insert(f_v[1], size(result));
+            insert(f_v[2], size(result));
+            insert(f_v[3], size(result));
+        }
+    }
+};
 
 template <typename Index>
-using VertsToTri = VertsToSimplex<Index, 2>;
-
-template <typename Index>
-using VertsToTet = VertsToSimplex<Index, 3>;
+struct VertsToTet
+{
+    using Map = impl::ManyToOne::Map<Index, 4>;
+};
 
 /// Returns the vertex opposite to each oriented edge within the same triangle
 template <typename Index>
