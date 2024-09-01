@@ -6,13 +6,13 @@ namespace dr
 {
 
 template <typename Index, int dim>
-Vec<Index, dim> grid_stride(Vec<Index, dim> const& count)
+Vec<Index, dim> grid_stride(Vec<Index, dim> const& shape)
 {
     Vec<Index, dim> result{};
     result[0] = 1;
 
     for (int i = 1; i < dim; ++i)
-        result[i] = count[i - 1] * result[i - 1];
+        result[i] = shape[i - 1] * result[i - 1];
 
     return result;
 }
@@ -41,11 +41,11 @@ Vec<Index, dim> index_to_grid(Index index, Vec<Index, dim> const& stride)
 template <typename Scalar, int dim>
 struct Grid
 {
-    Vec<isize, dim> count{};
+    Vec<isize, dim> shape{};
     Vec<Scalar, dim> spacing{Vec<Scalar, dim>::Ones()};
     Vec<Scalar, dim> origin{};
 
-    Vec<isize, dim> stride() const { return grid_stride(count); }
+    Vec<isize, dim> stride() const { return grid_stride(shape); }
 
     isize to_index(Vec<isize, dim> const& grid_pt) const
     {
