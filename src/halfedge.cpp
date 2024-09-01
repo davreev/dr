@@ -42,62 +42,51 @@ Builder::Error Builder::make_from_face_vertex(
 {
     static_assert(SupportedIndexTypes::includes<SrcIndex>);
 
-    struct FaceVertexSrc
-    {
-        SlicedArray<SrcIndex> const* src;
-        Index size() const { return src->num_slices(); }
-        Span<SrcIndex const> operator[](Index const face) const { return (*src)[face]; };
-    };
-
-    return make_from_face_vertex_impl<SrcIndex>(
-        FaceVertexSrc{&face_vertices},
+    return make_from_face_vertex<SrcIndex>(
+        [&](Index f) { return face_vertices[f]; },
+        face_vertices.num_slices(),
         result,
         include_previous,
         include_holes);
 }
 
-template <typename SrcIndex, int n>
+template <typename SrcIndex, int size>
 Builder::Error Builder::make_from_face_vertex(
-    Span<Vec<SrcIndex, n> const> const& face_vertices,
+    Span<Vec<SrcIndex, size> const> const& face_vertices,
     HalfedgeMesh& result,
     bool const include_previous,
     bool const include_holes)
 {
     static_assert(SupportedIndexTypes::includes<SrcIndex>);
-    static_assert(SupportedFaceSizes::includes<n>);
+    static_assert(SupportedFaceSizes::includes<size>);
 
-    struct FaceVertexSrc
-    {
-        Span<Vec<SrcIndex, n> const> src;
-        Index size() const { return src.size(); }
-        Span<SrcIndex const> operator[](Index const face) const { return as_span(src[face]); }
-    };
-
-    return make_from_face_vertex_impl<SrcIndex>(
-        FaceVertexSrc{face_vertices},
+    return make_from_face_vertex<SrcIndex>(
+        [&](Index f) { return as_span(face_vertices[f]); },
+        face_vertices.size(),
         result,
         include_previous,
         include_holes);
 }
 
-template <typename SrcIndex, typename FaceVertexSrc>
-Builder::Error Builder::make_from_face_vertex_impl(
-    FaceVertexSrc&& face_vertices,
+template <typename SrcIndex, typename FaceVertices>
+Builder::Error Builder::make_from_face_vertex(
+    FaceVertices&& face_vertices,
+    Index const num_faces,
     HalfedgeMesh& result,
     bool const include_previous,
     bool const include_holes)
 {
+    static_assert(std::is_invocable_r_v<Span<SrcIndex const>, FaceVertices, SrcIndex>);
     static_assert(is_integer<SrcIndex> || is_natural<SrcIndex>);
 
     v_to_he_.clear();
-    Index const num_faces = face_vertices.size();
     Index num_hedges = 0;
     Index num_verts = 0;
 
     // Create map from vertex pairs to halfedges
     for (Index f = 0; f < num_faces; ++f)
     {
-        Span<SrcIndex const> const f_v = face_vertices[f];
+        Span<SrcIndex const> const f_v = face_vertices(f);
 
         if (f_v.size() < 3)
             return Error_DegenerateFace;
@@ -153,7 +142,7 @@ Builder::Error Builder::make_from_face_vertex_impl(
     // Connect faces to halfedges and halfedges to vertices, faces, and next
     for (Index f = 0; f < num_faces; ++f)
     {
-        Span<SrcIndex const> const f_v = face_vertices[f];
+        Span<SrcIndex const> const f_v = face_vertices(f);
 
         auto v0 = static_cast<Index>(f_v[0]);
         auto v1 = static_cast<Index>(f_v[1]);

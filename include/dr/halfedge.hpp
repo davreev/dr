@@ -152,9 +152,17 @@ struct HalfedgeMesh : AllocatorAware
             bool include_previous = true,
             bool include_holes = true);
 
-        template <typename SrcIndex, int n>
+        template <typename SrcIndex, int size>
         Error make_from_face_vertex(
-            Span<Vec<SrcIndex, n> const> const& face_vertices,
+            Span<Vec<SrcIndex, size> const> const& face_vertices,
+            HalfedgeMesh& result,
+            bool include_previous = true,
+            bool include_holes = true);
+
+        template <typename SrcIndex, typename FaceVertices>
+        Error make_from_face_vertex(
+            FaceVertices&& face_vertices,
+            Index num_faces,
             HalfedgeMesh& result,
             bool include_previous = true,
             bool include_holes = true);
@@ -162,7 +170,7 @@ struct HalfedgeMesh : AllocatorAware
       private:
         struct VertsToHalfedge
         {
-            struct Hash
+            struct Hash : HighQualityHash
             {
                 usize operator()(Vec2<Index> const& key) const { return hash(as_bytes(key)); }
             };
@@ -171,13 +179,6 @@ struct HalfedgeMesh : AllocatorAware
         };
 
         VertsToHalfedge::Map v_to_he_;
-
-        template <typename SrcIndex, typename FaceVertexSrc>
-        Error make_from_face_vertex_impl(
-            FaceVertexSrc&& face_vertices,
-            HalfedgeMesh& result,
-            bool include_previous = true,
-            bool include_holes = true);
     };
 
     HalfedgeMesh(Allocator const alloc = {}) :
