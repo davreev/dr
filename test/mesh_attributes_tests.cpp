@@ -12,32 +12,32 @@ UTEST(mesh, area_centroid)
 
     struct TestCase
     {
-        Span<Vec3<f32> const> vert_coords;
-        Span<Vec3<i32> const> tri_verts;
+        Span<Vec3<f32> const> vertex_positions;
+        Span<Vec3<i16> const> face_vertices;
         Vec3<f32> result;
     };
 
-    using Prims = MeshPrimitives;
+    using Prims = TriMeshPrims;
 
     TestCase const test_cases[] = {
         {
-            Prims::Tetrahedron::vert_coords(),
-            Prims::Tetrahedron::tri_verts(),
+            as<Vec3<f32>>(Prims::Tetrahedron::vertex_positions()),
+            as<Vec3<i16>>(Prims::Tetrahedron::face_vertices()),
             {0.0, 0.0, 0.0},
         },
         {
-            Prims::Octahedron::vert_coords(),
-            Prims::Octahedron::tri_verts(),
+            as<Vec3<f32>>(Prims::Octahedron::vertex_positions()),
+            as<Vec3<i16>>(Prims::Octahedron::face_vertices()),
             {0.0, 0.0, 0.0},
         },
         {
-            Prims::Cube::vert_coords(),
-            Prims::Cube::tri_verts(),
+            as<Vec3<f32>>(Prims::Cube::vertex_positions()),
+            as<Vec3<i16>>(Prims::Cube::face_vertices()),
             {0.0, 0.0, 0.0},
         },
         {
-            Prims::Icosahedron::vert_coords(),
-            Prims::Icosahedron::tri_verts(),
+            as<Vec3<f32>>(Prims::Icosahedron::vertex_positions()),
+            as<Vec3<i16>>(Prims::Icosahedron::face_vertices()),
             {0.0, 0.0, 0.0},
         },
     };
@@ -60,23 +60,23 @@ UTEST(mesh, vertex_normals_area_weighted)
     struct TestCase
     {
         Span<Vec3<f32> const> vert_coords;
-        Span<Vec3<i32> const> tri_verts;
+        Span<Vec3<i16> const> tri_verts;
     };
 
-    using Prims = MeshPrimitives;
+    using Prims = TriMeshPrims;
 
     TestCase const test_cases[] = {
         {
-            Prims::Tetrahedron::vert_coords(),
-            Prims::Tetrahedron::tri_verts(),
+            as<Vec3<f32>>(Prims::Tetrahedron::vertex_positions()),
+            as<Vec3<i16>>(Prims::Tetrahedron::face_vertices()),
         },
         {
-            Prims::Octahedron::vert_coords(),
-            Prims::Octahedron::tri_verts(),
+            as<Vec3<f32>>(Prims::Octahedron::vertex_positions()),
+            as<Vec3<i16>>(Prims::Octahedron::face_vertices()),
         },
         {
-            Prims::Icosahedron::vert_coords(),
-            Prims::Icosahedron::tri_verts(),
+            as<Vec3<f32>>(Prims::Icosahedron::vertex_positions()),
+            as<Vec3<i16>>(Prims::Icosahedron::face_vertices()),
         },
     };
 
@@ -107,35 +107,35 @@ UTEST(mesh, integrate_vertex_values)
     struct TestCase
     {
         Span<Vec3<f32> const> vert_coords;
-        Span<Vec3<i32> const> tri_verts;
+        Span<Vec3<i16> const> tri_verts;
         f32 value;
         f32 result;
     };
 
-    using Prims = MeshPrimitives;
+    using Prims = TriMeshPrims;
 
     TestCase const test_cases[] = {
         {
-            Prims::Cube::vert_coords(),
-            Prims::Cube::tri_verts(),
+            as<Vec3<f32>>(Prims::Cube::vertex_positions()),
+            as<Vec3<i16>>(Prims::Cube::face_vertices()),
             1.0,
             6.0,
         },
         {
-            Prims::Cube::vert_coords(),
-            Prims::Cube::tri_verts(),
+            as<Vec3<f32>>(Prims::Cube::vertex_positions()),
+            as<Vec3<i16>>(Prims::Cube::face_vertices()),
             2.0,
             12.0,
         },
         {
-            Prims::Cube::vert_coords(),
-            Prims::Cube::tri_verts(),
+            as<Vec3<f32>>(Prims::Cube::vertex_positions()),
+            as<Vec3<i16>>(Prims::Cube::face_vertices()),
             0.5,
             3.0,
         },
         {
-            Prims::Cube::vert_coords(),
-            Prims::Cube::tri_verts(),
+            as<Vec3<f32>>(Prims::Cube::vertex_positions()),
+            as<Vec3<i16>>(Prims::Cube::face_vertices()),
             0.0,
             0.0,
         },

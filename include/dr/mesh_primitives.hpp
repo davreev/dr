@@ -1,37 +1,67 @@
 #pragma once
 
-#include <dr/math_types.hpp>
 #include <dr/span.hpp>
 
 namespace dr
 {
 
-struct MeshPrimitives
+struct TriMeshPrims
 {
     struct Tetrahedron
     {
-        static Span<Vec3<f32> const> vert_coords();
-        static Span<Vec3<i32> const> tri_verts();
+        static Span<f32 const[3]> vertex_positions();
+        static Span<i16 const[2]> edge_vertices();
+        static Span<i16 const[3]> face_vertices();
+        static Span<i16 const[3]> face_edges();
     };
 
     struct Octahedron
     {
-        static Span<Vec3<f32> const> vert_coords();
-        static Span<Vec3<i32> const> tri_verts();
-    };
-
-    struct Cube
-    {
-        static Span<Vec3<f32> const> vert_coords();
-        static Span<Vec3<i32> const> tri_verts();
-        static Span<Vec4<i32> const> quad_verts();
-        static Span<Vec4<i32> const> tet_verts();
+        static Span<f32 const[3]> vertex_positions();
+        static Span<i16 const[2]> edge_vertices();
+        static Span<i16 const[3]> face_vertices();
+        static Span<i16 const[3]> face_edges();
     };
 
     struct Icosahedron
     {
-        static Span<Vec3<f32> const> vert_coords();
-        static Span<Vec3<i32> const> tri_verts();
+        static Span<f32 const[3]> vertex_positions();
+        static Span<i16 const[2]> edge_vertices();
+        static Span<i16 const[3]> face_vertices();
+        static Span<i16 const[3]> face_edges();
+    };
+
+    struct Cube
+    {
+        static Span<f32 const[3]> vertex_positions();
+        static Span<i16 const[2]> edge_vertices();
+        static Span<i16 const[3]> face_vertices();
+        static Span<i16 const[3]> face_edges();
+    };
+};
+
+struct QuadMeshPrims
+{
+    struct Cube
+    {
+        static Span<f32 const[3]> vertex_positions();
+        static Span<i16 const[2]> edge_vertices();
+        static Span<i16 const[4]> face_vertices();
+        static Span<i16 const[4]> face_edges();
+    };
+};
+
+struct TetMeshPrims
+{
+    struct Cube
+    {
+        static Span<f32 const[3]> vertex_positions();
+        static Span<i16 const[2]> edge_vertices();
+        static Span<i16 const[3]> face_vertices();
+        static Span<i16 const[3]> face_edges();
+        static Span<i16 const[4]> cell_vertices();
+        static Span<i16 const[6]> cell_edges();
+        static Span<i16 const[4]> cell_faces();
     };
 };
 
