@@ -118,7 +118,7 @@ struct ManyToOne
         /// Returns the key associated with the oppositely oriented element
         Key opposite() const { return {indices({0, 1, 3, 2})}; }
 
-        bool operator==(Key const& other) const { return indices == other.v_; }
+        bool operator==(Key const& other) const { return indices == other.indices; }
 
         operator Vec4<Index>() const { return indices; }
     };
@@ -167,9 +167,8 @@ struct VertsToEdge
                 f_v({2, 0}),
             };
 
-            insert(e_v[0], size(result));
-            insert(e_v[1], size(result));
-            insert(e_v[2], size(result));
+            for (i8 i = 0; i < 3; ++i)
+                insert(e_v[i], size(result));
         }
     }
 };
@@ -204,10 +203,8 @@ struct VertsToTri
                 c_v({3, 2, 1}),
             };
 
-            insert(f_v[0], size(result));
-            insert(f_v[1], size(result));
-            insert(f_v[2], size(result));
-            insert(f_v[3], size(result));
+            for (i8 i = 0; i < 4; ++i)
+                insert(f_v[i], size(result));
         }
     }
 };
@@ -237,14 +234,12 @@ void collect_edge_opposite_verts(
             f_v({2, 0}),
         };
 
-        if (auto const it = verts_to_edge.find(e_v[0]); it != verts_to_edge.end())
-            result[it->second] = f_v[2];
-
-        if (auto const it = verts_to_edge.find(e_v[1]); it != verts_to_edge.end())
-            result[it->second] = f_v[0];
-
-        if (auto const it = verts_to_edge.find(e_v[2]); it != verts_to_edge.end())
-            result[it->second] = f_v[1];
+        Index v_op[] = {f_v[2], f_v[0], f_v[1]};
+        for (i8 i = 0; i < 3; ++i)
+        {
+            if (auto const it = verts_to_edge.find(e_v[i]); it != verts_to_edge.end())
+                result[it->second] = v_op[i];
+        }
     }
 }
 
@@ -267,14 +262,11 @@ void collect_edge_tris(
             f_v({2, 0}),
         };
 
-        if (auto const it = verts_to_edge.find(e_v[0]); it != verts_to_edge.end())
-            result[it->second] = static_cast<Index>(f);
-
-        if (auto const it = verts_to_edge.find(e_v[1]); it != verts_to_edge.end())
-            result[it->second] = static_cast<Index>(f);
-
-        if (auto const it = verts_to_edge.find(e_v[2]); it != verts_to_edge.end())
-            result[it->second] = static_cast<Index>(f);
+        for (i8 i = 0; i < 3; ++i)
+        {
+            if (auto const it = verts_to_edge.find(e_v[i]); it != verts_to_edge.end())
+                result[it->second] = static_cast<Index>(f);
+        }
     }
 }
 
@@ -297,14 +289,41 @@ void collect_tri_edges(
             f_v({2, 0}),
         };
 
-        if (auto const it = verts_to_edge.find(e_v[0]); it != verts_to_edge.end())
-            result[f][0] = it->second;
+        auto& f_e = result[f];
+        for (i8 i = 0; i < 3; ++i)
+        {
+            if (auto const it = verts_to_edge.find(e_v[i]); it != verts_to_edge.end())
+                f_e[i] = it->second;
+        }
+    }
+}
 
-        if (auto const it = verts_to_edge.find(e_v[1]); it != verts_to_edge.end())
-            result[f][1] = it->second;
+/// Returns the oriented triangles incident to each tetrahedron
+template <typename Index>
+void collect_tet_tris(
+    Span<Vec4<Index> const> const& tet_verts,
+    typename VertsToTri<Index>::Map const& verts_to_tri,
+    Span<Vec4<Index>> const result)
+{
+    assert(result.size() == tet_verts.size());
+    as_mat(result).setConstant(invalid_index<Index>);
 
-        if (auto const it = verts_to_edge.find(e_v[2]); it != verts_to_edge.end())
-            result[f][2] = it->second;
+    for (isize c = 0; c < tet_verts.size(); ++c)
+    {
+        auto const& c_v = tet_verts[c];
+        Vec3<Index> const f_v[]{
+            c_v({0, 1, 2}),
+            c_v({1, 0, 3}),
+            c_v({2, 3, 0}),
+            c_v({3, 2, 1}),
+        };
+
+        auto& c_f = result[c];
+        for (i8 i = 0; i < 4; ++i)
+        {
+            if (auto const it = verts_to_tri.find(f_v[i]); it != verts_to_tri.end())
+                c_f[i] = it->second;
+        }
     }
 }
 

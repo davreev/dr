@@ -5,6 +5,22 @@
 #include <dr/mesh_incidence.hpp>
 #include <dr/mesh_primitives.hpp>
 
+UTEST(mesh_incidence, sanity)
+{
+    using namespace dr;
+
+    VertsToEdge<i16>::Map verts_to_edge{};
+    verts_to_edge[Vec2<i16>{0, 1}] = 0;
+
+    VertsToTri<i16>::Map verts_to_tri{};
+    verts_to_tri[Vec3<i16>{0, 1, 2}] = 0;
+
+    VertsToTet<i16>::Map verts_to_tets{};
+    verts_to_tets[Vec4<i16>{0, 1, 2, 3}] = 0;
+
+    ASSERT_TRUE(true);
+}
+
 UTEST(mesh_incidence, make_verts_to_edge)
 {
     using namespace dr;
@@ -138,22 +154,12 @@ UTEST(mesh_incidence, collect_edge_opposite_verts)
                 f_v({2, 0}),
             };
 
+            i16 const e_v_op[]{f_v[2], f_v[0], f_v[1]};
+            for (i8 i = 0; i < 3; ++i)
             {
-                auto const it = verts_to_edge.find(e_v[0]);
+                auto const it = verts_to_edge.find(e_v[i]);
                 ASSERT_TRUE(it != verts_to_edge.end());
-                ASSERT_EQ(f_v[2], edge_op_verts[it->second]);
-            }
-
-            {
-                auto const it = verts_to_edge.find(e_v[1]);
-                ASSERT_TRUE(it != verts_to_edge.end());
-                ASSERT_EQ(f_v[0], edge_op_verts[it->second]);
-            }
-
-            {
-                auto const it = verts_to_edge.find(e_v[2]);
-                ASSERT_TRUE(it != verts_to_edge.end());
-                ASSERT_EQ(f_v[1], edge_op_verts[it->second]);
+                ASSERT_EQ(e_v_op[i], edge_op_verts[it->second]);
             }
         }
     }
@@ -209,20 +215,9 @@ UTEST(mesh_incidence, collect_edge_tris)
                 f_v({2, 0}),
             };
 
+            for (i8 i = 0; i < 3; ++i)
             {
-                auto const it = verts_to_edge.find(e_v[0]);
-                ASSERT_TRUE(it != verts_to_edge.end());
-                ASSERT_EQ(f, edge_tris[it->second]);
-            }
-
-            {
-                auto const it = verts_to_edge.find(e_v[1]);
-                ASSERT_TRUE(it != verts_to_edge.end());
-                ASSERT_EQ(f, edge_tris[it->second]);
-            }
-
-            {
-                auto const it = verts_to_edge.find(e_v[2]);
+                auto const it = verts_to_edge.find(e_v[i]);
                 ASSERT_TRUE(it != verts_to_edge.end());
                 ASSERT_EQ(f, edge_tris[it->second]);
             }
@@ -281,23 +276,65 @@ UTEST(mesh_incidence, collect_tri_edges)
             };
 
             Vec3<i16> const f_e = tri_edges[f];
-
+            for (i8 i = 0; i < 3; ++i)
             {
-                auto const it = verts_to_edge.find(e_v[0]);
+                auto const it = verts_to_edge.find(e_v[i]);
                 ASSERT_TRUE(it != verts_to_edge.end());
-                ASSERT_EQ(f_e[0], it->second);
+                ASSERT_EQ(f_e[i], it->second);
             }
+        }
+    }
+}
 
-            {
-                auto const it = verts_to_edge.find(e_v[1]);
-                ASSERT_TRUE(it != verts_to_edge.end());
-                ASSERT_EQ(f_e[1], it->second);
-            }
+UTEST(mesh_incidence, collect_tet_tris)
+{
+    using namespace dr;
 
+    struct TestCase
+    {
+        Span<Vec4<i16> const> tet_verts;
+        struct
+        {
+            i16 num_faces;
+        } expect;
+    };
+
+    using Prims = TetMeshPrims;
+
+    TestCase const test_cases[] = {
+        {
+            as<Vec4<i16>>(Prims::Cube::cell_vertices()),
+            {16},
+        },
+    };
+
+    VertsToTri<i16>::Map verts_to_tri{};
+    DynamicArray<Vec4<i16>> tet_tris{};
+
+    for (auto const& [tet_verts, expect] : test_cases)
+    {
+        VertsToTri<i16>::make_from_tets(tet_verts, verts_to_tri);
+        ASSERT_EQ(expect.num_faces * 2, size(verts_to_tri));
+
+        tet_tris.resize(tet_verts.size());
+        collect_tet_tris(tet_verts, verts_to_tri, as_span(tet_tris));
+
+        for (isize c = 0; c < tet_verts.size(); ++c)
+        {
+            auto const& c_v = tet_verts[c];
+            Vec3<i16> const f_v[]{
+                c_v({0, 1, 2}),
+                c_v({1, 0, 3}),
+                c_v({2, 3, 0}),
+                c_v({3, 2, 1}),
+            };
+
+            Vec4<i16> const& c_f = tet_tris[c];
+            for (i8 i = 0; i < 4; ++i)
             {
-                auto const it = verts_to_edge.find(e_v[2]);
-                ASSERT_TRUE(it != verts_to_edge.end());
-                ASSERT_EQ(f_e[2], it->second);
+                auto const it = verts_to_tri.find(f_v[i]);
+                ASSERT_TRUE(it != verts_to_tri.end());
+                ASSERT_EQ(c_f[i], it->second);
             }
         }
     }
