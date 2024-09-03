@@ -57,60 +57,60 @@ struct HalfedgeMesh : AllocatorAware
     struct VertexCirculator
     {
         VertexCirculator(HalfedgeMesh const& mesh, Halfedge const start) :
-            halfedge_next_{as_span(mesh.halfedge_next_)}, start_{start}, current_{start}
+            hedge_next_{as_span(mesh.hedge_next_)}, start_{start}, curr_{start}
         {
         }
 
         /// Returns the current halfedge
-        Halfedge current() const { return Halfedge{current_}; }
+        Halfedge current() const { return Halfedge{curr_}; }
 
         /// Returns true if the current halfedge is valid
-        bool is_valid() const { return current_ != invalid_index_; }
+        bool is_valid() const { return curr_ != invalid_index_; }
 
         /// Advances to the next halfedge around the vertex
         void advance()
         {
-            Index const next = halfedge_next_[current_ ^ 1];
-            current_ = (next == start_) ? invalid_index_ : next;
+            Index const next = hedge_next_[curr_ ^ 1];
+            curr_ = (next == start_) ? invalid_index_ : next;
         }
 
         /// Advances to the next halfedge around the vertex
         void operator++() { advance(); }
 
       private:
-        Span<Index const> halfedge_next_;
+        Span<Index const> hedge_next_;
         Index start_;
-        Index current_;
+        Index curr_;
     };
 
     /// Iterates over the halfedges within a face
     struct FaceCirculator
     {
         FaceCirculator(HalfedgeMesh const& mesh, Halfedge const start) :
-            halfedge_next_{as_span(mesh.halfedge_next_)}, start_{start}, current_{start}
+            hedge_next_{as_span(mesh.hedge_next_)}, start_{start}, curr_{start}
         {
         }
 
         /// Returns the current halfedge
-        Halfedge current() const { return Halfedge{current_}; }
+        Halfedge current() const { return Halfedge{curr_}; }
 
         /// Returns true if the current halfedge is valid
-        bool is_valid() const { return current_ != invalid_index_; }
+        bool is_valid() const { return curr_ != invalid_index_; }
 
         /// Advances to the next halfedge in the face
         void advance()
         {
-            Index const next = halfedge_next_[current_];
-            current_ = (next == start_) ? invalid_index_ : next;
+            Index const next = hedge_next_[curr_];
+            curr_ = (next == start_) ? invalid_index_ : next;
         }
 
         /// Advances to the next halfedge in the face
         void operator++() { advance(); }
 
       private:
-        Span<Index const> halfedge_next_;
+        Span<Index const> hedge_next_;
         Index start_;
-        Index current_;
+        Index curr_;
     };
 
     /// Iterates over the halfedges within a hole
@@ -182,26 +182,26 @@ struct HalfedgeMesh : AllocatorAware
     };
 
     HalfedgeMesh(Allocator const alloc = {}) :
-        halfedge_next_(alloc),
-        halfedge_prev_(alloc),
-        halfedge_vertex_(alloc),
-        halfedge_face_(alloc),
-        halfedge_hole_(alloc),
-        vertex_halfedge_(alloc),
-        face_halfedge_(alloc),
-        hole_halfedge_(alloc)
+        hedge_next_(alloc),
+        hedge_prev_(alloc),
+        hedge_vert_(alloc),
+        hedge_face_(alloc),
+        hedge_hole_(alloc),
+        vert_hedge_(alloc),
+        face_hedge_(alloc),
+        hole_hedge_(alloc)
     {
     }
 
     HalfedgeMesh(HalfedgeMesh const& other, Allocator const alloc = {}) :
-        halfedge_next_(other.halfedge_next_, alloc),
-        halfedge_prev_(other.halfedge_prev_, alloc),
-        halfedge_vertex_(other.halfedge_vertex_, alloc),
-        halfedge_face_(other.halfedge_face_, alloc),
-        halfedge_hole_(other.halfedge_hole_, alloc),
-        vertex_halfedge_(other.vertex_halfedge_, alloc),
-        face_halfedge_(other.face_halfedge_, alloc),
-        hole_halfedge_(other.hole_halfedge_, alloc)
+        hedge_next_(other.hedge_next_, alloc),
+        hedge_prev_(other.hedge_prev_, alloc),
+        hedge_vert_(other.hedge_vert_, alloc),
+        hedge_face_(other.hedge_face_, alloc),
+        hedge_hole_(other.hedge_hole_, alloc),
+        vert_hedge_(other.vert_hedge_, alloc),
+        face_hedge_(other.face_hedge_, alloc),
+        hole_hedge_(other.hole_hedge_, alloc)
     {
     }
 
@@ -210,85 +210,85 @@ struct HalfedgeMesh : AllocatorAware
     HalfedgeMesh& operator=(HalfedgeMesh&& other) noexcept = default;
 
     /// Returns the allocator used by this data structure
-    Allocator allocator() const { return halfedge_next_.get_allocator(); }
+    Allocator allocator() const { return hedge_next_.get_allocator(); }
 
     /// Returns the oppositely oriented twin of the given halfedge
-    static Halfedge twin(Halfedge const halfedge)
+    static Halfedge twin(Halfedge const he)
     {
-        return Halfedge{(assert(halfedge.is_valid()), halfedge.index ^ 1)};
+        return Halfedge{(assert(he.is_valid()), he.index ^ 1)};
     }
 
     /// Returns the halfedge after the given halfedge
-    Halfedge next(Halfedge const halfedge) const { return Halfedge{halfedge_next_[halfedge]}; }
+    Halfedge next(Halfedge const he) const { return Halfedge{hedge_next_[he]}; }
 
     /// Returns the halfedge before the given halfedge
-    Halfedge previous(Halfedge const halfedge) const { return Halfedge{halfedge_prev_[halfedge]}; }
+    Halfedge previous(Halfedge const he) const { return Halfedge{hedge_prev_[he]}; }
 
     /// Returns the halfedge at the given index
-    static Halfedge halfedge(Index const index) { return Halfedge{index}; }
+    static Halfedge halfedge(Index const i) { return Halfedge{i}; }
 
     /// Returns the first outgoing halfedge at the given vertex. If the vertex is on the mesh
     /// boundary, then the returned halfedge will be as well.
-    Halfedge halfedge(Vertex const vertex) const { return Halfedge{vertex_halfedge_[vertex]}; }
+    Halfedge halfedge(Vertex const e) const { return Halfedge{vert_hedge_[e]}; }
 
     /// Returns the first halfedge of the given edge
-    static Halfedge halfedge(Edge const edge)
+    static Halfedge halfedge(Edge const e)
     {
-        return Halfedge{(assert(edge.is_valid()), edge << 1)};
+        return Halfedge{(assert(e.is_valid()), e << 1)};
     }
 
     /// Returns the first halfedge in the given face
-    Halfedge halfedge(Face const face) const { return Halfedge{face_halfedge_[face]}; }
+    Halfedge halfedge(Face const f) const { return Halfedge{face_hedge_[f]}; }
 
     /// Returns the first halfedge in the given hole
-    Halfedge halfedge(Hole const hole) const { return Halfedge{hole_halfedge_[hole]}; }
+    Halfedge halfedge(Hole const h) const { return Halfedge{hole_hedge_[h]}; }
 
     /// Returns the vertex at the given index
-    static Vertex vertex(Index const index) { return Vertex{index}; }
+    static Vertex vertex(Index const i) { return Vertex{i}; }
 
     /// Returns the vertex at the start of the given halfegde
-    Vertex vertex(Halfedge const halfedge) const { return Vertex{halfedge_vertex_[halfedge]}; }
+    Vertex vertex(Halfedge const he) const { return Vertex{hedge_vert_[he]}; }
 
     /// Returns the edge at the given index
-    static Edge edge(Index const index) { return Edge{index}; }
+    static Edge edge(Index const i) { return Edge{i}; }
 
     /// Returns the edge incident to the given halfedge
-    static Edge edge(Halfedge const halfedge)
+    static Edge edge(Halfedge const he)
     {
-        return Edge{(assert(halfedge.is_valid()), halfedge >> 1)};
+        return Edge{(assert(he.is_valid()), he >> 1)};
     }
 
     /// Returns the face at the given index
-    static Face face(Index const index) { return Face{index}; }
+    static Face face(Index const i) { return Face{i}; }
 
     /// Returns the face incident to the given halfedge. If the halfedge is on the mesh boundary,
     /// the returned face will be invalid.
-    Face face(Halfedge const halfedge) const { return Face{halfedge_face_[halfedge]}; }
+    Face face(Halfedge const he) const { return Face{hedge_face_[he]}; }
 
     /// Returns the hole at the given index
-    static Hole hole(Index const index) { return Hole{index}; }
+    static Hole hole(Index const i) { return Hole{i}; }
 
     /// Returns the hole incident to the given halfedge. If the halfedge isn't on the mesh boundary,
     /// the returned hole will be invalid.
-    Hole hole(Halfedge const halfedge) const { return Hole{halfedge_hole_[halfedge]}; }
+    Hole hole(Halfedge const he) const { return Hole{hedge_hole_[he]}; }
 
     /// Returns the number of edges incident to the given vertex
-    Index vertex_degree(Vertex const vertex) const
+    Index vertex_degree(Vertex const v) const
     {
         Index result = 0;
 
-        for (auto itr = circulate_vertex(vertex); itr.is_valid(); ++itr)
+        for (auto itr = circulate_vertex(v); itr.is_valid(); ++itr)
             ++result;
 
         return result;
     }
 
     /// Returns the number of edges incident to the given face
-    Index face_degree(Face const face) const
+    Index face_degree(Face const f) const
     {
         Index result = 0;
 
-        for (auto itr = circulate_face(face); itr.is_valid(); ++itr)
+        for (auto itr = circulate_face(f); itr.is_valid(); ++itr)
             ++result;
 
         return result;
@@ -323,81 +323,81 @@ struct HalfedgeMesh : AllocatorAware
     }
 
     /// Returns the number of vertices in the mesh
-    Index num_vertices() const { return size_as<Index>(vertex_halfedge_); }
+    Index num_vertices() const { return size_as<Index>(vert_hedge_); }
 
     /// Returns the number of halfedges in the mesh
-    Index num_halfedges() const { return size_as<Index>(halfedge_next_); }
+    Index num_halfedges() const { return size_as<Index>(hedge_next_); }
 
     /// Returns the number of edges in the mesh
     Index num_edges() const { return num_halfedges() >> 1; }
 
     /// Returns the number of faces in the mesh
-    Index num_faces() const { return size_as<Index>(face_halfedge_); }
+    Index num_faces() const { return size_as<Index>(face_hedge_); }
 
     /// Returns the number of holes in the mesh
-    Index num_holes() const { return size_as<Index>(hole_halfedge_); }
+    Index num_holes() const { return size_as<Index>(hole_hedge_); }
 
     /// Returns true if the given halfedge is on the mesh boundary
-    bool is_boundary(Halfedge const halfedge) const
+    bool is_boundary(Halfedge const he) const
     {
-        return halfedge_face_[halfedge] == invalid_index_;
+        return hedge_face_[he] == invalid_index_;
     }
 
     // Returns true if the given vertex is on the mesh boundary
-    bool is_boundary(Vertex const vertex) const { return is_boundary(halfedge(vertex)); }
+    bool is_boundary(Vertex const v) const { return is_boundary(halfedge(v)); }
 
     /// Returns true if the given edge is on the mesh boundary
-    bool is_boundary(Edge const edge) const
+    bool is_boundary(Edge const e) const
     {
-        Halfedge const he = halfedge(edge);
+        Halfedge const he = halfedge(e);
         return is_boundary(he) || is_boundary(twin(he));
     }
 
     /// Returns true if this mesh is empty
-    bool is_empty() const { return halfedge_next_.size() == 0; }
+    bool is_empty() const { return hedge_next_.size() == 0; }
 
     /// Returns true if this mesh includes previous halfedges
-    bool includes_previous() const { return halfedge_prev_.size() > 0; }
+    bool includes_previous() const { return hedge_prev_.size() > 0; }
 
     /// Returns true if this mesh includes holes
-    bool includes_holes() const { return hole_halfedge_.size() > 0; }
+    bool includes_holes() const { return hole_hedge_.size() > 0; }
 
     /// Returns a circulator for the given vertex
-    VertexCirculator circulate_vertex(Vertex const vertex) const
+    VertexCirculator circulate_vertex(Vertex const v) const
     {
-        return {*this, halfedge(vertex)};
+        return {*this, halfedge(v)};
     }
 
     /// Returns a circulator for the vertex at the start of the given halfedge. When used,
     /// circulation will start from the given halfedge.
-    VertexCirculator circulate_vertex(Halfedge const halfedge) const { return {*this, halfedge}; }
+    VertexCirculator circulate_vertex(Halfedge const he) const { return {*this, he}; }
 
     /// Returns a circulator for the given face
-    FaceCirculator circulate_face(Face const face) const { return {*this, halfedge(face)}; }
+    FaceCirculator circulate_face(Face const f) const { return {*this, halfedge(f)}; }
 
     /// Returns a circulator for the face containing the given halfedge. When used, circulation will
     /// start from the given halfedge.
-    FaceCirculator circulate_face(const Halfedge halfedge) const { return {*this, halfedge}; }
+    FaceCirculator circulate_face(Halfedge const he) const { return {*this, he}; }
 
     /// Returns a circulator for the given hole
-    HoleCirculator circulate_hole(Hole const hole) const { return {*this, halfedge(hole)}; }
+    HoleCirculator circulate_hole(Hole const h) const { return {*this, halfedge(h)}; }
 
     /// Returns a circulator for the hole containing the given halfedge. When used, circulation will
     /// start from the given halfedge.
-    HoleCirculator circulate_hole(const Halfedge halfedge) const { return {*this, halfedge}; }
+    HoleCirculator circulate_hole(Halfedge const he) const { return {*this, he}; }
 
   private:
     static constexpr Index invalid_index_{-1};
 
-    DynamicArray<Index> halfedge_next_;
-    DynamicArray<Index> halfedge_prev_;
-    DynamicArray<Index> halfedge_vertex_;
-    DynamicArray<Index> halfedge_face_;
-    DynamicArray<Index> halfedge_hole_;
+    DynamicArray<Index> hedge_next_;
+    DynamicArray<Index> hedge_prev_;
+    DynamicArray<Index> hedge_vert_;
+    DynamicArray<Index> hedge_face_;
+    DynamicArray<Index> hedge_hole_;
 
-    DynamicArray<Index> vertex_halfedge_;
-    DynamicArray<Index> face_halfedge_;
-    DynamicArray<Index> hole_halfedge_;
+    DynamicArray<Index> vert_hedge_;
+    DynamicArray<Index> face_hedge_;
+    DynamicArray<Index> hole_hedge_;
 };
 
 } // namespace dr

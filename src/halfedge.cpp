@@ -124,19 +124,19 @@ Builder::Error Builder::make_from_face_vertex(
         }
     }
 
-    auto& he_next = result.halfedge_next_;
+    auto& he_next = result.hedge_next_;
     he_next.assign(num_hedges, invalid_index_);
 
-    auto& he_vert = result.halfedge_vertex_;
+    auto& he_vert = result.hedge_vert_;
     he_vert.assign(num_hedges, invalid_index_);
 
-    auto& he_face = result.halfedge_face_;
+    auto& he_face = result.hedge_face_;
     he_face.assign(num_hedges, invalid_index_);
 
-    auto& v_hedge = result.vertex_halfedge_;
+    auto& v_hedge = result.vert_hedge_;
     v_hedge.assign(num_verts, invalid_index_);
 
-    auto& f_hedge = result.face_halfedge_;
+    auto& f_hedge = result.face_hedge_;
     f_hedge.assign(num_faces, invalid_index_);
 
     // Connect faces to halfedges and halfedges to vertices, faces, and next
@@ -212,7 +212,7 @@ Builder::Error Builder::make_from_face_vertex(
     // Optionally connect halfedges to previous halfedges
     if (include_previous)
     {
-        auto& he_prev = result.halfedge_prev_;
+        auto& he_prev = result.hedge_prev_;
         he_prev.assign(num_hedges, invalid_index_);
 
         for (Index he = 0; he < num_hedges; ++he)
@@ -220,16 +220,16 @@ Builder::Error Builder::make_from_face_vertex(
     }
     else
     {
-        result.halfedge_prev_.clear();
+        result.hedge_prev_.clear();
     }
 
     // Optionally discover holes and connect them to/from halfedges
     if (include_holes)
     {
-        auto& he_hole = result.halfedge_hole_;
+        auto& he_hole = result.hedge_hole_;
         he_hole.assign(num_hedges, invalid_index_);
 
-        auto& h_hedge = result.hole_halfedge_;
+        auto& h_hedge = result.hole_hedge_;
         h_hedge.clear();
 
         Index num_holes = 0;
@@ -261,8 +261,8 @@ Builder::Error Builder::make_from_face_vertex(
     }
     else
     {
-        result.halfedge_hole_.clear();
-        result.hole_halfedge_.clear();
+        result.hedge_hole_.clear();
+        result.hole_hedge_.clear();
     }
 
     // Check for non-manifold vertices
