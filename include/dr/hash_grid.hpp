@@ -55,7 +55,7 @@ struct HashGrid : AllocatorAware
         clear();
     }
 
-    /// Clears all buckets in the grid
+    /// Removes all values from the grid
     void clear()
     {
         constexpr usize max_version = ~0;

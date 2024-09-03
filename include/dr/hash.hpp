@@ -14,7 +14,7 @@ using Hash = ankerl::unordered_dense::hash<T, Enable>;
 /// Allows the return value of derived hash types to be used directly by hash containers
 struct HighQualityHash
 {
-    // See https://github.com/martinus/unordered_dense?tab=readme-ov-file#32-hash
+    // See https://github.com/martinus/unordered_dense/blob/v4.4.0/README.md#32-hash
     using is_avalanching = void;
 };
 
