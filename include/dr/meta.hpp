@@ -65,16 +65,16 @@ template <typename... T>
 struct TypePack
 {
     template <typename... U>
-    using append = TypePack<T..., U...>;
+    using Append = TypePack<T..., U...>;
 
     template <typename... U>
-    using prepend = TypePack<U..., T...>;
+    using Prepend = TypePack<U..., T...>;
 
     template <typename Other>
-    using join = typename impl::Join<TypePack<T...>, Other>::Type;
+    using Join = typename impl::Join<TypePack<T...>, Other>::Type;
 
     template <isize index>
-    using at = typename impl::TypeAt<index, TypePack<T...>>::Type;
+    using At = typename impl::TypeAt<index, TypePack<T...>>::Type;
 
     template <typename U>
     static constexpr bool includes = ((std::is_same_v<U, T>) || ...);
@@ -86,13 +86,13 @@ template <typename T, T... vals>
 struct ValuePack
 {
     template <T... more_vals>
-    using append = ValuePack<T, vals..., more_vals...>;
+    using Append = ValuePack<T, vals..., more_vals...>;
 
     template <T... more_vals>
-    using prepend = ValuePack<T, more_vals..., vals...>;
+    using Prepend = ValuePack<T, more_vals..., vals...>;
 
     template <typename Other>
-    using join = typename impl::Join<ValuePack<T, vals...>, Other>::Type;
+    using Join = typename impl::Join<ValuePack<T, vals...>, Other>::Type;
 
     template <isize index>
     static constexpr T at = impl::ValueAt<index, ValuePack<T, vals...>>::value;
