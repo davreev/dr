@@ -30,9 +30,11 @@ struct UniformDistribution<Int, std::enable_if_t<(is_integer<Int> || is_natural<
 template <typename Scalar>
 using UniformDistribution = typename impl::UniformDistribution<Scalar>::Type;
 
-template <typename Scalar>
+template <typename Scalar, typename Engine = std::default_random_engine>
 struct Random
 {
+    using Distribution = UniformDistribution<Scalar>;
+
     Random() = default;
 
     Random(u32 const seed) :
@@ -54,9 +56,6 @@ struct Random
     Scalar operator()() { return distribution_(engine_); }
 
   private:
-    using Engine = std::default_random_engine;
-    using Distribution = UniformDistribution<Scalar>;
-
     Engine engine_{};
     Distribution distribution_{};
 };
