@@ -6,25 +6,19 @@
 #include <Eigen/SparseCholesky>
 
 #include <dr/linalg_reshape.hpp>
-#include <dr/meta.hpp>
 #include <dr/sparse_linalg_types.hpp>
 
 namespace dr
 {
 
+template <typename T, typename Enable = void>
+struct SelectSolver;
+
 /// Minimizes a convex quadratic objective with fixed value constraints
 template <typename Scalar, typename Index = i32, SolverType solver_type = SolverType_Direct>
 struct SparseMinQuadFixed
 {
-  private:
-    using DirectSolver = Eigen::SimplicialLDLT<SparseMat<Scalar, Index>>;
-    using IterativeSolver = Eigen::ConjugateGradient<
-        SparseMat<Scalar, Index>,
-        Eigen::Lower | Eigen::Upper,
-        Eigen::IncompleteCholesky<Scalar>>;
-
-  public:
-    using Solver = typename TypePack<DirectSolver, IterativeSolver>::template at<solver_type>;
+    using Solver = typename SelectSolver<SparseMinQuadFixed>::Type;
 
     /// Isolates unknown variables and factorizes/preconditions the linear system
     template <typename Predicate>
@@ -141,6 +135,21 @@ struct SparseMinQuadFixed
         x_.topRows(n_[0]) = solver_.solve(-b_);
         x.noalias() = P * x_;
     }
+};
+
+template <typename Scalar, typename Index>
+struct SelectSolver<SparseMinQuadFixed<Scalar, Index, SolverType_Direct>>
+{
+    using Type = Eigen::SimplicialLDLT<SparseMat<Scalar, Index>>;
+};
+
+template <typename Scalar, typename Index>
+struct SelectSolver<SparseMinQuadFixed<Scalar, Index, SolverType_Iterative>>
+{
+    using Type = Eigen::ConjugateGradient<
+        SparseMat<Scalar, Index>,
+        Eigen::Lower | Eigen::Upper,
+        Eigen::IncompleteCholesky<Scalar>>;
 };
 
 } // namespace dr
