@@ -1,7 +1,5 @@
 #pragma once
 
-#include <array>
-
 #include <dr/basic_types.hpp>
 
 namespace dr
@@ -30,20 +28,6 @@ struct TypeAt<0, TypePack<Head, Tail...>>
     using Type = Head;
 };
 
-template <isize index, typename T>
-struct ValueAt;
-
-template <isize index, typename T, T head, T... tail>
-struct ValueAt<index, ValuePack<T, head, tail...>> : ValueAt<index - 1, ValuePack<T, tail...>>
-{
-};
-
-template <typename T, T head, T... tail>
-struct ValueAt<0, ValuePack<T, head, tail...>>
-{
-    static constexpr T value = head;
-};
-
 template <typename T, typename U>
 struct Join;
 
@@ -57,6 +41,18 @@ template <typename T, T... a, T... b>
 struct Join<ValuePack<T, a...>, ValuePack<T, b...>>
 {
     using Type = ValuePack<T, a..., b...>;
+};
+
+template <typename T, typename U>
+struct IsSame
+{
+    static constexpr bool value = false;
+};
+
+template <typename T>
+struct IsSame<T, T>
+{
+    static constexpr bool value = true;
 };
 
 } // namespace impl
@@ -77,7 +73,7 @@ struct TypePack
     using At = typename impl::TypeAt<index, TypePack<T...>>::Type;
 
     template <typename U>
-    static constexpr bool includes = ((std::is_same_v<U, T>) || ...);
+    static constexpr bool includes = (impl::IsSame<U, T>::value || ...);
 
     static constexpr isize size = sizeof...(T);
 };
@@ -94,15 +90,15 @@ struct ValuePack
     template <typename Other>
     using Join = typename impl::Join<ValuePack<T, vals...>, Other>::Type;
 
+    static constexpr isize size = sizeof...(vals);
+
+    static constexpr T array[size]{vals...};
+
     template <isize index>
-    static constexpr T at = impl::ValueAt<index, ValuePack<T, vals...>>::value;
+    static constexpr T at = array[index];
 
     template <T val>
     static constexpr bool includes = ((vals == val) || ...);
-
-    static constexpr isize size = sizeof...(vals);
-
-    static constexpr std::array<T, sizeof...(vals)> array = {vals...};
 };
 
 } // namespace dr
