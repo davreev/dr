@@ -604,8 +604,8 @@ Mat<Real, 1, 3> eval_laplacian(
     return impl::eval_laplacian(p0, p1, p2, fe);
 }
 
-/// Evaluates a single triangle's contributions to the Laplacian of a n scalar functions defined on
-/// mesh vertices. Returns n integrated scalar quantities associated with each vertex.
+/// Evaluates a single triangle's contributions to the Laplacian of a vector-valued function defined
+/// on mesh vertices. Returns an integrated vector quantity associated with each vertex.
 template <typename Real, int n>
 Mat<Real, n, 3> eval_laplacian(
     Vec3<Real> const& p0,
