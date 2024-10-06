@@ -629,11 +629,27 @@ Interval<Scalar, dim> interval_union(Interval<Scalar, dim> const& a, Interval<Sc
     };
 }
 
+/// Computes the bounding interval of a point cloud
 template <typename Scalar, int dim>
 Interval<Scalar, dim> bounding_interval(Span<Vec<Scalar, dim> const> const& points)
 {
     auto m = as_mat(points);
     return {m.rowwise().minCoeff(), m.rowwise().maxCoeff()};
+}
+
+/// Computes the bounding radius of a point cloud with a given centroid
+template <typename Real>
+Real bounding_radius(Span<Vec3<Real> const> const& points, Vec3<Real> const& centroid)
+{
+    Real sqr_rad{0.0};
+
+    for (isize i = 0; i < points.size(); ++i)
+    {
+        auto const& p = points[i];
+        sqr_rad = max((centroid - p).squaredNorm(), sqr_rad);
+    }
+
+    return std::sqrt(sqr_rad);
 }
 
 template <typename Scalar, int dim>
