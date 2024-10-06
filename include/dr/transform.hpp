@@ -84,14 +84,15 @@ struct Rotation<Real, 2>
 {
     static_assert(is_real<Real>);
 
-    /// First basis vector after rotation (assumed to be unit length)
-    Vec2<Real> x{Vec2<Real>::UnitX()};
+    /// Unit complex number representation of the rotation. This can also be interpreted as the
+    /// first standard basis vector after rotation.
+    Vec2<Real> c{Vec2<Real>::UnitX()};
 
     /// Returns the inverse of this transformation
-    Rotation<Real, 2> inverse() const { return {vec(x[0], -x[1])}; }
+    Rotation<Real, 2> inverse() const { return {vec(c[0], -c[1])}; }
 
     /// Returns the matrix representation of this transformation
-    Mat2<Real> to_matrix() const { return mat(x, vec(-x[1], x[0])); }
+    Mat2<Real> to_matrix() const { return mat(c, vec(-c[1], c[0])); }
 
     /// Applies this transformation to the given vector
     Vec2<Real> apply(Vec2<Real> const& u) const { return to_matrix() * u; }
@@ -100,7 +101,7 @@ struct Rotation<Real, 2>
     Vec2<Real> operator*(Vec2<Real> const& u) const { return apply(u); }
 
     /// Applies this transformation to another transformation
-    Rotation<Real, 2> apply(Rotation<Real, 2> const& other) const { return {apply(other.x)}; }
+    Rotation<Real, 2> apply(Rotation<Real, 2> const& other) const { return {apply(other.c)}; }
 
     /// Applies this transformation to another transformation
     Rotation<Real, 2> operator*(Rotation<Real, 2> const& other) const { return apply(other); }
@@ -111,7 +112,7 @@ struct Rotation<Real, 3>
 {
     static_assert(is_real<Real>);
 
-    /// Quaternion representation of the rotation (assumed to be unit length)
+    /// Unit quaternion representation of the rotation
     Quat<Real> q{Quat<Real>::Identity()};
 
     /// Returns the inverse of this transformation
@@ -305,7 +306,7 @@ struct Rigid
     /// Applies the inverse of this transformation to another transformation
     Rigid<Real, dim> apply_inverse(Rigid<Real, dim> const& other) const
     {
-        // Sa⁻¹ Ra⁻¹ Ta⁻¹ Tb Rb Sb
+        // Ra⁻¹ Ta⁻¹ Tb Rb
         Rotation<Real, dim> const r_inv = rotation.inverse();
         return {
             r_inv * other.rotation,

@@ -168,7 +168,7 @@ UTEST(rigid2, apply_inverse_self)
         Rigid2<f64> const a{{Vec2<f64>::Random().normalized()}, Vec2<f64>::Random()};
         Rigid2<f64> const b = a.apply_inverse(a);
 
-        ASSERT_TRUE(near_equal(b.rotation.x, identity.rotation.x, eps));
+        ASSERT_TRUE(near_equal(b.rotation.c, identity.rotation.c, eps));
         ASSERT_TRUE(near_equal(b.translation, identity.translation, eps));
     }
 }
@@ -219,7 +219,7 @@ UTEST(conformal2, apply_inverse_self)
 
         Conformal2<f64> const b = a.apply_inverse(a);
 
-        ASSERT_TRUE(near_equal(b.rotation.x, identity.rotation.x, eps));
+        ASSERT_TRUE(near_equal(b.rotation.c, identity.rotation.c, eps));
         ASSERT_TRUE(near_equal(b.translation, identity.translation, eps));
         ASSERT_TRUE(near_equal(b.scale, identity.scale, eps));
     }
