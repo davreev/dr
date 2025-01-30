@@ -36,12 +36,23 @@ UTEST(type_pack, join)
     ASSERT_TRUE(true);
 }
 
+UTEST(type_pack, includes_all)
+{
+    using namespace dr;
+
+    using TypesA = TypePack<i8, i16, i32, i64>;
+    static_assert(TypesA::includes_all<i8, i16, i32>);
+    static_assert(!TypesA::includes_all<i8, i16, i32, u8>);
+
+    ASSERT_TRUE(true);
+}
+
 UTEST(value_pack, append_prepend)
 {
     using namespace dr;
 
     using ValuesA = ValuePack<i32, 1, 2>;
-    
+
     using ValuesB = ValuesA::Append<3>;
     static_assert(ValuesB::at<2> == 3);
     static_assert(ValuesB::size == 3);
@@ -65,6 +76,17 @@ UTEST(value_pack, join)
     static_assert(TypesAB::includes<1>);
     static_assert(TypesAB::includes<2>);
     static_assert(TypesAB::includes<3>);
+
+    ASSERT_TRUE(true);
+}
+
+UTEST(value_pack, includes_all)
+{
+    using namespace dr;
+
+    using TypesA = ValuePack<i32, 0, 1, 2, 3, 4>;
+    static_assert(TypesA::includes_all<0, 2, 4>);
+    static_assert(!TypesA::includes_all<0, 2, 4, 5>);
 
     ASSERT_TRUE(true);
 }

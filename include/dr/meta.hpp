@@ -75,6 +75,9 @@ struct TypePack
     template <typename U>
     static constexpr bool includes = (impl::IsSame<U, T>::value || ...);
 
+    template <typename... U>
+    static constexpr bool includes_all = (includes<U> && ...);
+
     static constexpr isize size = sizeof...(T);
 };
 
@@ -99,6 +102,9 @@ struct ValuePack
 
     template <T val>
     static constexpr bool includes = ((vals == val) || ...);
+
+    template <T... other_vals>
+    static constexpr bool includes_all = (includes<other_vals> && ...);
 };
 
 } // namespace dr
