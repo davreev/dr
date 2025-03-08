@@ -6,7 +6,7 @@ namespace dr
 {
 
 template <typename Func>
-struct Deferred
+struct Deferred final
 {
     template <typename Func_>
     Deferred(Func_&& func) :

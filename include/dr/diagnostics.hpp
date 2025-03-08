@@ -8,7 +8,7 @@ namespace dr
 {
 
 template <typename Duration>
-struct ScopedTimer
+struct ScopedTimer final
 {
     ScopedTimer(char const* const context, std::FILE* const out = stdout) :
         context_{context},

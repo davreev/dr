@@ -133,7 +133,7 @@ Span<u8 const> as_bytes(T const&& item) = delete;
 
 /// Simple RAII-style heap allocation
 template <usize alignment>
-struct ScopedAlloc
+struct ScopedAlloc final
 {
     ScopedAlloc(usize size, Allocator alloc = {}) :
         data_{alloc.allocate(size, alignment)}, size_{size}, alloc_{alloc}
@@ -198,7 +198,7 @@ UniquePtr<T> make_unique(Allocator alloc, Args&&... args)
 }
 
 /// Memory resource for tracking allocation frequency and memory footprint
-struct DebugMemoryResource : public std::pmr::memory_resource
+struct DebugMemoryResource final : public std::pmr::memory_resource
 {
     std::pmr::memory_resource* upstream;
     usize num_allocs{};

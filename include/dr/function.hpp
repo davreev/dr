@@ -14,7 +14,7 @@ struct Function;
 
 /// Type-erased allocator-aware function wrapper
 template <typename Return, typename... Args>
-struct Function<Return(Args...)> : AllocatorAware
+struct Function<Return(Args...)> final : AllocatorAware
 {
     /// Creates an instance from a function object
     template <
