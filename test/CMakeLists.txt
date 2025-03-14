@@ -11,7 +11,6 @@ add_executable(
     grid_tests.cpp
     halfedge_tests.cpp
     hash_grid_tests.cpp
-    interpolate_tests.cpp
     linalg_tests.cpp
     main.cpp
     math_tests.cpp
@@ -27,6 +26,7 @@ add_executable(
     slot_map_tests.cpp
     span_tests.cpp
     sparse_min_quad_tests.cpp
+    spline_tests.cpp
     transform_tests.cpp
     triangulate_tests.cpp
 )

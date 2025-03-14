@@ -1,8 +1,8 @@
 #include <utest.h>
 
-#include <dr/interpolate.hpp>
+#include <dr/spline.hpp>
 
-UTEST(interpolate, linear)
+UTEST(spline, linear)
 {
     using namespace dr;
 
@@ -67,15 +67,15 @@ UTEST(interpolate, linear)
 
     for (auto const& [vals, t, expect] : test_cases)
     {
-        auto const val = interp_linear(vals, t);
+        auto const val = eval_linear(vals, t);
         ASSERT_NEAR(expect.val, val, eps);
 
-        auto const dt = interp_linear_dt(vals, t);
+        auto const dt = eval_linear_dt(vals, t);
         ASSERT_NEAR(expect.dt, dt, eps);
     }
 }
 
-UTEST(interpolate, cubic)
+UTEST(spline, cubic)
 {
     using namespace dr;
 
@@ -153,15 +153,15 @@ UTEST(interpolate, cubic)
 
     for (auto const& [vals, t, expect] : test_cases)
     {
-        auto const val = interp_cubic(vals, t);
+        auto const val = eval_cubic(vals, t);
         ASSERT_NEAR(expect.val, val, eps);
 
-        auto const dt = interp_cubic_dt(vals, t);
+        auto const dt = eval_cubic_dt(vals, t);
         ASSERT_NEAR(expect.dt, dt, eps);
     }
 }
 
-UTEST(interpolate, bezier_quadratic)
+UTEST(spline, bezier_quadratic)
 {
     using namespace dr;
 
@@ -239,15 +239,15 @@ UTEST(interpolate, bezier_quadratic)
 
     for (auto const& [vals, t, expect] : test_cases)
     {
-        auto const val = interp_bezier_quadratic(vals, t);
+        auto const val = eval_bezier_quadratic(vals, t);
         ASSERT_NEAR(expect.val, val, eps);
 
-        auto const dt = interp_bezier_quadratic_dt(vals, t);
+        auto const dt = eval_bezier_quadratic_dt(vals, t);
         ASSERT_NEAR(expect.dt, dt, eps);
     }
 }
 
-UTEST(interpolate, bezier_cubic)
+UTEST(spline, bezier_cubic)
 {
     using namespace dr;
 
@@ -341,15 +341,15 @@ UTEST(interpolate, bezier_cubic)
 
     for (auto const& [vals, t, expect] : test_cases)
     {
-        auto const val = interp_bezier_cubic(vals, t);
+        auto const val = eval_bezier_cubic(vals, t);
         ASSERT_NEAR(expect.val, val, eps);
 
-        auto const dt = interp_bezier_cubic_dt(vals, t);
+        auto const dt = eval_bezier_cubic_dt(vals, t);
         ASSERT_NEAR(expect.dt, dt, eps);
     }
 }
 
-UTEST(interpolate, bilinear)
+UTEST(spline, bilinear)
 {
     using namespace dr;
 
@@ -523,18 +523,18 @@ UTEST(interpolate, bilinear)
 
     for (auto const& [vals, u, v, expect] : test_cases)
     {
-        auto const val = interp_bilinear(vals, u, v);
+        auto const val = eval_bilinear(vals, u, v);
         ASSERT_NEAR(expect.val, val, eps);
 
-        auto const du = interp_bilinear_du(vals, u, v);
+        auto const du = eval_bilinear_du(vals, u, v);
         ASSERT_NEAR(expect.du, du, eps);
 
-        auto const dv = interp_bilinear_dv(vals, u, v);
+        auto const dv = eval_bilinear_dv(vals, u, v);
         ASSERT_NEAR(expect.dv, dv, eps);
     }
 }
 
-UTEST(interpolate, trilinear)
+UTEST(spline, trilinear)
 {
     using namespace dr;
 
@@ -800,16 +800,16 @@ UTEST(interpolate, trilinear)
 
     for (auto const& [vals, u, v, w, expect] : test_cases)
     {
-        auto const val = interp_trilinear(vals, u, v, w);
+        auto const val = eval_trilinear(vals, u, v, w);
         ASSERT_NEAR(expect.val, val, eps);
 
-        auto const du = interp_trilinear_du(vals, u, v, w);
+        auto const du = eval_trilinear_du(vals, u, v, w);
         ASSERT_NEAR(expect.du, du, eps);
 
-        auto const dv = interp_trilinear_dv(vals, u, v, w);
+        auto const dv = eval_trilinear_dv(vals, u, v, w);
         ASSERT_NEAR(expect.dv, dv, eps);
 
-        auto const dw = interp_trilinear_dw(vals, u, v, w);
+        auto const dw = eval_trilinear_dw(vals, u, v, w);
         ASSERT_NEAR(expect.dw, dw, eps);
     }
 }

@@ -437,26 +437,26 @@ struct BernsteinBasis<3> : SplineBasis<3>
 };
 
 template <typename Value, typename Real>
-constexpr Value interp_linear(Value const x[2], Real const t)
+constexpr Value eval_linear(Value const x[2], Real const t)
 {
     return impl::spline_eval<LinearBasis>(x, t);
 }
 
 template <typename Value, typename Real>
-constexpr Value interp_linear_dt(Value const x[2], Real const t)
+constexpr Value eval_linear_dt(Value const x[2], Real const t)
 {
     return impl::spline_eval<LinearBasis::Diff<1>>(x, t);
 }
 
 template <typename Value, typename Real>
-constexpr Value interp_bilinear(Value const x[4], Real const u, Real const v)
+constexpr Value eval_bilinear(Value const x[4], Real const u, Real const v)
 {
     using B = LinearBasis;
     return impl::spline_eval<B, B>(x, u, v);
 }
 
 template <typename Value, typename Real>
-constexpr void interp_bilinear(
+constexpr void eval_bilinear(
     Value const x[4],
     Real const u,
     Real const v,
@@ -468,28 +468,28 @@ constexpr void interp_bilinear(
 }
 
 template <typename Value, typename Real>
-constexpr Value interp_bilinear_du(Value const x[4], Real const u, Real const v)
+constexpr Value eval_bilinear_du(Value const x[4], Real const u, Real const v)
 {
     using B = LinearBasis;
     return impl::spline_eval<B::Diff<1>, B>(x, u, v);
 }
 
 template <typename Value, typename Real>
-constexpr Value interp_bilinear_dv(Value const x[4], Real const u, Real const v)
+constexpr Value eval_bilinear_dv(Value const x[4], Real const u, Real const v)
 {
     using B = LinearBasis;
     return impl::spline_eval<B, B::Diff<1>>(x, u, v);
 }
 
 template <typename Value, typename Real>
-constexpr Value interp_trilinear(Value const x[8], Real const u, Real const v, Real const w)
+constexpr Value eval_trilinear(Value const x[8], Real const u, Real const v, Real const w)
 {
     using B = LinearBasis;
     return impl::spline_eval<B, B, B>(x, u, v, w);
 }
 
 template <typename Value, typename Real>
-constexpr void interp_trilinear(
+constexpr void eval_trilinear(
     Value const x[8],
     Real const u,
     Real const v,
@@ -502,47 +502,47 @@ constexpr void interp_trilinear(
 }
 
 template <typename Value, typename Real>
-constexpr Value interp_trilinear_du(Value const x[8], Real const u, Real const v, Real const w)
+constexpr Value eval_trilinear_du(Value const x[8], Real const u, Real const v, Real const w)
 {
     using B = LinearBasis;
     return impl::spline_eval<B::Diff<1>, B, B>(x, u, v, w);
 }
 
 template <typename Value, typename Real>
-constexpr Value interp_trilinear_dv(Value const x[8], Real const u, Real const v, Real const w)
+constexpr Value eval_trilinear_dv(Value const x[8], Real const u, Real const v, Real const w)
 {
     using B = LinearBasis;
     return impl::spline_eval<B, B::Diff<1>, B>(x, u, v, w);
 }
 
 template <typename Value, typename Real>
-constexpr Value interp_trilinear_dw(Value const x[8], Real const u, Real const v, Real const w)
+constexpr Value eval_trilinear_dw(Value const x[8], Real const u, Real const v, Real const w)
 {
     using B = LinearBasis;
     return impl::spline_eval<B, B, B::Diff<1>>(x, u, v, w);
 }
 
 template <typename Value, typename Real>
-constexpr Value interp_cubic(Value const x[4], Real const t)
+constexpr Value eval_cubic(Value const x[4], Real const t)
 {
     return impl::spline_eval<CatmullRomBasis>(x, t);
 }
 
 template <typename Value, typename Real>
-constexpr Value interp_cubic_dt(Value const x[4], Real const t)
+constexpr Value eval_cubic_dt(Value const x[4], Real const t)
 {
     return impl::spline_eval<CatmullRomBasis::Diff<1>>(x, t);
 }
 
 template <typename Value, typename Real>
-constexpr Value interp_bicubic(Value const x[16], Real const u, Real const v)
+constexpr Value eval_bicubic(Value const x[16], Real const u, Real const v)
 {
     using B = CatmullRomBasis;
     return impl::spline_eval<B, B>(x, u, v);
 }
 
 template <typename Value, typename Real>
-constexpr void interp_bicubic(
+constexpr void eval_bicubic(
     Value const x[16],
     Real const u,
     Real const v,
@@ -554,28 +554,28 @@ constexpr void interp_bicubic(
 }
 
 template <typename Value, typename Real>
-constexpr Value interp_bicubic_du(Value const x[16], Real const u, Real const v)
+constexpr Value eval_bicubic_du(Value const x[16], Real const u, Real const v)
 {
     using B = CatmullRomBasis;
     return impl::spline_eval<B::Diff<1>, B>(x, u, v);
 }
 
 template <typename Value, typename Real>
-constexpr Value interp_bicubic_dv(Value const x[16], Real const u, Real const v)
+constexpr Value eval_bicubic_dv(Value const x[16], Real const u, Real const v)
 {
     using B = CatmullRomBasis;
     return impl::spline_eval<B, B::Diff<1>>(x, u, v);
 }
 
 template <typename Value, typename Real>
-constexpr Value interp_tricubic(Value const x[64], Real const u, Real const v, Real const w)
+constexpr Value eval_tricubic(Value const x[64], Real const u, Real const v, Real const w)
 {
     using B = CatmullRomBasis;
     return impl::spline_eval<B, B, B>(x, u, v, w);
 }
 
 template <typename Value, typename Real>
-constexpr void interp_tricubic(
+constexpr void eval_tricubic(
     Value const x[64],
     Real const u,
     Real const v,
@@ -588,47 +588,47 @@ constexpr void interp_tricubic(
 }
 
 template <typename Value, typename Real>
-constexpr Value interp_tricubic_du(Value const x[64], Real const u, Real const v, Real const w)
+constexpr Value eval_tricubic_du(Value const x[64], Real const u, Real const v, Real const w)
 {
     using B = CatmullRomBasis;
     return impl::spline_eval<B::Diff<1>, B, B>(x, u, v, w);
 }
 
 template <typename Value, typename Real>
-constexpr Value interp_tricubic_dv(Value const x[64], Real const u, Real const v, Real const w)
+constexpr Value eval_tricubic_dv(Value const x[64], Real const u, Real const v, Real const w)
 {
     using B = CatmullRomBasis;
     return impl::spline_eval<B, B::Diff<1>, B>(x, u, v, w);
 }
 
 template <typename Value, typename Real>
-constexpr Value interp_tricubic_dw(Value const x[64], Real const u, Real const v, Real const w)
+constexpr Value eval_tricubic_dw(Value const x[64], Real const u, Real const v, Real const w)
 {
     using B = CatmullRomBasis;
     return impl::spline_eval<B, B, B::Diff<1>>(x, u, v, w);
 }
 
 template <typename Value, typename Real>
-constexpr Value interp_bezier_quadratic(Value const x[3], Real const t)
+constexpr Value eval_bezier_quadratic(Value const x[3], Real const t)
 {
     return impl::spline_eval<BernsteinBasis<2>>(x, t);
 }
 
 template <typename Value, typename Real>
-constexpr Value interp_bezier_quadratic_dt(Value const x[3], Real const t)
+constexpr Value eval_bezier_quadratic_dt(Value const x[3], Real const t)
 {
     return impl::spline_eval<BernsteinBasis<2>::Diff<1>>(x, t);
 }
 
 template <typename Value, typename Real>
-constexpr Value interp_bezier_biquadratic(Value const x[9], Real const u, Real const v)
+constexpr Value eval_bezier_biquadratic(Value const x[9], Real const u, Real const v)
 {
     using B = BernsteinBasis<2>;
     return impl::spline_eval<B, B>(x, u, v);
 }
 
 template <typename Value, typename Real>
-constexpr void interp_bezier_biquadratic(
+constexpr void eval_bezier_biquadratic(
     Value const x[9],
     Real const u,
     Real const v,
@@ -640,21 +640,21 @@ constexpr void interp_bezier_biquadratic(
 }
 
 template <typename Value, typename Real>
-constexpr Value interp_bezier_biquadratic_du(Value const x[9], Real const u, Real const v)
+constexpr Value eval_bezier_biquadratic_du(Value const x[9], Real const u, Real const v)
 {
     using B = BernsteinBasis<2>;
     return impl::spline_eval<B::Diff<1>, B>(x, u, v);
 }
 
 template <typename Value, typename Real>
-constexpr Value interp_bezier_biquadratic_dv(Value const x[9], Real const u, Real const v)
+constexpr Value eval_bezier_biquadratic_dv(Value const x[9], Real const u, Real const v)
 {
     using B = BernsteinBasis<2>;
     return impl::spline_eval<B, B::Diff<1>>(x, u, v);
 }
 
 template <typename Value, typename Real>
-constexpr Value interp_bezier_triquadratic(
+constexpr Value eval_bezier_triquadratic(
     Value const x[27],
     Real const u,
     Real const v,
@@ -665,7 +665,7 @@ constexpr Value interp_bezier_triquadratic(
 }
 
 template <typename Value, typename Real>
-constexpr void interp_bezier_triquadratic(
+constexpr void eval_bezier_triquadratic(
     Value const x[27],
     Real const u,
     Real const v,
@@ -678,7 +678,7 @@ constexpr void interp_bezier_triquadratic(
 }
 
 template <typename Value, typename Real>
-constexpr Value interp_bezier_triquadratic_du(
+constexpr Value eval_bezier_triquadratic_du(
     Value const x[27],
     Real const u,
     Real const v,
@@ -689,7 +689,7 @@ constexpr Value interp_bezier_triquadratic_du(
 }
 
 template <typename Value, typename Real>
-constexpr Value interp_bezier_triquadratic_dv(
+constexpr Value eval_bezier_triquadratic_dv(
     Value const x[27],
     Real const u,
     Real const v,
@@ -700,7 +700,7 @@ constexpr Value interp_bezier_triquadratic_dv(
 }
 
 template <typename Value, typename Real>
-constexpr Value interp_bezier_triquadratic_dw(
+constexpr Value eval_bezier_triquadratic_dw(
     Value const x[27],
     Real const u,
     Real const v,
@@ -711,27 +711,27 @@ constexpr Value interp_bezier_triquadratic_dw(
 }
 
 template <typename Value, typename Real>
-constexpr Value interp_bezier_cubic(Value const x[4], Real const t)
+constexpr Value eval_bezier_cubic(Value const x[4], Real const t)
 {
     return impl::spline_eval<BernsteinBasis<3>>(x, t);
 }
 
 template <typename Value, typename Real>
-constexpr Value interp_bezier_cubic_dt(Value const x[4], Real const t)
+constexpr Value eval_bezier_cubic_dt(Value const x[4], Real const t)
 {
     return impl::spline_eval<BernsteinBasis<3>::Diff<1>>(x, t);
 }
 
 
 template <typename Value, typename Real>
-constexpr Value interp_bezier_bicubic(Value const x[16], Real const u, Real const v)
+constexpr Value eval_bezier_bicubic(Value const x[16], Real const u, Real const v)
 {
     using B = BernsteinBasis<3>;
     return impl::spline_eval<B, B>(x, u, v);
 }
 
 template <typename Value, typename Real>
-constexpr void interp_bezier_bicubic(
+constexpr void eval_bezier_bicubic(
     Value const x[16],
     Real const u,
     Real const v,
@@ -743,21 +743,21 @@ constexpr void interp_bezier_bicubic(
 }
 
 template <typename Value, typename Real>
-constexpr Value interp_bezier_bicubic_du(Value const x[16], Real const u, Real const v)
+constexpr Value eval_bezier_bicubic_du(Value const x[16], Real const u, Real const v)
 {
     using B = BernsteinBasis<3>;
     return impl::spline_eval<B::Diff<1>, B>(x, u, v);
 }
 
 template <typename Value, typename Real>
-constexpr Value interp_bezier_bicubic_dv(Value const x[16], Real const u, Real const v)
+constexpr Value eval_bezier_bicubic_dv(Value const x[16], Real const u, Real const v)
 {
     using B = BernsteinBasis<3>;
     return impl::spline_eval<B, B::Diff<1>>(x, u, v);
 }
 
 template <typename Value, typename Real>
-constexpr Value interp_bezier_tricubic(
+constexpr Value eval_bezier_tricubic(
     Value const x[64],
     Real const u,
     Real const v,
@@ -768,7 +768,7 @@ constexpr Value interp_bezier_tricubic(
 }
 
 template <typename Value, typename Real>
-constexpr void interp_bezier_tricubic(
+constexpr void eval_bezier_tricubic(
     Value const x[64],
     Real const u,
     Real const v,
@@ -781,7 +781,7 @@ constexpr void interp_bezier_tricubic(
 }
 
 template <typename Value, typename Real>
-constexpr Value interp_bezier_tricubic_du(
+constexpr Value eval_bezier_tricubic_du(
     Value const x[64],
     Real const u,
     Real const v,
@@ -792,7 +792,7 @@ constexpr Value interp_bezier_tricubic_du(
 }
 
 template <typename Value, typename Real>
-constexpr Value interp_bezier_tricubic_dv(
+constexpr Value eval_bezier_tricubic_dv(
     Value const x[64],
     Real const u,
     Real const v,
@@ -803,7 +803,7 @@ constexpr Value interp_bezier_tricubic_dv(
 }
 
 template <typename Value, typename Real>
-constexpr Value interp_bezier_tricubic_dw(
+constexpr Value eval_bezier_tricubic_dw(
     Value const x[64],
     Real const u,
     Real const v,
