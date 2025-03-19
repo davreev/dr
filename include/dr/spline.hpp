@@ -288,14 +288,14 @@ struct CatmullRomBasis : SplineBasis<3>
                 result[2] = Real{4.0} * t + Real{0.5} - Real{4.5} * tt;
                 result[3] = Real{1.5} * tt - t;
             }
-            else if (order_ == 2)
+            else if constexpr (order_ == 2)
             {
                 result[0] = Real{2.0} - Real{3.0} * t;
                 result[1] = Real{9.0} * t - Real{5.0};
                 result[2] = Real{4.0} - Real{9.0} * t;
                 result[3] = Real{3.0} * t - Real{1.0};
             }
-            else if (order_ == 3)
+            else if constexpr (order_ == 3)
             {
                 result[0] = Real{-3.0};
                 result[1] = Real{9.0};
@@ -353,7 +353,7 @@ struct BernsteinBasis<2> : SplineBasis<2>
                 result[1] = Real{2.0} - Real{4.0} * t;
                 result[2] = Real{2.0} * t;
             }
-            else if (order_ == 2)
+            else if constexpr (order_ == 2)
             {
                 result[0] = Real{2.0};
                 result[1] = Real{-4.0};
@@ -411,14 +411,14 @@ struct BernsteinBasis<3> : SplineBasis<3>
                 result[2] = Real{6.0} * t - Real{9.0} * tt;
                 result[3] = Real{3.0} * tt;
             }
-            else if (order_ == 2)
+            else if constexpr (order_ == 2)
             {
                 result[0] = Real{6.0} - Real{2.0} * t;
                 result[1] = Real{18.0} * t - Real{12.0};
                 result[2] = Real{6.0} - Real{18.0} * t;
                 result[3] = Real{6.0} * t;
             }
-            else if (order_ == 3)
+            else if constexpr (order_ == 3)
             {
                 result[0] = Real{-2.0};
                 result[1] = Real{18.0};

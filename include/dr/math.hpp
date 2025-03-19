@@ -101,12 +101,12 @@ Scalar mod(Scalar const x, Scalar const y)
     {
         return x - y * std::floor(x / y);
     }
-    else if (is_integer<Scalar>)
+    else if constexpr (is_integer<Scalar>)
     {
         Scalar const rem = x % y;
         return (rem * y < 0) ? rem + y : rem;
     }
-    else if (is_natural<Scalar>)
+    else if constexpr (is_natural<Scalar>)
     {
         return x % y;
     }
