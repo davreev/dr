@@ -10,11 +10,12 @@ namespace
 template <typename Real>
 bool check_random_real(Real const min, Real const max)
 {
-    Random<Real> rnd{min, max, 1};
+    Random rnd{1};
+    auto gen = rnd.generator(min, max);
 
     for (isize i = 0; i < 1000; ++i)
     {
-        Real const x = rnd();
+        Real const x = gen();
 
         // Reals should be in [min, max)
         if (x < min || x >= max)
@@ -27,11 +28,12 @@ bool check_random_real(Real const min, Real const max)
 template <typename Int>
 bool check_random_int(Int const min, Int const max)
 {
-    Random<Int> rnd{min, max, 1};
+    Random rnd{1};
+    auto gen = rnd.generator(min, max);
 
     for (isize i = 0; i < 1000; ++i)
     {
-        Int const x = rnd();
+        Int const x = gen();
 
         // Integers should be in [min, max]
         if (x < min || x > max)

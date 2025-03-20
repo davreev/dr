@@ -30,34 +30,38 @@ struct UniformDistribution<Int, std::enable_if_t<(is_integer<Int> || is_natural<
 template <typename Scalar>
 using UniformDistribution = typename impl::UniformDistribution<Scalar>::Type;
 
-template <typename Scalar, typename Engine = std::default_random_engine>
+template <typename Engine = std::default_random_engine>
 struct Random
 {
-    using Distribution = UniformDistribution<Scalar>;
+    template <typename Scalar>
+    struct Generator
+    {
+        using Distribution = UniformDistribution<Scalar>;
+
+        Generator(Engine* engine, Scalar const min, Scalar const max) :
+            engine_{engine}, distribution_{min, max}
+        {
+        }
+
+        Scalar operator()() { return distribution_(*engine_); }
+
+      private:
+        Engine* engine_;
+        Distribution distribution_;
+    };
 
     Random() = default;
 
-    Random(u32 const seed) :
-        engine_{seed}
-    {
-    }
+    Random(u32 const seed) : engine_{seed} {}
 
-    Random(Scalar const min, Scalar const max) :
-        distribution_{min, max}
+    template <typename Scalar>
+    Generator<Scalar> generator(Scalar const min, Scalar const max)
     {
+        return {&engine_, min, max};
     }
-
-    Random(Scalar const min, Scalar const max, u32 const seed) :
-        engine_{seed},
-        distribution_{min, max}
-    {
-    }
-
-    Scalar operator()() { return distribution_(engine_); }
 
   private:
     Engine engine_{};
-    Distribution distribution_{};
 };
 
 } // namespace dr
