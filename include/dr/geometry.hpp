@@ -11,7 +11,7 @@
 namespace dr
 {
 
-/// Returns the parameter for the closest point on the given line
+/// Returns the parameter of the closest point on the given line
 template <typename Real>
 Real nearest_point_line(
     Vec3<Real> const& point,
@@ -22,7 +22,7 @@ Real nearest_point_line(
     return line_delta.dot(point - line_start) / line_delta.squaredNorm();
 }
 
-/// Returns the parameter for the closest point on the given line segment
+/// Returns the parameter of the closest point on the given line segment
 template <typename Real>
 Real nearest_point_segment(
     Vec3<Real> const& point,
@@ -44,7 +44,7 @@ Vec3<Real> nearest_point_plane(
     return point + project((plane_origin - point).eval(), plane_normal);
 }
 
-/// Returns parameters for the closest pair of points on the given lines
+/// Returns parameters of the closest pair of points on the given lines
 template <typename Real>
 Vec2<Real> nearest_line_line(
     Vec3<Real> const& a_start,
@@ -59,7 +59,7 @@ Vec2<Real> nearest_line_line(
     return std::isnan(x[0]) ? Vec2<Real>{} : vec(x[0], -x[1]);
 }
 
-/// Returns parameters for the closest pair of points on the given line segment and line
+/// Returns parameters of the closest pair of points on the given line segment and line
 template <typename Real>
 Vec2<Real> nearest_segment_line(
     Vec3<Real> const& seg_start,
