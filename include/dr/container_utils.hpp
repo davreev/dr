@@ -30,7 +30,7 @@ struct Size
     template <typename Container>
     constexpr T operator()(Container&& container) const
     {
-        return static_cast<T>(container.size());
+        return T(container.size());
     }
 };
 
@@ -59,14 +59,14 @@ constexpr Span<T> as_span(T (&array)[n])
 template <typename Container, std::enable_if_t<is_contiguous<Container>>* = nullptr>
 constexpr Span<typename Container::value_type> as_span(Container& container)
 {
-    return {container.data(), static_cast<isize>(container.size())};
+    return {container.data(), isize(container.size())};
 }
 
 /// Creates a span from another contiguous container type
 template <typename Container, std::enable_if_t<is_contiguous<Container>>* = nullptr>
 constexpr Span<const typename Container::value_type> as_span(Container const& container)
 {
-    return {container.data(), static_cast<isize>(container.size())};
+    return {container.data(), isize(container.size())};
 }
 
 /// Deleted to avoid creating a span from a temporary

@@ -87,8 +87,8 @@ constexpr void unit_square_corner(u8 const index, Scalar result[2])
     static_assert(is_real<Scalar> || is_integer<Scalar> || is_natural<Scalar>);
 
     assert(index < 4);
-    result[0] = static_cast<Scalar>(index & 1);
-    result[1] = static_cast<Scalar>((index >> 1) & 1);
+    result[0] = Scalar(index & 1);
+    result[1] = Scalar((index >> 1) & 1);
 }
 
 template <typename Scalar>
@@ -97,9 +97,9 @@ constexpr void unit_cube_corner(u8 const index, Scalar result[3])
     static_assert(is_real<Scalar> || is_integer<Scalar> || is_natural<Scalar>);
 
     assert(index < 8);
-    result[0] = static_cast<Scalar>(index & 1);
-    result[1] = static_cast<Scalar>((index >> 1) & 1);
-    result[2] = static_cast<Scalar>((index >> 2) & 1);
+    result[0] = Scalar(index & 1);
+    result[1] = Scalar((index >> 1) & 1);
+    result[2] = Scalar((index >> 2) & 1);
 }
 
 } // namespace dr

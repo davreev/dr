@@ -93,8 +93,8 @@ Builder::Error Builder::make_from_face_vertex(
 
         for (Index i = 0, n = f_v.size(); i < n; ++i)
         {
-            auto const v0 = static_cast<Index>(f_v[i]);
-            auto const v1 = static_cast<Index>(f_v[(i + 1) % n]);
+            auto const v0 = Index(f_v[i]);
+            auto const v1 = Index(f_v[(i + 1) % n]);
 
             if (v0 == v1)
                 return Error_DegenerateEdge;
@@ -144,8 +144,8 @@ Builder::Error Builder::make_from_face_vertex(
     {
         Span<SrcIndex const> const f_v = face_vertices(f);
 
-        auto v0 = static_cast<Index>(f_v[0]);
-        auto v1 = static_cast<Index>(f_v[1]);
+        auto v0 = Index(f_v[0]);
+        auto v1 = Index(f_v[1]);
         Index he0 = v_to_he_[{v0, v1}];
 
         // Assign first halfedge in face
@@ -163,7 +163,7 @@ Builder::Error Builder::make_from_face_vertex(
             he_face[he0] = f;
 
             // Assign next halfedge
-            auto const v2 = static_cast<Index>(f_v[(i + 2) % n]);
+            auto const v2 = Index(f_v[(i + 2) % n]);
             Index const he1 = v_to_he_[{v1, v2}];
             he_next[he0] = he1;
 

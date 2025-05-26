@@ -20,9 +20,7 @@ struct HighQualityHash
 
 inline u64 hash(Span<u8 const> const& key)
 {
-    return ankerl::unordered_dense::detail::wyhash::hash(
-        key.data(),
-        static_cast<usize>(key.size()));
+    return ankerl::unordered_dense::detail::wyhash::hash(key.data(), usize(key.size()));
 }
 
 inline u64 hash(u64 const key) { return ankerl::unordered_dense::detail::wyhash::hash(key); }

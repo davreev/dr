@@ -140,14 +140,14 @@ struct HashGrid : AllocatorAware
         usize operator()(Vec<Index, 2> const& key) const
         {
             // Multiply each coord with a large prime and xor together
-            return static_cast<usize>(key[0]) * primes[0] ^ static_cast<usize>(key[1]) * primes[1];
+            return usize(key[0]) * primes[0] ^ usize(key[1]) * primes[1];
         }
 
         usize operator()(Vec<Index, 3> const& key) const
         {
             // Multiply each coord with a large prime and xor together
-            return static_cast<usize>(key[0]) * primes[0] ^ static_cast<usize>(key[1]) * primes[1]
-                ^ static_cast<usize>(key[2]) * primes[2];
+            return usize(key[0]) * primes[0] ^ usize(key[1]) * primes[1]
+                ^ usize(key[2]) * primes[2];
         }
     };
 

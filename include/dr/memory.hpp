@@ -103,28 +103,28 @@ Dst const* as(Src const* const ptr)
 template <typename Dst, typename Src>
 constexpr Span<Dst> as(Span<Src> const& src)
 {
-    return {as<Dst>(src.data()), static_cast<isize>((src.size() * sizeof(Src)) / sizeof(Dst))};
+    return {as<Dst>(src.data()), isize((src.size() * sizeof(Src)) / sizeof(Dst))};
 }
 
 /// Reinterprets a span of one type as a span of another
 template <typename Dst, typename Src>
 constexpr Span<Dst const> as(Span<Src const> const& src)
 {
-    return {as<Dst>(src.data()), static_cast<isize>((src.size() * sizeof(Src)) / sizeof(Dst))};
+    return {as<Dst>(src.data()), isize((src.size() * sizeof(Src)) / sizeof(Dst))};
 }
 
 /// Views the given instance as a span of bytes
 template <typename T>
 Span<u8> as_bytes(T& item)
 {
-    return {as<u8>(&item), static_cast<isize>(sizeof(T))};
+    return {as<u8>(&item), isize(sizeof(T))};
 }
 
 /// Views the given instance as a span of bytes
 template <typename T>
 Span<u8 const> as_bytes(T const& item)
 {
-    return {as<u8>(&item), static_cast<isize>(sizeof(T))};
+    return {as<u8>(&item), isize(sizeof(T))};
 }
 
 /// Deleted to avoid creating a span over a temporary
@@ -145,11 +145,11 @@ struct ScopedAlloc final
     ScopedAlloc(ScopedAlloc const&) = delete;
     ScopedAlloc& operator=(ScopedAlloc const&) = delete;
 
-    Span<u8> data() { return {static_cast<u8*>(data_), static_cast<isize>(size_)}; }
+    Span<u8> data() { return {static_cast<u8*>(data_), isize(size_)}; }
 
     Span<u8 const> data() const
     {
-        return {static_cast<u8 const*>(data_), static_cast<isize>(size_)};
+        return {static_cast<u8 const*>(data_), isize(size_)};
     }
 
     template <typename T>
@@ -157,7 +157,7 @@ struct ScopedAlloc final
     {
         static_assert(std::is_trivially_destructible_v<T>);
         static_assert(alignof(T) <= alignment);
-        return {static_cast<T*>(data_), static_cast<isize>(size_ / sizeof(T))};
+        return {static_cast<T*>(data_), isize(size_ / sizeof(T))};
     }
 
     template <typename T>
@@ -165,7 +165,7 @@ struct ScopedAlloc final
     {
         static_assert(std::is_trivially_destructible_v<T>);
         static_assert(alignof(T) <= alignment);
-        return {static_cast<T const*>(data_), static_cast<isize>(size_ / sizeof(T))};
+        return {static_cast<T const*>(data_), isize(size_ / sizeof(T))};
     }
 
   private:
