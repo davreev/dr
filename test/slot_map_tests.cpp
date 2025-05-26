@@ -19,7 +19,7 @@ UTEST(slot_map, insert_remove)
     Handle h0{};
     ASSERT_EQ(0u, h0.index);
     ASSERT_EQ(0u, h0.version);
-    
+
     h0 = map.insert("One");
     ASSERT_EQ(0u, h0.index);
     ASSERT_EQ(1u, h0.version);
@@ -79,5 +79,11 @@ UTEST(slot_map, allocator_propagation)
 
         Handle const h1 = map.insert(1000, 2);
         ASSERT_TRUE(map[h1]->get_allocator().resource()->is_equal(mem_res[1]));
+
+        map.remove(h1);
+        ASSERT_TRUE(map[h1] == nullptr);
+
+        Handle const h2 = map.insert(1000, 3);
+        ASSERT_TRUE(map[h2]->get_allocator().resource()->is_equal(mem_res[1]));
     }
 }
