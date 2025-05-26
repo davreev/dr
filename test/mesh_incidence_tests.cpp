@@ -9,13 +9,13 @@ UTEST(mesh_incidence, sanity)
 {
     using namespace dr;
 
-    VertsToEdge<i16>::Map verts_to_edge{};
+    VerticesToEdge<i16>::Map verts_to_edge{};
     verts_to_edge[Vec2<i16>{0, 1}] = 0;
 
-    VertsToTri<i16>::Map verts_to_tri{};
+    VerticesToTri<i16>::Map verts_to_tri{};
     verts_to_tri[Vec3<i16>{0, 1, 2}] = 0;
 
-    VertsToTet<i16>::Map verts_to_tets{};
+    VerticesToTet<i16>::Map verts_to_tets{};
     verts_to_tets[Vec4<i16>{0, 1, 2, 3}] = 0;
 
     ASSERT_TRUE(true);
@@ -51,11 +51,11 @@ UTEST(mesh_incidence, make_verts_to_edge)
         },
     };
 
-    VertsToEdge<i16>::Map verts_to_edge{};
+    VerticesToEdge<i16>::Map verts_to_edge{};
 
     for (auto const& [tri_verts, expect] : test_cases)
     {
-        VertsToEdge<i16>::make_from_tris(tri_verts, verts_to_edge);
+        VerticesToEdge<i16>::make_from_tris(tri_verts, verts_to_edge);
         ASSERT_EQ(expect.num_edges * 2, size(verts_to_edge));
 
         // Check that opposite edges are consecutive
@@ -89,11 +89,11 @@ UTEST(mesh_incidence, make_verts_to_tri)
         },
     };
 
-    VertsToTri<i16>::Map verts_to_tri{};
+    VerticesToTri<i16>::Map verts_to_tri{};
 
     for (auto const& [tet_verts, result] : test_cases)
     {
-        VertsToTri<i16>::make_from_tets(tet_verts, verts_to_tri);
+        VerticesToTri<i16>::make_from_tets(tet_verts, verts_to_tri);
         ASSERT_EQ(result.num_faces * 2, size(verts_to_tri));
 
         // Check that opposite faces are consecutive
@@ -105,7 +105,7 @@ UTEST(mesh_incidence, make_verts_to_tri)
     }
 }
 
-UTEST(mesh_incidence, collect_edge_opposite_verts)
+UTEST(mesh_incidence, collect_edge_opposite_vertices)
 {
     using namespace dr;
 
@@ -135,16 +135,16 @@ UTEST(mesh_incidence, collect_edge_opposite_verts)
         },
     };
 
-    VertsToEdge<i16>::Map verts_to_edge{};
+    VerticesToEdge<i16>::Map verts_to_edge{};
     DynamicArray<i16> edge_op_verts{};
 
     for (auto const& [tri_verts, expect] : test_cases)
     {
-        VertsToEdge<i16>::make_from_tris(tri_verts, verts_to_edge);
+        VerticesToEdge<i16>::make_from_tris(tri_verts, verts_to_edge);
         ASSERT_EQ(expect.num_edges * 2, size(verts_to_edge));
 
         edge_op_verts.resize(verts_to_edge.size());
-        collect_edge_opposite_verts(tri_verts, verts_to_edge, as_span(edge_op_verts));
+        collect_edge_opposite_vertices(tri_verts, verts_to_edge, as_span(edge_op_verts));
 
         for (auto const& f_v : tri_verts)
         {
@@ -195,12 +195,12 @@ UTEST(mesh_incidence, collect_edge_tris)
         },
     };
 
-    VertsToEdge<i16>::Map verts_to_edge{};
+    VerticesToEdge<i16>::Map verts_to_edge{};
     DynamicArray<i16> edge_tris{};
 
     for (auto const& [tri_verts, expect] : test_cases)
     {
-        VertsToEdge<i16>::make_from_tris(tri_verts, verts_to_edge);
+        VerticesToEdge<i16>::make_from_tris(tri_verts, verts_to_edge);
         ASSERT_EQ(expect.num_edges * 2, size(verts_to_edge));
 
         edge_tris.resize(verts_to_edge.size());
@@ -255,12 +255,12 @@ UTEST(mesh_incidence, collect_tri_edges)
         },
     };
 
-    VertsToEdge<i16>::Map verts_to_edge{};
+    VerticesToEdge<i16>::Map verts_to_edge{};
     DynamicArray<Vec3<i16>> tri_edges{};
 
     for (auto const& [tri_verts, expect] : test_cases)
     {
-        VertsToEdge<i16>::make_from_tris(tri_verts, verts_to_edge);
+        VerticesToEdge<i16>::make_from_tris(tri_verts, verts_to_edge);
         ASSERT_EQ(expect.num_edges * 2, size(verts_to_edge));
 
         tri_edges.resize(tri_verts.size());
@@ -308,12 +308,12 @@ UTEST(mesh_incidence, collect_tet_tris)
         },
     };
 
-    VertsToTri<i16>::Map verts_to_tri{};
+    VerticesToTri<i16>::Map verts_to_tri{};
     DynamicArray<Vec4<i16>> tet_tris{};
 
     for (auto const& [tet_verts, expect] : test_cases)
     {
-        VertsToTri<i16>::make_from_tets(tet_verts, verts_to_tri);
+        VerticesToTri<i16>::make_from_tets(tet_verts, verts_to_tri);
         ASSERT_EQ(expect.num_faces * 2, size(verts_to_tri));
 
         tet_tris.resize(tet_verts.size());

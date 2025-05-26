@@ -168,7 +168,7 @@ struct HalfedgeMesh : AllocatorAware
             bool include_holes = true);
 
       private:
-        struct VertsToHalfedge
+        struct VerticesToHalfedge
         {
             struct Hash : HighQualityHash
             {
@@ -178,7 +178,7 @@ struct HalfedgeMesh : AllocatorAware
             using Map = HashMap<Vec2<Index>, Index, Hash>;
         };
 
-        VertsToHalfedge::Map v_to_he_;
+        VerticesToHalfedge::Map v_to_he_;
     };
 
     HalfedgeMesh(Allocator const alloc = {}) :

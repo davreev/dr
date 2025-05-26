@@ -16,7 +16,7 @@ namespace dr
 namespace impl
 {
 
-struct ManyToOne
+struct MeshIncidence
 {
     template <typename Index, int size>
     struct Key;
@@ -139,9 +139,9 @@ struct ManyToOne
 } // namespace impl
 
 template <typename Index>
-struct VertsToEdge
+struct VerticesToEdge
 {
-    using Map = impl::ManyToOne::Map<Index, 2>;
+    using Map = impl::MeshIncidence::Map<Index, 2>;
 
     /// Creates a map from vertex pairs to oriented edges. By convention, oppositely oriented edges
     /// have consecutive indices.
@@ -174,9 +174,9 @@ struct VertsToEdge
 };
 
 template <typename Index>
-struct VertsToTri
+struct VerticesToTri
 {
-    using Map = impl::ManyToOne::Map<Index, 3>;
+    using Map = impl::MeshIncidence::Map<Index, 3>;
 
     /// Creates a map from vertex triples to oriented triangles. By convention, oppositely oriented
     /// triangles have consecutive indices.
@@ -210,16 +210,16 @@ struct VertsToTri
 };
 
 template <typename Index>
-struct VertsToTet
+struct VerticesToTet
 {
-    using Map = impl::ManyToOne::Map<Index, 4>;
+    using Map = impl::MeshIncidence::Map<Index, 4>;
 };
 
 /// Returns the vertex opposite to each oriented edge within the same triangle
 template <typename Index>
-void collect_edge_opposite_verts(
+void collect_edge_opposite_vertices(
     Span<Vec3<Index> const> const& tri_verts,
-    typename VertsToEdge<Index>::Map const& verts_to_edge,
+    typename VerticesToEdge<Index>::Map const& verts_to_edge,
     Span<Index> const result)
 {
     assert(result.size() == size(verts_to_edge));
@@ -247,7 +247,7 @@ void collect_edge_opposite_verts(
 template <typename Index>
 void collect_edge_tris(
     Span<Vec3<Index> const> const& tri_verts,
-    typename VertsToEdge<Index>::Map const& verts_to_edge,
+    typename VerticesToEdge<Index>::Map const& verts_to_edge,
     Span<Index> const result)
 {
     assert(result.size() == size(verts_to_edge));
@@ -265,7 +265,7 @@ void collect_edge_tris(
         for (i8 i = 0; i < 3; ++i)
         {
             if (auto const it = verts_to_edge.find(e_v[i]); it != verts_to_edge.end())
-                result[it->second] = static_cast<Index>(f);
+                result[it->second] = Index(f);
         }
     }
 }
@@ -274,7 +274,7 @@ void collect_edge_tris(
 template <typename Index>
 void collect_tri_edges(
     Span<Vec3<Index> const> const& tri_verts,
-    typename VertsToEdge<Index>::Map const& verts_to_edge,
+    typename VerticesToEdge<Index>::Map const& verts_to_edge,
     Span<Vec3<Index>> const result)
 {
     assert(result.size() == tri_verts.size());
@@ -302,7 +302,7 @@ void collect_tri_edges(
 template <typename Index>
 void collect_tet_tris(
     Span<Vec4<Index> const> const& tet_verts,
-    typename VertsToTri<Index>::Map const& verts_to_tri,
+    typename VerticesToTri<Index>::Map const& verts_to_tri,
     Span<Vec4<Index>> const result)
 {
     assert(result.size() == tet_verts.size());
