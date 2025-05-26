@@ -49,9 +49,10 @@ struct Allocator : impl::AllocatorBase
     }
 
     template <typename T>
-    void delete_object(T* ptr) const
+    void delete_object(T* ptr)
     {
-        ptr->~T();
+        static_assert(!std::is_array_v<T>);
+        destroy(ptr);
         deallocate(ptr);
     }
 };
