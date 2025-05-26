@@ -10,10 +10,10 @@
 namespace dr
 {
 
-template <typename T, typename Index = u64, int version_bits = (sizeof(Index) << 2)>
+template <typename T, typename Index = u64, int version_bits = (8 * sizeof(Index) / 2)>
 struct SlotMap : AllocatorAware
 {
-    static constexpr int index_bits = (sizeof(Index) << 3) - version_bits;
+    static constexpr int index_bits = (8 * sizeof(Index)) - version_bits;
     static_assert(index_bits > 0 && version_bits > 0);
 
     struct Handle
@@ -37,8 +37,16 @@ struct SlotMap : AllocatorAware
     {
         if (free_indices_.empty())
         {
-            items_.emplace_back(make_t(std::forward<Args>(args)...));
-            return {static_cast<Index>(items_.size() - 1), 1};
+            Index const index{items_.size()};
+            constexpr Index version{1};
+
+            // If T is allocator-aware, share this container's allocator
+            if constexpr (is_allocator_aware<T>)
+                items_.push_back({T(std::forward<Args>(args)..., allocator()), version});
+            else
+                items_.push_back({T(std::forward<Args>(args)...), version});
+
+            return {index, version};
         }
         else
         {
@@ -47,7 +55,7 @@ struct SlotMap : AllocatorAware
 
             // Use existing slot
             Item& item = items_[index];
-            item.data = make_t(std::forward<Args>(args)...);
+            allocator().construct(&item.data, std::forward<Args>(args)...);
 
             return {index, item.version};
         }
@@ -60,7 +68,7 @@ struct SlotMap : AllocatorAware
 
         if (Item& item = items_[handle.index]; item.version == handle.version)
         {
-            item.data = make_t();
+            allocator().destroy(&item.data);
 
             // Reuse the slot if the version isn't maxed out
             if (++item.version < max_version)
@@ -88,31 +96,20 @@ struct SlotMap : AllocatorAware
     T* operator[](Handle const handle) { return const_cast<T*>(std::as_const(*this)[handle]); }
 
     /// Returns the number of items in the map
-    isize size() { return static_cast<isize>(items_.size()); }
+    isize size() { return isize(items_.size() - free_indices_.size()); }
 
     /// Returns true if the map contains no items
-    bool empty() { return items_.empty(); }
+    bool empty() { return items_.size() == free_indices_.size(); }
 
   private:
     struct Item
     {
         T data;
-        Index version{1};
-        Item(T&& data) : data{std::move(data)} {}
+        Index version;
     };
 
     DynamicArray<Item> items_;
     DynamicArray<Index> free_indices_;
-
-    template <typename... Args>
-    T make_t(Args&&... args)
-    {
-        // If T is allocator-aware, use the map's allocator to construct
-        if constexpr (is_allocator_aware<T>)
-            return T(std::forward<Args>(args)..., allocator());
-        else
-            return T(std::forward<Args>(args)...);
-    }
 };
 
 }; // namespace dr
