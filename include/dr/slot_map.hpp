@@ -24,8 +24,14 @@ struct SlotMap : AllocatorAware
 
     SlotMap(Allocator const alloc = {}) : slots_(alloc), free_indices_(alloc) {}
 
-    SlotMap(SlotMap const& other) = delete;
-    SlotMap& operator=(SlotMap const& other) = delete;
+    SlotMap(SlotMap const& other, Allocator const alloc = {}) :
+        slots_(other.slots_, alloc), free_indices_(other.free_indices_, alloc)
+    {
+    }
+
+    SlotMap(SlotMap&& other) noexcept = default;
+    SlotMap& operator=(SlotMap const& other) = default;
+    SlotMap& operator=(SlotMap&& other) noexcept = default;
 
     /// Returns the allocator used by this container
     Allocator allocator() const { return slots_.get_allocator(); }
