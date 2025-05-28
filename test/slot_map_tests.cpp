@@ -15,6 +15,8 @@ UTEST(slot_map, insert_remove)
     using Handle = SlotMap::Handle;
 
     SlotMap map{};
+    assert(map.num_items() == 0);
+    assert(map.num_slots() == 0);
 
     Handle h0{};
     ASSERT_EQ(0u, h0.index);
@@ -23,34 +25,39 @@ UTEST(slot_map, insert_remove)
     h0 = map.insert("One");
     ASSERT_EQ(0u, h0.index);
     ASSERT_EQ(1u, h0.version);
-    ASSERT_TRUE(map.size() == 1);
+    ASSERT_TRUE(map.num_items() == 1);
+    ASSERT_TRUE(map.num_slots() == 1);
     ASSERT_TRUE(map.is_valid(h0));
     ASSERT_TRUE(map[h0]->compare("One") == 0);
 
     Handle const h1 = map.insert("Two");
     ASSERT_EQ(1u, h1.index);
     ASSERT_EQ(1u, h1.version);
-    ASSERT_TRUE(map.size() == 2);
+    ASSERT_TRUE(map.num_items() == 2);
+    ASSERT_TRUE(map.num_slots() == 2);
     ASSERT_TRUE(map.is_valid(h1));
     ASSERT_TRUE(map[h1]->compare("Two") == 0);
 
     Handle const h2 = map.insert("Three");
     ASSERT_EQ(2u, h2.index);
     ASSERT_EQ(1u, h2.version);
-    ASSERT_TRUE(map.size() == 3);
+    ASSERT_TRUE(map.num_items() == 3);
+    ASSERT_TRUE(map.num_slots() == 3);
     ASSERT_TRUE(map.is_valid(h2));
     ASSERT_TRUE(map[h2]->compare("Three") == 0);
 
     ASSERT_TRUE(map.remove(h1));
     ASSERT_FALSE(map.remove(h1));
-    ASSERT_TRUE(map.size() == 2);
+    ASSERT_TRUE(map.num_items() == 2);
+    ASSERT_TRUE(map.num_slots() == 3);
     ASSERT_FALSE(map.is_valid(h1));
     ASSERT_TRUE(map[h1] == nullptr);
 
     Handle const h3 = map.insert("Four");
     ASSERT_EQ(1u, h3.index);
     ASSERT_EQ(2u, h3.version);
-    ASSERT_TRUE(map.size() == 3);
+    ASSERT_TRUE(map.num_items() == 3);
+    ASSERT_TRUE(map.num_slots() == 3);
     ASSERT_TRUE(map.is_valid(h3));
     ASSERT_TRUE(map[h3]->compare("Four") == 0);
 }
@@ -70,7 +77,6 @@ UTEST(slot_map, allocator_propagation)
 
     {
         SlotMap<DynamicArray<i32>> map{&mem_res[1]};
-        assert(map.empty());
         using Handle = SlotMap<DynamicArray<i32>>::Handle;
 
         Handle const h0 = map.insert(1000, 1);

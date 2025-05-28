@@ -22,13 +22,13 @@ struct SlotMap : AllocatorAware
         Index version : version_bits;
     };
 
-    SlotMap(Allocator const alloc = {}) : items_(alloc), free_indices_(alloc) {}
+    SlotMap(Allocator const alloc = {}) : slots_(alloc), free_indices_(alloc) {}
 
     SlotMap(SlotMap const& other) = delete;
     SlotMap& operator=(SlotMap const& other) = delete;
 
     /// Returns the allocator used by this container
-    Allocator allocator() const { return items_.get_allocator(); }
+    Allocator allocator() const { return slots_.get_allocator(); }
 
     /// Inserts a new item into the map by constructing it in-place. Returns a valid handle to the
     /// new item.
@@ -37,14 +37,14 @@ struct SlotMap : AllocatorAware
     {
         if (free_indices_.empty())
         {
-            Index const index{items_.size()};
+            Index const index{slots_.size()};
             constexpr Index version{1};
 
             // If T is allocator-aware, share this container's allocator
             if constexpr (is_allocator_aware<T>)
-                items_.push_back({T(std::forward<Args>(args)..., allocator()), version});
+                slots_.push_back({T(std::forward<Args>(args)..., allocator()), version, false});
             else
-                items_.push_back({T(std::forward<Args>(args)...), version});
+                slots_.push_back({T(std::forward<Args>(args)...), version, false});
 
             return {index, version};
         }
@@ -54,10 +54,10 @@ struct SlotMap : AllocatorAware
             free_indices_.pop_back();
 
             // Use existing slot
-            Item& item = items_[index];
-            allocator().construct(&item.data, std::forward<Args>(args)...);
+            Slot& slot = slots_[index];
+            allocator().construct(&slot.item, std::forward<Args>(args)...);
 
-            return {index, item.version};
+            return {index, slot.version};
         }
     }
 
@@ -66,12 +66,15 @@ struct SlotMap : AllocatorAware
     {
         constexpr Index max_version = (Index{1} << version_bits) - Index{1};
 
-        if (Item& item = items_[handle.index]; item.version == handle.version)
+        if (Slot& slot = slots_[handle.index]; slot.version == handle.version)
         {
-            allocator().destroy(&item.data);
+            allocator().destroy(&slot.item);
 
-            // Reuse the slot if the version isn't maxed out
-            if (++item.version < max_version)
+            // Mark slot as free
+            slot.is_free = true;
+
+            // Reuse the slot if its version isn't maxed out
+            if (++slot.version < max_version)
                 free_indices_.push_back(handle.index);
 
             return true;
@@ -81,13 +84,13 @@ struct SlotMap : AllocatorAware
     }
 
     /// Returns true if the handle refers to a valid item
-    bool is_valid(Handle const handle) { return (items_[handle.index].version == handle.version); }
+    bool is_valid(Handle const handle) { return slots_[handle.index].version == handle.version; }
 
     /// Returns the item associated with the given handle or null if the handle isn't valid
     T const* operator[](Handle const handle) const
     {
-        if (Item const& item = items_[handle.index]; item.version == handle.version)
-            return &item.data;
+        if (Slot const& slot = slots_[handle.index]; slot.version == handle.version)
+            return &slot.item;
 
         return nullptr;
     }
@@ -95,20 +98,29 @@ struct SlotMap : AllocatorAware
     /// Returns the item associated with the given handle or null if the handle isn't valid
     T* operator[](Handle const handle) { return const_cast<T*>(std::as_const(*this)[handle]); }
 
-    /// Returns the number of items in the map
-    isize size() { return isize(items_.size() - free_indices_.size()); }
+    /// Returns the handle to the item at the given index if one exists. Otherwise, returns an
+    /// invalid handle.
+    Handle handle_at(Index const index)
+    {
+        auto const& slot = slots_[index];
+        return slot.is_free ? Handle{index, 0} : Handle{index, slot.version};
+    }
 
-    /// Returns true if the map contains no items
-    bool empty() { return items_.size() == free_indices_.size(); }
+    /// Returns the number of items in the map
+    isize num_items() { return isize(slots_.size() - free_indices_.size()); }
+
+    /// Returns the number of slots in the map
+    isize num_slots() { return isize(slots_.size()); }
 
   private:
-    struct Item
+    struct Slot
     {
-        T data;
+        T item;
         Index version;
+        bool is_free;
     };
 
-    DynamicArray<Item> items_;
+    DynamicArray<Slot> slots_;
     DynamicArray<Index> free_indices_;
 };
 
