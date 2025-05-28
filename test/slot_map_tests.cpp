@@ -67,29 +67,54 @@ UTEST(slot_map, allocator_propagation)
     using namespace dr;
 
     // Restore default memory resource after test is complete
-    auto default_mem_res = std::pmr::get_default_resource();
+    auto def_mem = std::pmr::get_default_resource();
     auto _ = defer([=]() {
-        std::pmr::set_default_resource(default_mem_res);
+        std::pmr::set_default_resource(def_mem);
     });
 
-    DebugMemoryResource mem_res[2]{};
-    std::pmr::set_default_resource(&mem_res[0]);
+    DebugMemoryResource mem[3]{};
+    std::pmr::set_default_resource(&mem[0]);
 
+    // Check propagation on copy/move
     {
-        SlotMap<DynamicArray<i32>> map{&mem_res[1]};
+        SlotMap<DynamicArray<i32>> src{&mem[1]};
+        ASSERT_TRUE(src.allocator().resource()->is_equal(mem[1]));
+
+        {
+            // dst should use the given memory resource
+            SlotMap<DynamicArray<i32>> dst{src, &mem[2]};
+            ASSERT_TRUE(dst.allocator().resource()->is_equal(mem[2]));
+        }
+
+        {
+            // dst should use the current default memory resource
+            SlotMap<DynamicArray<i32>> dst{src};
+            ASSERT_TRUE(dst.allocator().resource()->is_equal(mem[0]));
+        }
+
+        {
+            // dst should use the same memory resource as src
+            SlotMap<DynamicArray<i32>> dst{std::move(src)};
+            ASSERT_TRUE(dst.allocator().resource()->is_equal(mem[1]));
+        }
+    }
+
+    // Check propagation to elements
+    {
+        SlotMap<DynamicArray<i32>> map{&mem[1]};
         using Handle = SlotMap<DynamicArray<i32>>::Handle;
 
         Handle const h0 = map.insert(1000, 1);
-        ASSERT_TRUE(map[h0]->get_allocator().resource()->is_equal(mem_res[1]));
+        ASSERT_TRUE(map[h0]->get_allocator().resource()->is_equal(mem[1]));
         map.remove(h0);
 
         Handle const h1 = map.insert(1000, 2);
-        ASSERT_TRUE(map[h1]->get_allocator().resource()->is_equal(mem_res[1]));
+        ASSERT_TRUE(map[h1]->get_allocator().resource()->is_equal(mem[1]));
 
         map.remove(h1);
         ASSERT_TRUE(map[h1] == nullptr);
 
         Handle const h2 = map.insert(1000, 3);
-        ASSERT_TRUE(map[h2]->get_allocator().resource()->is_equal(mem_res[1]));
+        ASSERT_TRUE(map[h2]->get_allocator().resource()->is_equal(mem[1]));
     }
 }

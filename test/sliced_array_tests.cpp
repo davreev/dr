@@ -1,5 +1,6 @@
 #include <utest.h>
 
+#include <dr/defer.hpp>
 #include <dr/memory.hpp>
 #include <dr/sliced_array.hpp>
 
@@ -65,28 +66,35 @@ UTEST(sliced_array, allocator_propagation)
 {
     using namespace dr;
 
-    DebugMemoryResource mem{};
+    // Restore default memory resource after test is complete
+    auto def_mem = std::pmr::get_default_resource();
+    auto _ = defer([=]() {
+        std::pmr::set_default_resource(def_mem);
+    });
 
-    SlicedArray<f32> arr{&mem};
-    arr.reserve(5, 2);
-    arr.push_back(3, 1.0);
-    arr.push_back(2, 2.0);
+    DebugMemoryResource mem[3]{};
+    std::pmr::set_default_resource(&mem[0]);
+
+    SlicedArray<f32> src{&mem[1]};
+    src.reserve(5, 2);
+    src.push_back(3, 1.0);
+    src.push_back(2, 2.0);
 
     {
-        // This copy should use the same memory resource
-        SlicedArray<f32> arr_copy{arr, &mem};
-        ASSERT_TRUE(arr_copy.allocator().resource()->is_equal(mem));
+        // dst should use the given memory resource
+        SlicedArray<f32> dst{src, &mem[2]};
+        ASSERT_TRUE(dst.allocator().resource()->is_equal(mem[2]));
     }
 
     {
-        // This copy should use the current default memory resource
-        SlicedArray<f32> arr_copy{arr};
-        ASSERT_TRUE(arr_copy.allocator().resource()->is_equal(*std::pmr::get_default_resource()));
+        // dst should use the current default memory resource
+        SlicedArray<f32> dst{src};
+        ASSERT_TRUE(dst.allocator().resource()->is_equal(mem[0]));
     }
 
     {
-        // Move should use the same memory resource
-        SlicedArray<f32> arr_move{std::move(arr)};
-        ASSERT_TRUE(arr_move.allocator().resource()->is_equal(mem));
+        // dst should use the same memory resource as src
+        SlicedArray<f32> dst{std::move(src)};
+        ASSERT_TRUE(dst.allocator().resource()->is_equal(mem[1]));
     }
 }

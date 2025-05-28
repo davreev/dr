@@ -1,5 +1,6 @@
 #include <utest.h>
 
+#include <dr/defer.hpp>
 #include <dr/halfedge.hpp>
 #include <dr/memory.hpp>
 #include <dr/mesh_primitives.hpp>
@@ -8,22 +9,34 @@ UTEST(halfedge, allocator_propagation)
 {
     using namespace dr;
 
-    DebugMemoryResource mr{};
-    HalfedgeMesh src{&mr};
+    // Restore default memory resource after test is complete
+    auto def_mem = std::pmr::get_default_resource();
+    auto _ = defer([=]() {
+        std::pmr::set_default_resource(def_mem);
+    });
+
+    DebugMemoryResource mem[3]{};
+    std::pmr::set_default_resource(&mem[0]);
+
+    HalfedgeMesh src{&mem[1]};
+    ASSERT_TRUE(src.allocator().resource()->is_equal(mem[1]));
 
     {
+        // dst should use the given memory resource
+        HalfedgeMesh dst{src, &mem[2]};
+        ASSERT_TRUE(dst.allocator().resource()->is_equal(mem[2]));
+    }
+
+    {
+        // dst should use the current default memory resource
         HalfedgeMesh dst{src};
-        ASSERT_EQ(dst.allocator().resource(), std::pmr::get_default_resource());
+        ASSERT_TRUE(dst.allocator().resource()->is_equal(mem[0]));
     }
 
     {
-        HalfedgeMesh dst{src, src.allocator()};
-        ASSERT_EQ(dst.allocator().resource(), &mr);
-    }
-
-    {
+        // dst should use the same memory resource as src
         HalfedgeMesh dst{std::move(src)};
-        ASSERT_EQ(dst.allocator().resource(), &mr);
+        ASSERT_TRUE(dst.allocator().resource()->is_equal(mem[1]));
     }
 }
 

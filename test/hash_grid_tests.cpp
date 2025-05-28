@@ -2,6 +2,7 @@
 
 #include <algorithm>
 
+#include <dr/defer.hpp>
 #include <dr/dynamic_array.hpp>
 #include <dr/geometry_types.hpp>
 #include <dr/hash_grid.hpp>
@@ -14,28 +15,35 @@ UTEST(hash_grid, allocator_propagation)
 {
     using namespace dr;
 
-    DebugMemoryResource mem{};
+    // Restore default memory resource after test is complete
+    auto def_mem = std::pmr::get_default_resource();
+    auto _ = defer([=]() {
+        std::pmr::set_default_resource(def_mem);
+    });
 
-    HashGrid2<f32> grid{&mem};
-    grid.insert({1.0f, 1.0f}, 0);
-    grid.insert({2.0f, 2.0f}, 1);
+    DebugMemoryResource mem[3]{};
+    std::pmr::set_default_resource(&mem[0]);
+
+    HashGrid2<f32> src{&mem[1]};
+    src.insert({1.0f, 1.0f}, 0);
+    src.insert({2.0f, 2.0f}, 1);
 
     {
-        // This copy should use the same memory resource
-        HashGrid2<f32> grid_copy{grid, &mem};
-        ASSERT_TRUE(grid_copy.allocator().resource()->is_equal(mem));
+        // dst should use the given memory resource
+        HashGrid2<f32> grid_copy{src, &mem[2]};
+        ASSERT_TRUE(grid_copy.allocator().resource()->is_equal(mem[2]));
     }
 
     {
-        // This copy should use the current default memory resource
-        HashGrid2<f32> grid_copy{grid};
-        ASSERT_TRUE(grid_copy.allocator().resource()->is_equal(*std::pmr::get_default_resource()));
+        // dst should use the current default memory resource
+        HashGrid2<f32> dst{src};
+        ASSERT_TRUE(dst.allocator().resource()->is_equal(mem[0]));
     }
 
     {
-        // This copy should use the current default memory resource
-        HashGrid2<f32> grid_move{std::move(grid)};
-        ASSERT_TRUE(grid_move.allocator().resource()->is_equal(mem));
+        // dst should use the same memory resource as src
+        HashGrid2<f32> grid_move{std::move(src)};
+        ASSERT_TRUE(grid_move.allocator().resource()->is_equal(mem[1]));
     }
 }
 
@@ -99,7 +107,9 @@ UTEST(hash_grid, insert_find)
         ASSERT_EQ(grid.size(), size(points));
 
         DynamicArray<i32> found_indices{};
-        grid.find(interval, [&](i32 const i) { found_indices.push_back(i); });
+        grid.find(interval, [&](i32 const i) {
+            found_indices.push_back(i);
+        });
 
         std::sort(found_indices.begin(), found_indices.end());
 
