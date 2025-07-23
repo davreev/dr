@@ -48,9 +48,9 @@ struct SlotMap : AllocatorAware
 
             // If T is allocator-aware, share this container's allocator
             if constexpr (is_allocator_aware<T>)
-                slots_.push_back({T(std::forward<Args>(args)..., allocator()), version, false});
+                slots_.push_back({T(std::forward<Args>(args)..., allocator()), {version, 0}});
             else
-                slots_.push_back({T(std::forward<Args>(args)...), version, false});
+                slots_.push_back({T(std::forward<Args>(args)...), {version, 0}});
 
             return {index, version};
         }
@@ -63,7 +63,7 @@ struct SlotMap : AllocatorAware
             Slot& slot = slots_[index];
             allocator().construct(&slot.item, std::forward<Args>(args)...);
 
-            return {index, slot.version};
+            return {index, slot.status.version};
         }
     }
 
@@ -72,15 +72,15 @@ struct SlotMap : AllocatorAware
     {
         constexpr Index max_version = (Index{1} << version_bits) - Index{1};
 
-        if (Slot& slot = slots_[handle.index]; slot.version == handle.version)
+        if (Slot& slot = slots_[handle.index]; slot.status.version == handle.version)
         {
             allocator().destroy(&slot.item);
 
             // Mark slot as free
-            slot.is_free = true;
+            slot.status.flags |= Flag_Free;
 
             // Reuse the slot if its version isn't maxed out
-            if (++slot.version < max_version)
+            if (++slot.status.version < max_version)
                 free_indices_.push_back(handle.index);
 
             return true;
@@ -90,12 +90,15 @@ struct SlotMap : AllocatorAware
     }
 
     /// Returns true if the handle refers to a valid item
-    bool is_valid(Handle const handle) { return slots_[handle.index].version == handle.version; }
+    bool is_valid(Handle const handle)
+    {
+        return slots_[handle.index].status.version == handle.version;
+    }
 
     /// Returns the item associated with the given handle or null if the handle isn't valid
     T const* operator[](Handle const handle) const
     {
-        if (Slot const& slot = slots_[handle.index]; slot.version == handle.version)
+        if (Slot const& slot = slots_[handle.index]; slot.status.version == handle.version)
             return &slot.item;
 
         return nullptr;
@@ -109,7 +112,9 @@ struct SlotMap : AllocatorAware
     Handle handle_at(Index const index)
     {
         auto const& slot = slots_[index];
-        return slot.is_free ? Handle{index, 0} : Handle{index, slot.version};
+        return (slot.status.flags & Flag_Free) //
+            ? Handle{index, 0}
+            : Handle{index, slot.status.version};
     }
 
     /// Returns the number of items in the map
@@ -119,11 +124,22 @@ struct SlotMap : AllocatorAware
     isize num_slots() { return isize(slots_.size()); }
 
   private:
+    static constexpr auto flag_bits = index_bits;
+
     struct Slot
     {
         T item;
-        Index version;
-        bool is_free;
+        struct
+        {
+            Index version : version_bits;
+            Index flags : flag_bits;
+        } status;
+    };
+
+    enum Flag : u8
+    {
+        Flag_Free = 1,
+        // ...
     };
 
     DynamicArray<Slot> slots_;
