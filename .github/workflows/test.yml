@@ -2,78 +2,59 @@ name: test
 
 on:
   push:
-    branches: [ develop ]
+    branches: [develop]
   pull_request:
-    branches: [ develop ]
+    branches: [develop]
 
 env:
   BUILD_TYPE: Debug
 
 jobs:
-  test-ubuntu-gcc:
+  test-ubuntu:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-    - name: Configure CMake
-      run: >
-        cmake -B ${{github.workspace}}/build 
-        -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} 
-        -DCMAKE_CXX_COMPILER=g++ 
-        -DCMAKE_C_COMPILER=gcc 
-        -DDR_TEST=ON
+      - name: Build (gcc)
+        run: >
+          cmake -B ${{github.workspace}}/build 
+          -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} 
+          -DCMAKE_CXX_COMPILER=g++ 
+          -DCMAKE_C_COMPILER=gcc 
+          -DDR_TEST=ON && 
+          cmake --build ${{github.workspace}}/build
 
-    - name: Build
-      run: cmake --build ${{github.workspace}}/build
+      - name: Build (clang)
+        run: >
+          cmake -B ${{github.workspace}}/build 
+          -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} 
+          -DCMAKE_CXX_COMPILER=clang++ 
+          -DCMAKE_C_COMPILER=clang 
+          -DDR_TEST=ON && 
+          cmake --build ${{github.workspace}}/build
 
-    - name: Test
-      working-directory: ${{github.workspace}}/build
-      run: ctest -C ${{env.BUILD_TYPE}}
+      - name: Test
+        run: ${{github.workspace}}/build/test/dr-test
 
-  test-ubuntu-clang:
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v3
-
-    - name: Configure CMake
-      run: >
-        cmake -B ${{github.workspace}}/build 
-        -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} 
-        -DCMAKE_CXX_COMPILER=clang++ 
-        -DCMAKE_C_COMPILER=clang 
-        -DDR_TEST=ON
-
-    - name: Build
-      run: cmake --build ${{github.workspace}}/build
-
-    - name: Test
-      working-directory: ${{github.workspace}}/build
-      run: ctest -C ${{env.BUILD_TYPE}}
-      
-  test-windows-clang:
+  test-windows:
     runs-on: windows-latest
 
     steps:
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-    - name: Install build dependencies
-      run: >
-        choco install ninja
+      - name: Install build dependencies
+        run: >
+          choco install ninja
 
-    - name: Configure CMake
-      run: >
-        cmake -B ${{github.workspace}}/build -G "Ninja" 
-        -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} 
-        -DCMAKE_CXX_COMPILER=clang++ 
-        -DCMAKE_C_COMPILER=clang 
-        -DDR_TEST=ON
+      - name: Build (clang)
+        run: >
+          cmake -B ${{github.workspace}}/build -G "Ninja" 
+          -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} 
+          -DCMAKE_CXX_COMPILER=clang++ 
+          -DCMAKE_C_COMPILER=clang 
+          -DDR_TEST=ON && 
+          cmake --build ${{github.workspace}}/build
 
-    - name: Build
-      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
-
-    - name: Test
-      working-directory: ${{github.workspace}}/build
-      run: ctest -C ${{env.BUILD_TYPE}}
-      
+      - name: Test
+        run: ${{github.workspace}}/build/test/dr-test.exe
