@@ -168,7 +168,7 @@ struct HalfedgeMesh : AllocatorAware
             bool include_holes = true);
 
       private:
-        struct VerticesToHalfedge
+        struct VertexToHalfedge
         {
             struct Hash : HighQualityHash
             {
@@ -178,7 +178,7 @@ struct HalfedgeMesh : AllocatorAware
             using Map = HashMap<Vec2<Index>, Index, Hash>;
         };
 
-        VerticesToHalfedge::Map v_to_he_;
+        VertexToHalfedge::Map v_to_he_;
     };
 
     HalfedgeMesh(Allocator const alloc = {}) :
@@ -232,10 +232,7 @@ struct HalfedgeMesh : AllocatorAware
     Halfedge halfedge(Vertex const e) const { return Halfedge{vert_hedge_[e]}; }
 
     /// Returns the first halfedge of the given edge
-    static Halfedge halfedge(Edge const e)
-    {
-        return Halfedge{(assert(e.is_valid()), e << 1)};
-    }
+    static Halfedge halfedge(Edge const e) { return Halfedge{(assert(e.is_valid()), e << 1)}; }
 
     /// Returns the first halfedge in the given face
     Halfedge halfedge(Face const f) const { return Halfedge{face_hedge_[f]}; }
@@ -253,10 +250,7 @@ struct HalfedgeMesh : AllocatorAware
     static Edge edge(Index const i) { return Edge{i}; }
 
     /// Returns the edge incident to the given halfedge
-    static Edge edge(Halfedge const he)
-    {
-        return Edge{(assert(he.is_valid()), he >> 1)};
-    }
+    static Edge edge(Halfedge const he) { return Edge{(assert(he.is_valid()), he >> 1)}; }
 
     /// Returns the face at the given index
     static Face face(Index const i) { return Face{i}; }
@@ -314,7 +308,7 @@ struct HalfedgeMesh : AllocatorAware
     {
         for (auto itr = circulate_face(f0); itr.is_valid(); ++itr)
         {
-            const Halfedge he = itr.current();
+            Halfedge const he = itr.current();
             if (face(twin(he)) == f1)
                 return he;
         }
@@ -338,10 +332,7 @@ struct HalfedgeMesh : AllocatorAware
     Index num_holes() const { return size_as<Index>(hole_hedge_); }
 
     /// Returns true if the given halfedge is on the mesh boundary
-    bool is_boundary(Halfedge const he) const
-    {
-        return hedge_face_[he] == invalid_index_;
-    }
+    bool is_boundary(Halfedge const he) const { return hedge_face_[he] == invalid_index_; }
 
     // Returns true if the given vertex is on the mesh boundary
     bool is_boundary(Vertex const v) const { return is_boundary(halfedge(v)); }
@@ -363,10 +354,7 @@ struct HalfedgeMesh : AllocatorAware
     bool includes_holes() const { return hole_hedge_.size() > 0; }
 
     /// Returns a circulator for the given vertex
-    VertexCirculator circulate_vertex(Vertex const v) const
-    {
-        return {*this, halfedge(v)};
-    }
+    VertexCirculator circulate_vertex(Vertex const v) const { return {*this, halfedge(v)}; }
 
     /// Returns a circulator for the vertex at the start of the given halfedge. When used,
     /// circulation will start from the given halfedge.

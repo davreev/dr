@@ -80,7 +80,9 @@ struct MeshIncidence
         Key(Vec4<Index> const& indices)
         {
             // Find the indices of the two smallest elements
-            auto const comp = [&](Index const i, Index const j) { return indices[i] < indices[j]; };
+            auto const comp = [&](Index const i, Index const j) {
+                return indices[i] < indices[j];
+            };
             Index p[]{0, 1, 2, 3};
             std::nth_element(p, p + 1, p + 4, comp);
 
@@ -139,7 +141,7 @@ struct MeshIncidence
 } // namespace impl
 
 template <typename Index>
-struct VerticesToEdge
+struct VertexToEdge
 {
     using Map = impl::MeshIncidence::Map<Index, 2>;
 
@@ -174,7 +176,7 @@ struct VerticesToEdge
 };
 
 template <typename Index>
-struct VerticesToTri
+struct VertexToTri
 {
     using Map = impl::MeshIncidence::Map<Index, 3>;
 
@@ -210,7 +212,7 @@ struct VerticesToTri
 };
 
 template <typename Index>
-struct VerticesToTet
+struct VertexToTet
 {
     using Map = impl::MeshIncidence::Map<Index, 4>;
 };
@@ -219,10 +221,10 @@ struct VerticesToTet
 template <typename Index>
 void collect_edge_opposite_vertices(
     Span<Vec3<Index> const> const& tri_verts,
-    typename VerticesToEdge<Index>::Map const& verts_to_edge,
+    typename VertexToEdge<Index>::Map const& vert_to_edge,
     Span<Index> const result)
 {
-    assert(result.size() == size(verts_to_edge));
+    assert(result.size() == size(vert_to_edge));
     as_vec(result).setConstant(invalid_index<Index>);
 
     for (isize f = 0; f < tri_verts.size(); ++f)
@@ -237,7 +239,7 @@ void collect_edge_opposite_vertices(
         Index v_op[] = {f_v[2], f_v[0], f_v[1]};
         for (i8 i = 0; i < 3; ++i)
         {
-            if (auto const it = verts_to_edge.find(e_v[i]); it != verts_to_edge.end())
+            if (auto const it = vert_to_edge.find(e_v[i]); it != vert_to_edge.end())
                 result[it->second] = v_op[i];
         }
     }
@@ -247,10 +249,10 @@ void collect_edge_opposite_vertices(
 template <typename Index>
 void collect_edge_tris(
     Span<Vec3<Index> const> const& tri_verts,
-    typename VerticesToEdge<Index>::Map const& verts_to_edge,
+    typename VertexToEdge<Index>::Map const& vert_to_edge,
     Span<Index> const result)
 {
-    assert(result.size() == size(verts_to_edge));
+    assert(result.size() == size(vert_to_edge));
     as_vec(result).setConstant(invalid_index<Index>);
 
     for (isize f = 0; f < tri_verts.size(); ++f)
@@ -264,7 +266,7 @@ void collect_edge_tris(
 
         for (i8 i = 0; i < 3; ++i)
         {
-            if (auto const it = verts_to_edge.find(e_v[i]); it != verts_to_edge.end())
+            if (auto const it = vert_to_edge.find(e_v[i]); it != vert_to_edge.end())
                 result[it->second] = Index(f);
         }
     }
@@ -274,7 +276,7 @@ void collect_edge_tris(
 template <typename Index>
 void collect_tri_edges(
     Span<Vec3<Index> const> const& tri_verts,
-    typename VerticesToEdge<Index>::Map const& verts_to_edge,
+    typename VertexToEdge<Index>::Map const& vert_to_edge,
     Span<Vec3<Index>> const result)
 {
     assert(result.size() == tri_verts.size());
@@ -292,7 +294,7 @@ void collect_tri_edges(
         auto& f_e = result[f];
         for (i8 i = 0; i < 3; ++i)
         {
-            if (auto const it = verts_to_edge.find(e_v[i]); it != verts_to_edge.end())
+            if (auto const it = vert_to_edge.find(e_v[i]); it != vert_to_edge.end())
                 f_e[i] = it->second;
         }
     }
@@ -302,7 +304,7 @@ void collect_tri_edges(
 template <typename Index>
 void collect_tet_tris(
     Span<Vec4<Index> const> const& tet_verts,
-    typename VerticesToTri<Index>::Map const& verts_to_tri,
+    typename VertexToTri<Index>::Map const& vert_to_tri,
     Span<Vec4<Index>> const result)
 {
     assert(result.size() == tet_verts.size());
@@ -321,7 +323,7 @@ void collect_tet_tris(
         auto& c_f = result[c];
         for (i8 i = 0; i < 4; ++i)
         {
-            if (auto const it = verts_to_tri.find(f_v[i]); it != verts_to_tri.end())
+            if (auto const it = vert_to_tri.find(f_v[i]); it != vert_to_tri.end())
                 c_f[i] = it->second;
         }
     }
