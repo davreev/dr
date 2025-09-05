@@ -47,7 +47,8 @@ UTEST(halfedge, build_cube)
     HalfedgeMesh::Builder builder{};
 
     {
-        auto const face_verts = as<Vec3<i16>>(TriMeshPrims::Cube::face_vertices());
+        auto& mesh_prim = MeshPrimitives::Tri::cube();
+        auto const face_verts = as<Vec3<i16>>(mesh_prim.face_vertices);
 
         HalfedgeMesh mesh{};
         auto const err = builder.make_from_face_vertex(face_verts, mesh);
@@ -60,7 +61,8 @@ UTEST(halfedge, build_cube)
     }
 
     {
-        auto const face_verts = as<Vec4<i16>>(QuadMeshPrims::Cube::face_vertices());
+        auto& mesh_prim = MeshPrimitives::Quad::cube();
+        auto const face_verts = as<Vec4<i16>>(mesh_prim.face_vertices);
 
         HalfedgeMesh mesh{};
         auto const err = builder.make_from_face_vertex(face_verts, mesh);

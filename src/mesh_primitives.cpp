@@ -5,24 +5,16 @@
 namespace dr
 {
 
-////////////////////////////////////////////////////////////////////////////////
-// TriMeshPrims::Tetrahedron
-
-Span<f32 const[3]> TriMeshPrims::Tetrahedron::vertex_positions()
+MeshPrimitives::Tri::Mesh const& MeshPrimitives::Tri::tetrahedron()
 {
-    static constexpr f32 result[][3]{
+    static constexpr f32 vert_positions[][3]{
         {-0.5, -0.5, -0.5},
         {0.5, 0.5, -0.5},
         {0.5, -0.5, 0.5},
         {-0.5, 0.5, 0.5},
     };
 
-    return as_span(result);
-}
-
-Span<i16 const[2]> TriMeshPrims::Tetrahedron::edge_vertices()
-{
-    static constexpr i16 result[][2]{
+    static constexpr i16 edge_verts[][2]{
         {0, 1},
         {1, 0},
         {1, 2},
@@ -37,39 +29,33 @@ Span<i16 const[2]> TriMeshPrims::Tetrahedron::edge_vertices()
         {3, 2},
     };
 
-    return as_span(result);
-}
-
-Span<i16 const[3]> TriMeshPrims::Tetrahedron::face_vertices()
-{
-    static constexpr i16 result[][3]{
+    static constexpr i16 face_verts[][3]{
         {0, 1, 2},
         {1, 0, 3},
         {2, 3, 0},
         {3, 2, 1},
     };
 
-    return as_span(result);
-}
-
-Span<i16 const[3]> TriMeshPrims::Tetrahedron::face_edges()
-{
-    static constexpr i16 result[][3]{
+    static constexpr i16 face_edges[][3]{
         {0, 2, 4},
         {1, 6, 8},
         {10, 7, 5},
         {11, 3, 9},
     };
 
-    return as_span(result);
+    static constexpr Mesh mesh{
+        as_span(vert_positions),
+        as_span(edge_verts),
+        as_span(face_verts),
+        as_span(face_edges),
+    };
+
+    return mesh;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-// TriMeshPrims::Ocathedron
-
-Span<f32 const[3]> TriMeshPrims::Octahedron::vertex_positions()
+MeshPrimitives::Tri::Mesh const& MeshPrimitives::Tri::octahedron()
 {
-    static constexpr f32 result[][3]{
+    static constexpr f32 vert_positions[][3]{
         {-0.5, -0.5, 0.0},
         {0.5, -0.5, 0.0},
         {-0.5, 0.5, 0.0},
@@ -78,13 +64,8 @@ Span<f32 const[3]> TriMeshPrims::Octahedron::vertex_positions()
         {0.0, 0.0, 0.5},
     };
 
-    return as_span(result);
-}
-
-Span<i16 const[2]> TriMeshPrims::Octahedron::edge_vertices()
-{
     // clang-format off
-    static constexpr i16 result[][2]{
+    static constexpr i16 edge_verts[][2]{
         {0, 1},
         {1, 0},
         {1, 5},
@@ -112,12 +93,7 @@ Span<i16 const[2]> TriMeshPrims::Octahedron::edge_vertices()
     };
     // clang-format on
 
-    return as_span(result);
-}
-
-Span<i16 const[3]> TriMeshPrims::Octahedron::face_vertices()
-{
-    static constexpr i16 result[][3]{
+    static constexpr i16 face_verts[][3]{
         {0, 1, 5},
         {1, 3, 5},
         {3, 2, 5},
@@ -128,12 +104,7 @@ Span<i16 const[3]> TriMeshPrims::Octahedron::face_vertices()
         {0, 2, 4},
     };
 
-    return as_span(result);
-}
-
-Span<i16 const[3]> TriMeshPrims::Octahedron::face_edges()
-{
-    static constexpr i16 result[][3]{
+    static constexpr i16 face_edges[][3]{
         {0, 2, 4},
         {6, 8, 3},
         {10, 12, 9},
@@ -144,18 +115,22 @@ Span<i16 const[3]> TriMeshPrims::Octahedron::face_edges()
         {15, 23, 17},
     };
 
-    return as_span(result);
+    static constexpr Mesh mesh{
+        as_span(vert_positions),
+        as_span(edge_verts),
+        as_span(face_verts),
+        as_span(face_edges),
+    };
+
+    return mesh;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-// TriMeshPrims::Icosahedron
-
-Span<f32 const[3]> TriMeshPrims::Icosahedron::vertex_positions()
+MeshPrimitives::Tri::Mesh const& MeshPrimitives::Tri::icosahedron()
 {
     constexpr f64 x = 0.525731112119133606;
     constexpr f64 z = 0.850650808352039932;
 
-    static constexpr f32 result[][3] = {
+    static constexpr f32 vert_positions[][3] = {
         {-x, 0.0, z},
         {x, 0.0, z},
         {-x, 0.0, -z},
@@ -170,13 +145,8 @@ Span<f32 const[3]> TriMeshPrims::Icosahedron::vertex_positions()
         {-z, -x, 0.0},
     };
 
-    return as_span(result);
-}
-
-Span<i16 const[2]> TriMeshPrims::Icosahedron::edge_vertices()
-{
     // clang-format off
-    static constexpr i16 result[][2]{
+    static constexpr i16 edge_verts[][2]{
         {1, 4},
         {4, 1},
         {4, 0},
@@ -240,13 +210,8 @@ Span<i16 const[2]> TriMeshPrims::Icosahedron::edge_vertices()
     };
     // clang-format on
 
-    return as_span(result);
-}
-
-Span<i16 const[3]> TriMeshPrims::Icosahedron::face_vertices()
-{
     // clang-format off
-    static constexpr i16 result[][3] = {
+    static constexpr i16 face_verts[][3] = {
         {1, 4, 0},
         {4, 9, 0},
         {4, 5, 9},
@@ -270,13 +235,8 @@ Span<i16 const[3]> TriMeshPrims::Icosahedron::face_vertices()
     };
     // clang-format on
 
-    return as_span(result);
-}
-
-Span<i16 const[3]> TriMeshPrims::Icosahedron::face_edges()
-{
     // clang-format off
-    static constexpr i16 result[][3] = {
+    static constexpr i16 face_edges[][3] = {
         {0, 2, 4},
         {6, 8, 3},
         {10, 12, 7},
@@ -300,15 +260,19 @@ Span<i16 const[3]> TriMeshPrims::Icosahedron::face_edges()
     };
     // clang-format on
 
-    return as_span(result);
+    static constexpr Mesh mesh{
+        as_span(vert_positions),
+        as_span(edge_verts),
+        as_span(face_verts),
+        as_span(face_edges),
+    };
+
+    return mesh;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-// TriMeshPrims::Cube
-
-Span<f32 const[3]> TriMeshPrims::Cube::vertex_positions()
+MeshPrimitives::Tri::Mesh const& MeshPrimitives::Tri::cube()
 {
-    static constexpr f32 result[][3] = {
+    static constexpr f32 vert_positions[][3] = {
         {-0.5, -0.5, -0.5},
         {0.5, -0.5, -0.5},
         {-0.5, 0.5, -0.5},
@@ -319,13 +283,8 @@ Span<f32 const[3]> TriMeshPrims::Cube::vertex_positions()
         {0.5, 0.5, 0.5},
     };
 
-    return as_span(result);
-}
-
-Span<i16 const[2]> TriMeshPrims::Cube::edge_vertices()
-{
     // clang-format off
-    static constexpr i16 result[][2]{
+    static constexpr i16 edge_verts[][2]{
         {0, 1},
         {1, 0},
         {1, 4},
@@ -365,12 +324,7 @@ Span<i16 const[2]> TriMeshPrims::Cube::edge_vertices()
     };
     // clang-format on
 
-    return as_span(result);
-}
-
-Span<i16 const[3]> TriMeshPrims::Cube::face_vertices()
-{
-    static constexpr i16 result[][3]{
+    static constexpr i16 face_verts[][3]{
         {0, 1, 4},
         {5, 4, 1},
         {3, 2, 7},
@@ -385,12 +339,7 @@ Span<i16 const[3]> TriMeshPrims::Cube::face_vertices()
         {4, 5, 6},
     };
 
-    return as_span(result);
-}
-
-Span<i16 const[3]> TriMeshPrims::Cube::face_edges()
-{
-    static constexpr i16 result[][3]{
+    static constexpr i16 face_edges[][3]{
         {0, 2, 4},
         {6, 3, 8},
         {10, 12, 14},
@@ -405,21 +354,20 @@ Span<i16 const[3]> TriMeshPrims::Cube::face_edges()
         {7, 35, 25},
     };
 
-    return as_span(result);
+    static constexpr Mesh mesh{
+        as_span(vert_positions),
+        as_span(edge_verts),
+        as_span(face_verts),
+        as_span(face_edges),
+    };
+
+    return mesh;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-// QuadMeshPrims::Cube
-
-Span<f32 const[3]> QuadMeshPrims::Cube::vertex_positions()
-{
-    return TriMeshPrims::Cube::vertex_positions();
-}
-
-Span<i16 const[2]> QuadMeshPrims::Cube::edge_vertices()
+MeshPrimitives::Quad::Mesh const& MeshPrimitives::Quad::cube()
 {
     // clang-format off
-    static constexpr i16 result[][2]{
+    static constexpr i16 edge_verts[][2]{
         {0, 1},
         {1, 0},
         {1, 5},
@@ -447,12 +395,7 @@ Span<i16 const[2]> QuadMeshPrims::Cube::edge_vertices()
     };
     // clang-format on
 
-    return as_span(result);
-}
-
-Span<i16 const[4]> QuadMeshPrims::Cube::face_vertices()
-{
-    static constexpr i16 result[][4] = {
+    static constexpr i16 face_verts[][4] = {
         {0, 1, 5, 4},
         {3, 2, 6, 7},
         {2, 0, 4, 6},
@@ -461,12 +404,7 @@ Span<i16 const[4]> QuadMeshPrims::Cube::face_vertices()
         {7, 6, 4, 5},
     };
 
-    return as_span(result);
-}
-
-Span<i16 const[4]> QuadMeshPrims::Cube::face_edges()
-{
-    static constexpr i16 result[][4] = {
+    static constexpr i16 face_edges[][4] = {
         {0, 2, 4, 6},
         {8, 10, 12, 14},
         {16, 7, 18, 11},
@@ -475,21 +413,20 @@ Span<i16 const[4]> QuadMeshPrims::Cube::face_edges()
         {13, 19, 5, 23},
     };
 
-    return as_span(result);
+    static Mesh const mesh{
+        Tri::cube().vertex_positions,
+        as_span(edge_verts),
+        as_span(face_verts),
+        as_span(face_edges),
+    };
+
+    return mesh;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-// TetMeshPrims::Cube
-
-Span<f32 const[3]> TetMeshPrims::Cube::vertex_positions()
-{
-    return TriMeshPrims::Cube::vertex_positions();
-}
-
-Span<i16 const[2]> TetMeshPrims::Cube::edge_vertices()
+MeshPrimitives::Tet::Mesh const& MeshPrimitives::Tet::cube()
 {
     // clang-format off
-    static constexpr i16 result[][2]{
+    static constexpr i16 edge_verts[][2]{
         {0, 3},
         {3, 0},
         {3, 5},
@@ -529,13 +466,8 @@ Span<i16 const[2]> TetMeshPrims::Cube::edge_vertices()
     };
     // clang-format on
 
-    return as_span(result);
-}
-
-Span<i16 const[3]> TetMeshPrims::Cube::face_vertices()
-{
     // clang-format off
-    static constexpr i16 result[][3]{
+    static constexpr i16 face_verts[][3]{
         {0, 3, 5},
         {0, 5, 3},
         {0, 6, 3},
@@ -571,13 +503,8 @@ Span<i16 const[3]> TetMeshPrims::Cube::face_vertices()
     };
     // clang-format on
 
-    return as_span(result);
-}
-
-Span<i16 const[3]> TetMeshPrims::Cube::face_edges()
-{
     // clang-format off
-    static constexpr i16 result[][3]{
+    static constexpr i16 face_edges[][3]{
         {0, 2, 4},
         {5, 3, 1},
         {6, 8, 1},
@@ -613,12 +540,7 @@ Span<i16 const[3]> TetMeshPrims::Cube::face_edges()
     };
     // clang-format on
 
-    return as_span(result);
-}
-
-Span<i16 const[4]> TetMeshPrims::Cube::cell_vertices()
-{
-    static constexpr i16 result[][4] = {
+    static constexpr i16 cell_verts[][4] = {
         {0, 3, 5, 6},
         {0, 1, 5, 3},
         {3, 2, 6, 0},
@@ -626,12 +548,7 @@ Span<i16 const[4]> TetMeshPrims::Cube::cell_vertices()
         {7, 5, 3, 6},
     };
 
-    return as_span(result);
-}
-
-Span<i16 const[6]> TetMeshPrims::Cube::cell_edges()
-{
-    static constexpr i16 result[][6] = {
+    static constexpr i16 cell_edges[][6] = {
         {0, 2, 4, 6, 8, 10},
         {12, 14, 4, 0, 16, 3},
         {20, 18, 8, 1, 22, 7},
@@ -639,12 +556,7 @@ Span<i16 const[6]> TetMeshPrims::Cube::cell_edges()
         {32, 3, 30, 34, 11, 9},
     };
 
-    return as_span(result);
-}
-
-Span<i16 const[4]> TetMeshPrims::Cube::cell_faces()
-{
-    static constexpr i16 result[][4] = {
+    static constexpr i16 cell_faces[][4] = {
         {0, 2, 4, 6},
         {8, 10, 1, 12},
         {14, 16, 3, 18},
@@ -652,7 +564,17 @@ Span<i16 const[4]> TetMeshPrims::Cube::cell_faces()
         {26, 28, 30, 7},
     };
 
-    return as_span(result);
+    static Mesh const mesh{
+        Tri::cube().vertex_positions,
+        as_span(edge_verts),
+        as_span(face_verts),
+        as_span(face_edges),
+        as_span(cell_verts),
+        as_span(cell_edges),
+        as_span(cell_faces),
+    };
+
+    return mesh;
 }
 
 } // namespace dr

@@ -8,9 +8,9 @@ UTEST(mesh, append)
 {
     using namespace dr;
 
-    using Prim = TriMeshPrims::Cube;
-    auto const src_verts = as<Vec3<f32>>(Prim::vertex_positions());
-    auto const src_faces = as<Vec3<i16>>(Prim::face_vertices());
+    auto& mesh = MeshPrimitives::Tri::cube();
+    auto const src_verts = as<Vec3<f32>>(mesh.vertex_positions);
+    auto const src_faces = as<Vec3<i16>>(mesh.face_vertices);
 
     DynamicArray<Vec3<f32>> dst_verts{};
     DynamicArray<Vec3<i16>> dst_faces{};

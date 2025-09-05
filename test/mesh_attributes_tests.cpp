@@ -17,27 +17,27 @@ UTEST(mesh, area_centroid)
         Vec3<f32> result;
     };
 
-    using Prims = TriMeshPrims;
+    using MeshPrims = MeshPrimitives::Tri;
 
     TestCase const test_cases[] = {
         {
-            as<Vec3<f32>>(Prims::Tetrahedron::vertex_positions()),
-            as<Vec3<i16>>(Prims::Tetrahedron::face_vertices()),
+            as<Vec3<f32>>(MeshPrims::tetrahedron().vertex_positions),
+            as<Vec3<i16>>(MeshPrims::tetrahedron().face_vertices),
             {0.0, 0.0, 0.0},
         },
         {
-            as<Vec3<f32>>(Prims::Octahedron::vertex_positions()),
-            as<Vec3<i16>>(Prims::Octahedron::face_vertices()),
+            as<Vec3<f32>>(MeshPrims::octahedron().vertex_positions),
+            as<Vec3<i16>>(MeshPrims::octahedron().face_vertices),
             {0.0, 0.0, 0.0},
         },
         {
-            as<Vec3<f32>>(Prims::Cube::vertex_positions()),
-            as<Vec3<i16>>(Prims::Cube::face_vertices()),
+            as<Vec3<f32>>(MeshPrims::cube().vertex_positions),
+            as<Vec3<i16>>(MeshPrims::cube().face_vertices),
             {0.0, 0.0, 0.0},
         },
         {
-            as<Vec3<f32>>(Prims::Icosahedron::vertex_positions()),
-            as<Vec3<i16>>(Prims::Icosahedron::face_vertices()),
+            as<Vec3<f32>>(MeshPrims::icosahedron().vertex_positions),
+            as<Vec3<i16>>(MeshPrims::icosahedron().face_vertices),
             {0.0, 0.0, 0.0},
         },
     };
@@ -63,20 +63,20 @@ UTEST(mesh, vertex_normals_area_weighted)
         Span<Vec3<i16> const> tri_verts;
     };
 
-    using Prims = TriMeshPrims;
+    using MeshPrims = MeshPrimitives::Tri;
 
     TestCase const test_cases[] = {
         {
-            as<Vec3<f32>>(Prims::Tetrahedron::vertex_positions()),
-            as<Vec3<i16>>(Prims::Tetrahedron::face_vertices()),
+            as<Vec3<f32>>(MeshPrims::tetrahedron().vertex_positions),
+            as<Vec3<i16>>(MeshPrims::tetrahedron().face_vertices),
         },
         {
-            as<Vec3<f32>>(Prims::Octahedron::vertex_positions()),
-            as<Vec3<i16>>(Prims::Octahedron::face_vertices()),
+            as<Vec3<f32>>(MeshPrims::octahedron().vertex_positions),
+            as<Vec3<i16>>(MeshPrims::octahedron().face_vertices),
         },
         {
-            as<Vec3<f32>>(Prims::Icosahedron::vertex_positions()),
-            as<Vec3<i16>>(Prims::Icosahedron::face_vertices()),
+            as<Vec3<f32>>(MeshPrims::icosahedron().vertex_positions),
+            as<Vec3<i16>>(MeshPrims::icosahedron().face_vertices),
         },
     };
 
@@ -112,30 +112,30 @@ UTEST(mesh, integrate_vertex_values)
         f32 result;
     };
 
-    using Prims = TriMeshPrims;
+    auto const mesh = MeshPrimitives::Tri::cube();
 
     TestCase const test_cases[] = {
         {
-            as<Vec3<f32>>(Prims::Cube::vertex_positions()),
-            as<Vec3<i16>>(Prims::Cube::face_vertices()),
+            as<Vec3<f32>>(mesh.vertex_positions),
+            as<Vec3<i16>>(mesh.face_vertices),
             1.0,
             6.0,
         },
         {
-            as<Vec3<f32>>(Prims::Cube::vertex_positions()),
-            as<Vec3<i16>>(Prims::Cube::face_vertices()),
+            as<Vec3<f32>>(mesh.vertex_positions),
+            as<Vec3<i16>>(mesh.face_vertices),
             2.0,
             12.0,
         },
         {
-            as<Vec3<f32>>(Prims::Cube::vertex_positions()),
-            as<Vec3<i16>>(Prims::Cube::face_vertices()),
+            as<Vec3<f32>>(mesh.vertex_positions),
+            as<Vec3<i16>>(mesh.face_vertices),
             0.5,
             3.0,
         },
         {
-            as<Vec3<f32>>(Prims::Cube::vertex_positions()),
-            as<Vec3<i16>>(Prims::Cube::face_vertices()),
+            as<Vec3<f32>>(mesh.vertex_positions),
+            as<Vec3<i16>>(mesh.face_vertices),
             0.0,
             0.0,
         },

@@ -5,63 +5,78 @@
 namespace dr
 {
 
-struct TriMeshPrims
+struct MeshPrimitives
 {
-    struct Tetrahedron
+    struct Tri
     {
-        static Span<f32 const[3]> vertex_positions();
-        static Span<i16 const[2]> edge_vertices();
-        static Span<i16 const[3]> face_vertices();
-        static Span<i16 const[3]> face_edges();
+        struct Mesh
+        {
+            Span<f32 const[3]> vertex_positions;
+            Span<i16 const[2]> edge_vertices;
+            Span<i16 const[3]> face_vertices;
+            Span<i16 const[3]> face_edges;
+        };
+
+        static Mesh const& tetrahedron();
+        static Mesh const& octahedron();
+        static Mesh const& icosahedron();
+        static Mesh const& cube();
+        // ...
+        // ...
+        // ...
     };
 
-    struct Octahedron
+    struct Quad
     {
-        static Span<f32 const[3]> vertex_positions();
-        static Span<i16 const[2]> edge_vertices();
-        static Span<i16 const[3]> face_vertices();
-        static Span<i16 const[3]> face_edges();
+        struct Mesh
+        {
+            Span<f32 const[3]> vertex_positions;
+            Span<i16 const[2]> edge_vertices;
+            Span<i16 const[4]> face_vertices;
+            Span<i16 const[4]> face_edges;
+        };
+
+        static Mesh const& cube();
+        // ...
+        // ...
+        // ...
     };
 
-    struct Icosahedron
+    struct Tet
     {
-        static Span<f32 const[3]> vertex_positions();
-        static Span<i16 const[2]> edge_vertices();
-        static Span<i16 const[3]> face_vertices();
-        static Span<i16 const[3]> face_edges();
+        struct Mesh
+        {
+            Span<f32 const[3]> vertex_positions;
+            Span<i16 const[2]> edge_vertices;
+            Span<i16 const[3]> face_vertices;
+            Span<i16 const[3]> face_edges;
+            Span<i16 const[4]> cell_vertices;
+            Span<i16 const[6]> cell_edges;
+            Span<i16 const[4]> cell_faces;
+        };
+
+        static Mesh const& cube();
+        // ...
+        // ...
+        // ...
     };
 
-    struct Cube
+    struct Hex
     {
-        static Span<f32 const[3]> vertex_positions();
-        static Span<i16 const[2]> edge_vertices();
-        static Span<i16 const[3]> face_vertices();
-        static Span<i16 const[3]> face_edges();
-    };
-};
+        struct Mesh
+        {
+            Span<f32 const[3]> vertex_positions;
+            Span<i16 const[2]> edge_vertices;
+            Span<i16 const[4]> face_vertices;
+            Span<i16 const[4]> face_edges;
+            Span<i16 const[8]> cell_vertices;
+            Span<i16 const[12]> cell_edges;
+            Span<i16 const[6]> cell_faces;
+        };
 
-struct QuadMeshPrims
-{
-    struct Cube
-    {
-        static Span<f32 const[3]> vertex_positions();
-        static Span<i16 const[2]> edge_vertices();
-        static Span<i16 const[4]> face_vertices();
-        static Span<i16 const[4]> face_edges();
-    };
-};
-
-struct TetMeshPrims
-{
-    struct Cube
-    {
-        static Span<f32 const[3]> vertex_positions();
-        static Span<i16 const[2]> edge_vertices();
-        static Span<i16 const[3]> face_vertices();
-        static Span<i16 const[3]> face_edges();
-        static Span<i16 const[4]> cell_vertices();
-        static Span<i16 const[6]> cell_edges();
-        static Span<i16 const[4]> cell_faces();
+        // ...
+        // ...
+        // ...
     };
 };
 

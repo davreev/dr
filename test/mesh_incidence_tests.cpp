@@ -34,19 +34,19 @@ UTEST(mesh_incidence, make_vertex_to_edge)
         } expect;
     };
 
-    using Prims = TriMeshPrims;
+    using MeshPrims = MeshPrimitives::Tri;
 
     TestCase const test_cases[] = {
         {
-            as<Vec3<i16>>(Prims::Tetrahedron::face_vertices()),
+            as<Vec3<i16>>(MeshPrims::tetrahedron().face_vertices),
             {6},
         },
         {
-            as<Vec3<i16>>(Prims::Cube::face_vertices()),
+            as<Vec3<i16>>(MeshPrims::cube().face_vertices),
             {18},
         },
         {
-            as<Vec3<i16>>(Prims::Icosahedron::face_vertices()),
+            as<Vec3<i16>>(MeshPrims::icosahedron().face_vertices),
             {30},
         },
     };
@@ -80,11 +80,11 @@ UTEST(mesh_incidence, make_vertex_to_tri)
         } result;
     };
 
-    using Prims = TetMeshPrims;
+    using MeshPrims = MeshPrimitives::Tet;
 
     TestCase const test_cases[] = {
         {
-            as<Vec4<i16>>(Prims::Cube::cell_vertices()),
+            as<Vec4<i16>>(MeshPrims::cube().cell_vertices),
             {16},
         },
     };
@@ -118,19 +118,19 @@ UTEST(mesh_incidence, collect_edge_opposite_vertices)
         } expect;
     };
 
-    using Prims = TriMeshPrims;
+    using MeshPrims = MeshPrimitives::Tri;
 
     TestCase const test_cases[] = {
         {
-            as<Vec3<i16>>(Prims::Tetrahedron::face_vertices()),
+            as<Vec3<i16>>(MeshPrims::tetrahedron().face_vertices),
             {6},
         },
         {
-            as<Vec3<i16>>(Prims::Cube::face_vertices()),
+            as<Vec3<i16>>(MeshPrims::cube().face_vertices),
             {18},
         },
         {
-            as<Vec3<i16>>(Prims::Icosahedron::face_vertices()),
+            as<Vec3<i16>>(MeshPrims::icosahedron().face_vertices),
             {30},
         },
     };
@@ -178,19 +178,19 @@ UTEST(mesh_incidence, collect_edge_tris)
         } expect;
     };
 
-    using Prims = TriMeshPrims;
+    using MeshPrims = MeshPrimitives::Tri;
 
     TestCase const test_cases[] = {
         {
-            as<Vec3<i16>>(Prims::Tetrahedron::face_vertices()),
+            as<Vec3<i16>>(MeshPrims::tetrahedron().face_vertices),
             {6},
         },
         {
-            as<Vec3<i16>>(Prims::Cube::face_vertices()),
+            as<Vec3<i16>>(MeshPrims::cube().face_vertices),
             {18},
         },
         {
-            as<Vec3<i16>>(Prims::Icosahedron::face_vertices()),
+            as<Vec3<i16>>(MeshPrims::icosahedron().face_vertices),
             {30},
         },
     };
@@ -238,19 +238,19 @@ UTEST(mesh_incidence, collect_tri_edges)
         } expect;
     };
 
-    using Prims = TriMeshPrims;
+    using MeshPrims = MeshPrimitives::Tri;
 
     TestCase const test_cases[] = {
         {
-            as<Vec3<i16>>(Prims::Tetrahedron::face_vertices()),
+            as<Vec3<i16>>(MeshPrims::tetrahedron().face_vertices),
             {6},
         },
         {
-            as<Vec3<i16>>(Prims::Cube::face_vertices()),
+            as<Vec3<i16>>(MeshPrims::cube().face_vertices),
             {18},
         },
         {
-            as<Vec3<i16>>(Prims::Icosahedron::face_vertices()),
+            as<Vec3<i16>>(MeshPrims::icosahedron().face_vertices),
             {30},
         },
     };
@@ -299,11 +299,11 @@ UTEST(mesh_incidence, collect_tet_tris)
         } expect;
     };
 
-    using Prims = TetMeshPrims;
+    using MeshPrims = MeshPrimitives::Tet;
 
     TestCase const test_cases[] = {
         {
-            as<Vec4<i16>>(Prims::Cube::cell_vertices()),
+            as<Vec4<i16>>(MeshPrims::cube().cell_vertices),
             {16},
         },
     };
