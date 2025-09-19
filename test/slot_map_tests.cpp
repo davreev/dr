@@ -1,11 +1,11 @@
 #include <memory_resource>
+#include <string>
+
 #include <utest.h>
 
 #include <dr/defer.hpp>
 #include <dr/memory.hpp>
 #include <dr/slot_map.hpp>
-
-#include <dr/shim/pmr/string.hpp>
 
 UTEST(slot_map, insert_remove)
 {

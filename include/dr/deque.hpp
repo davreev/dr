@@ -1,6 +1,6 @@
 #pragma once
 
-#include <dr/shim/pmr/deque.hpp>
+#include <deque>
 
 namespace dr
 {

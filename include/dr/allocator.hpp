@@ -1,7 +1,8 @@
 #pragma once
 
+#include <memory_resource>
+
 #include <dr/basic_types.hpp>
-#include <dr/shim/pmr/memory_resource.hpp>
 
 namespace dr
 {

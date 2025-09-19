@@ -1,6 +1,6 @@
 #pragma once
 
-#include <dr/shim/pmr/string.hpp>
+#include <string>
 
 namespace dr
 {

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <dr/shim/pmr/vector.hpp>
+#include <vector>
 
 namespace dr
 {

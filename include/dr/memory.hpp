@@ -5,13 +5,12 @@
 */
 
 #include <memory>
+#include <memory_resource>
 #include <type_traits>
 
 #include <dr/allocator.hpp>
 #include <dr/basic_types.hpp>
 #include <dr/span.hpp>
-
-#include <dr/shim/pmr/memory_resource.hpp>
 
 namespace dr
 {
