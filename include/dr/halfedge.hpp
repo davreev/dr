@@ -30,21 +30,10 @@ struct HalfedgeMesh : AllocatorAware
     template <Tag>
     struct Element
     {
-        constexpr Element() = default;
-
-        constexpr explicit Element(Index const index) : index{index} {}
+        Index index{invalid_index_};
 
         constexpr bool is_valid() const { return index != invalid_index_; }
-
         constexpr operator Index() const { return index; }
-
-        constexpr Element& operator++() { return ++index, *this; }
-        constexpr Element& operator--() { return --index, *this; }
-
-        constexpr Element operator++(int) { return {index++}; }
-        constexpr Element operator--(int) { return {index--}; }
-
-        Index index{invalid_index_};
     };
 
     using Halfedge = Element<Tag_Halfedge>;
