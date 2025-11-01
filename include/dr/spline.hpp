@@ -102,7 +102,11 @@ template <
     isize n_u = BasisU::size,
     isize n_v = BasisV::size,
     isize n_w = BasisW::size>
-constexpr Value spline_eval(Value const coeffs[n_u * n_v * n_w], Real const u, Real const v, Real const w)
+constexpr Value spline_eval(
+    Value const coeffs[n_u * n_v * n_w],
+    Real const u,
+    Real const v,
+    Real const w)
 {
     static_assert(is_real<Real>);
 
@@ -206,14 +210,14 @@ constexpr void spline_eval(
 
 } // namespace impl
 
-template <isize order_, isize size_ = order_ + 1>
+template <isize degree_, isize size_>
 struct SplineBasis
 {
-    static constexpr isize order{order_};
+    static constexpr isize degree{degree_};
     static constexpr isize size{size_};
 };
 
-struct LinearBasis : SplineBasis<1>
+struct LinearBasis : SplineBasis<1, 2>
 {
     template <typename Real>
     static constexpr void eval(Real const t, Real result[size])
@@ -224,16 +228,17 @@ struct LinearBasis : SplineBasis<1>
         result[1] = t;
     }
 
-    template <isize order_>
-    struct Diff : SplineBasis<1>
+    template <isize order>
+    struct Diff : SplineBasis<degree - order, 2>
     {
+        static_assert(order > 0);
+
         template <typename Real>
         static constexpr void eval(Real const /*t*/, Real result[size])
         {
             static_assert(is_real<Real>);
-            static_assert(order_ > 0);
 
-            if constexpr (order_ == 1)
+            if constexpr (order == 1)
             {
                 result[0] = Real{-1.0};
                 result[1] = Real{1.0};
@@ -247,7 +252,7 @@ struct LinearBasis : SplineBasis<1>
     };
 };
 
-struct CatmullRomBasis : SplineBasis<3>
+struct CatmullRomBasis : SplineBasis<3, 4>
 {
     template <typename Real>
     static constexpr void eval(Real const t, Real result[size])
@@ -271,16 +276,17 @@ struct CatmullRomBasis : SplineBasis<3>
         result[3] = Real{0.5} * (ttt - tt);
     }
 
-    template <isize order_>
-    struct Diff : SplineBasis<3>
+    template <isize order>
+    struct Diff : SplineBasis<degree - order, 4>
     {
+        static_assert(order > 0);
+
         template <typename Real>
         static constexpr void eval(Real const t, Real result[size])
         {
             static_assert(is_real<Real>);
-            static_assert(order_ > 0);
 
-            if constexpr (order_ == 1)
+            if constexpr (order == 1)
             {
                 Real const tt = t * t;
                 result[0] = Real{2.0} * t - Real{1.5} * tt - Real{0.5};
@@ -288,14 +294,14 @@ struct CatmullRomBasis : SplineBasis<3>
                 result[2] = Real{4.0} * t + Real{0.5} - Real{4.5} * tt;
                 result[3] = Real{1.5} * tt - t;
             }
-            else if constexpr (order_ == 2)
+            else if constexpr (order == 2)
             {
                 result[0] = Real{2.0} - Real{3.0} * t;
                 result[1] = Real{9.0} * t - Real{5.0};
                 result[2] = Real{4.0} - Real{9.0} * t;
                 result[3] = Real{3.0} * t - Real{1.0};
             }
-            else if constexpr (order_ == 3)
+            else if constexpr (order == 3)
             {
                 result[0] = Real{-3.0};
                 result[1] = Real{9.0};
@@ -313,11 +319,11 @@ struct CatmullRomBasis : SplineBasis<3>
     };
 };
 
-template <isize order>
+template <isize degree>
 struct BernsteinBasis;
 
 template <>
-struct BernsteinBasis<2> : SplineBasis<2>
+struct BernsteinBasis<2> : SplineBasis<2, 3>
 {
     template <typename Real>
     static constexpr void eval(Real const t, Real result[size])
@@ -338,22 +344,23 @@ struct BernsteinBasis<2> : SplineBasis<2>
         result[2] = tt;
     }
 
-    template <isize order_>
-    struct Diff : SplineBasis<2>
+    template <isize order>
+    struct Diff : SplineBasis<degree - order, 3>
     {
+        static_assert(order > 0);
+
         template <typename Real>
         static constexpr void eval(Real const t, Real result[size])
         {
             static_assert(is_real<Real>);
-            static_assert(order_ > 0);
 
-            if constexpr (order_ == 1)
+            if constexpr (order == 1)
             {
                 result[0] = Real{2.0} * t - Real{2.0};
                 result[1] = Real{2.0} - Real{4.0} * t;
                 result[2] = Real{2.0} * t;
             }
-            else if constexpr (order_ == 2)
+            else if constexpr (order == 2)
             {
                 result[0] = Real{2.0};
                 result[1] = Real{-4.0};
@@ -370,7 +377,7 @@ struct BernsteinBasis<2> : SplineBasis<2>
 };
 
 template <>
-struct BernsteinBasis<3> : SplineBasis<3>
+struct BernsteinBasis<3> : SplineBasis<3, 4>
 {
     template <typename Real>
     static constexpr void eval(Real const t, Real result[size])
@@ -394,16 +401,17 @@ struct BernsteinBasis<3> : SplineBasis<3>
         result[3] = ttt;
     }
 
-    template <isize order_>
-    struct Diff : SplineBasis<3>
+    template <isize order>
+    struct Diff : SplineBasis<degree - order, 4>
     {
+        static_assert(order > 0);
+
         template <typename Real>
         static constexpr void eval(Real const t, Real result[size])
         {
             static_assert(is_real<Real>);
-            static_assert(order_ > 0);
 
-            if constexpr (order_ == 1)
+            if constexpr (order == 1)
             {
                 Real const tt = t * t;
                 result[0] = Real{6.0} * t - Real{3.0} * tt - Real{3.0};
@@ -411,14 +419,14 @@ struct BernsteinBasis<3> : SplineBasis<3>
                 result[2] = Real{6.0} * t - Real{9.0} * tt;
                 result[3] = Real{3.0} * tt;
             }
-            else if constexpr (order_ == 2)
+            else if constexpr (order == 2)
             {
                 result[0] = Real{6.0} - Real{2.0} * t;
                 result[1] = Real{18.0} * t - Real{12.0};
                 result[2] = Real{6.0} - Real{18.0} * t;
                 result[3] = Real{6.0} * t;
             }
-            else if constexpr (order_ == 3)
+            else if constexpr (order == 3)
             {
                 result[0] = Real{-2.0};
                 result[1] = Real{18.0};
@@ -722,7 +730,6 @@ constexpr Value eval_bezier_cubic_dt(Value const x[4], Real const t)
     return impl::spline_eval<BernsteinBasis<3>::Diff<1>>(x, t);
 }
 
-
 template <typename Value, typename Real>
 constexpr Value eval_bezier_bicubic(Value const x[16], Real const u, Real const v)
 {
@@ -757,11 +764,7 @@ constexpr Value eval_bezier_bicubic_dv(Value const x[16], Real const u, Real con
 }
 
 template <typename Value, typename Real>
-constexpr Value eval_bezier_tricubic(
-    Value const x[64],
-    Real const u,
-    Real const v,
-    Real const w)
+constexpr Value eval_bezier_tricubic(Value const x[64], Real const u, Real const v, Real const w)
 {
     using B = BernsteinBasis<3>;
     return impl::spline_eval<B, B, B>(x, u, v, w);
@@ -781,33 +784,21 @@ constexpr void eval_bezier_tricubic(
 }
 
 template <typename Value, typename Real>
-constexpr Value eval_bezier_tricubic_du(
-    Value const x[64],
-    Real const u,
-    Real const v,
-    Real const w)
+constexpr Value eval_bezier_tricubic_du(Value const x[64], Real const u, Real const v, Real const w)
 {
     using B = BernsteinBasis<3>;
     return impl::spline_eval<B::Diff<1>, B, B>(x, u, v, w);
 }
 
 template <typename Value, typename Real>
-constexpr Value eval_bezier_tricubic_dv(
-    Value const x[64],
-    Real const u,
-    Real const v,
-    Real const w)
+constexpr Value eval_bezier_tricubic_dv(Value const x[64], Real const u, Real const v, Real const w)
 {
     using B = BernsteinBasis<3>;
     return impl::spline_eval<B, B::Diff<1>, B>(x, u, v, w);
 }
 
 template <typename Value, typename Real>
-constexpr Value eval_bezier_tricubic_dw(
-    Value const x[64],
-    Real const u,
-    Real const v,
-    Real const w)
+constexpr Value eval_bezier_tricubic_dw(Value const x[64], Real const u, Real const v, Real const w)
 {
     using B = BernsteinBasis<3>;
     return impl::spline_eval<B, B, B::Diff<1>>(x, u, v, w);
