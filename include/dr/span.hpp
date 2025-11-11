@@ -17,6 +17,11 @@ struct Span
     {
     }
 
+    template <isize n>
+    constexpr Span(T (&data)[n]) : data_{data}, size_{n}
+    {
+    }
+
     /// Implicit conversion to Span of const elements
     constexpr operator Span<T const>() const { return {data_, size_}; }
 

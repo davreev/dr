@@ -62,3 +62,20 @@ UTEST(span, range_base_for)
 
     ASSERT_EQ(sum, 15);
 }
+
+UTEST(span, ctor)
+{
+    using namespace dr;
+
+    i32 const arr[] = {0, 1, 2, 3, 4, 5};
+
+    {
+        Span const span{arr};
+        ASSERT_EQ(span.size(), 6);
+    }
+
+    {
+        Span const span{arr, 3};
+        ASSERT_EQ(span.size(), 3);
+    }
+}
