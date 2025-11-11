@@ -286,6 +286,26 @@ Vec3<Real> to_barycentric(
     return {Real{1.0} - x.sum(), x[0], x[1]};
 }
 
+/// Returns the barycentric coords of a point with respect to a tetrahedron
+template <typename Real>
+Vec4<Real> to_barycentric(
+    Vec3<Real> const& point,
+    Vec3<Real> const& tet_a,
+    Vec3<Real> const& tet_b,
+    Vec3<Real> const& tet_c,
+    Vec3<Real> const& tet_d)
+{
+    static_assert(is_real<Real>);
+
+    Vec3<Real> const a0 = tet_b - tet_a;
+    Vec3<Real> const a1 = tet_c - tet_a;
+    Vec3<Real> const a2 = tet_d - tet_a;
+    Vec3<Real> const b = point - tet_a;
+    Vec3<Real> const x = mat(a0, a1, a2).inverse() * b;
+
+    return {Real{1.0} - x.sum(), x[0], x[1], x[2]};
+}
+
 /// Returns the solid angle of a triangle as viewed from a point
 template <typename Real>
 Real solid_angle(
@@ -323,7 +343,9 @@ Real solid_angle(Span<Vec3<Real> const> const& polygon, Vec3<Real> const& point)
     if (n < 3)
         return Real{0.0};
 
-    auto const to_sphere = [&](Vec3<Real> const& p) { return (p - point).normalized(); };
+    auto const to_sphere = [&](Vec3<Real> const& p) {
+        return (p - point).normalized();
+    };
     Vec3<Real> p0 = to_sphere(polygon[0]);
     Vec3<Real> p1 = to_sphere(polygon[1]);
     Real sum{};
@@ -481,12 +503,12 @@ Covec3<Real> eval_gradient(
     Vec3<Real> const dp[]{p1 - p0, p2 - p0};
     Real const df[]{f1 - f0, f2 - f0};
 
-    // Compute gradients of linear basis "hat" funcs
+    // Compute gradients of linear basis funcs
     Vec3<Real> norm = dp[0].cross(dp[1]);
     norm /= norm.squaredNorm();
     Covec3<Real> const g[]{dp[1].cross(norm), norm.cross(dp[0])};
 
-    // NOTE: The result is a linear combo of basis grads
+    // Return linear combo of basis grads
     // | df0  df1 | * | g0 |
     //                | g1 |
     return as_row<2>(df) * as_mat<2>(g);
@@ -508,15 +530,85 @@ Mat<Real, dim, 3> eval_jacobian(
     Vec3<Real> const dp[]{p1 - p0, p2 - p0};
     Vec<Real, dim> const df[]{f1 - f0, f2 - f0};
 
-    // Compute gradients of linear basis "hat" funcs
+    // Compute gradients of linear basis funcs
     Vec3<Real> norm = dp[0].cross(dp[1]);
     norm /= norm.squaredNorm();
     Covec3<Real> const g[]{dp[1].cross(norm), norm.cross(dp[0])};
 
-    // NOTE: Each row of the result is a linear combo of basis grads
+    // Return linear combos of basis grads as rows
     // | df0  df1 | * | g0 |
     //                | g1 |
     return as_mat<2>(df) * as_mat<2>(g);
+}
+
+/// Evaluates the (constant) gradient of a function defined on vertices of a tetrahedron
+template <typename Real>
+Covec3<Real> eval_gradient(
+    Vec3<Real> const& p0,
+    Vec3<Real> const& p1,
+    Vec3<Real> const& p2,
+    Vec3<Real> const& p3,
+    Real const f0,
+    Real const f1,
+    Real const f2,
+    Real const f3)
+{
+    static_assert(is_real<Real>);
+
+    // Offset s.t. coord/value at first vertex is zero (no longer contributes to result)
+    Vec3<Real> const dp[]{p1 - p0, p2 - p0, p3 - p0};
+    Real const df[]{f1 - f0, f2 - f0, f3 - f0};
+
+    // Compute gradients of linear basis funcs
+    Covec3<Real> g[]{
+        project(dp[0], dp[1].cross(dp[2])),
+        project(dp[1], dp[2].cross(dp[0])),
+        project(dp[2], dp[0].cross(dp[1])),
+    };
+    g[0] /= g[0].squaredNorm();
+    g[1] /= g[1].squaredNorm();
+    g[2] /= g[2].squaredNorm();
+
+    // Return linear combo of basis grads
+    // | df0  df1  df2 | * | g0 |
+    //                     | g1 |
+    //                     | g2 |
+    return as_row<3>(df) * as_mat<3>(g);
+}
+
+/// Evaluates the (constant) Jacobian of a function defined on vertices of a tetrahedron
+template <typename Real, int dim>
+Mat<Real, dim, 3> eval_jacobian(
+    Vec3<Real> const& p0,
+    Vec3<Real> const& p1,
+    Vec3<Real> const& p2,
+    Vec3<Real> const& p3,
+    Vec<Real, dim> const& f0,
+    Vec<Real, dim> const& f1,
+    Vec<Real, dim> const& f2,
+    Vec<Real, dim> const& f3)
+{
+    static_assert(is_real<Real>);
+
+    // Offset s.t. coord/value at first vertex is zero (no longer contributes to result)
+    Vec3<Real> const dp[]{p1 - p0, p2 - p0, p3 - p0};
+    Vec<Real, dim> const df[]{f1 - f0, f2 - f0, f3 - f0};
+
+    // Compute gradients of linear basis funcs
+    Covec3<Real> g[]{
+        project(dp[0], dp[1].cross(dp[2])),
+        project(dp[1], dp[2].cross(dp[0])),
+        project(dp[2], dp[0].cross(dp[1])),
+    };
+    g[0] /= g[0].squaredNorm();
+    g[1] /= g[1].squaredNorm();
+    g[2] /= g[2].squaredNorm();
+
+    // Return linear combos of basis grads as rows
+    // | df0  df1  df2 | * | g0 |
+    //                     | g1 |
+    //                     | g2 |
+    return as_mat<3>(df) * as_mat<3>(g);
 }
 
 /// Returns the cotangent weight for each of the given triangle edges

@@ -4,7 +4,7 @@
 #include <dr/geometry.hpp>
 #include <dr/result.hpp>
 
-UTEST(geometry, eval_gradient)
+UTEST(geometry, eval_gradient_tri)
 {
     using namespace dr;
 
@@ -45,6 +45,15 @@ UTEST(geometry, eval_gradient)
             {0.0, 0.0, 1.0},
             vec(0.0, 0.5, 0.0),
         },
+        {
+            {
+                vec(0.0, 0.0, 0.0),
+                vec(1.0, 0.0, 0.0),
+                vec(0.0, 1.0, 0.0),
+            },
+            {1.0, 1.0, 1.0},
+            vec(0.0, 0.0, 0.0),
+        },
     };
 
     for (auto const& [p, f, expect] : test_cases)
@@ -56,7 +65,7 @@ UTEST(geometry, eval_gradient)
     }
 }
 
-UTEST(geometry, eval_jacobian)
+UTEST(geometry, eval_jacobian_tri)
 {
     using namespace dr;
 
@@ -96,11 +105,190 @@ UTEST(geometry, eval_jacobian)
             },
             mat(row(0.0, 1.0, 0.0), row(0.0, 2.0, 0.0)),
         },
+        {
+            {
+                vec(0.0, 0.0, 0.0),
+                vec(1.0, 0.0, 0.0),
+                vec(0.0, 2.0, 0.0),
+            },
+            {
+                vec(0.0, 0.0),
+                vec(0.0, 0.0),
+                vec(1.0, 2.0),
+            },
+            mat(row(0.0, 0.5, 0.0), row(0.0, 1.0, 0.0)),
+        },
+        {
+            {
+                vec(0.0, 0.0, 0.0),
+                vec(1.0, 0.0, 0.0),
+                vec(0.0, 1.0, 0.0),
+            },
+            {
+                vec(1.0, 2.0),
+                vec(1.0, 2.0),
+                vec(1.0, 2.0),
+            },
+            mat(row(0.0, 0.0, 0.0), row(0.0, 0.0, 0.0)),
+        },
     };
 
     for (auto const& [p, f, expect] : test_cases)
     {
         auto const J = eval_jacobian(p[0], p[1], p[2], f[0], f[1], f[2]);
+        ASSERT_NEAR(expect(0, 0), J(0, 0), eps);
+        ASSERT_NEAR(expect(0, 1), J(0, 1), eps);
+        ASSERT_NEAR(expect(0, 2), J(0, 2), eps);
+        ASSERT_NEAR(expect(1, 0), J(1, 0), eps);
+        ASSERT_NEAR(expect(1, 1), J(1, 1), eps);
+        ASSERT_NEAR(expect(1, 2), J(1, 2), eps);
+    }
+}
+
+UTEST(geometry, eval_gradient_tet)
+{
+    using namespace dr;
+
+    constexpr f64 eps = 1.0e-8;
+
+    struct TestCase
+    {
+        Vec3<f64> p[4];
+        f64 f[4];
+        Covec3<f64> expect;
+    };
+
+    TestCase const test_cases[] = {
+        {
+            {
+                vec(0.0, 0.0, 0.0),
+                vec(1.0, 0.0, 0.0),
+                vec(0.0, 1.0, 0.0),
+                vec(0.0, 0.0, 1.0),
+            },
+            {0.0, 0.0, 0.0, 1.0},
+            vec(0.0, 0.0, 1.0),
+        },
+        {
+            {
+                vec(0.0, 0.0, 0.0),
+                vec(1.0, 0.0, 0.0),
+                vec(0.0, 1.0, 0.0),
+                vec(0.0, 0.0, 1.0),
+            },
+            {0.0, 0.0, 0.0, 2.0},
+            vec(0.0, 0.0, 2.0),
+        },
+        {
+            {
+                vec(0.0, 0.0, 0.0),
+                vec(1.0, 0.0, 0.0),
+                vec(0.0, 1.0, 0.0),
+                vec(0.0, 0.0, 2.0),
+            },
+            {0.0, 0.0, 0.0, 1.0},
+            vec(0.0, 0.0, 0.5),
+        },
+        {
+            {
+                vec(0.0, 0.0, 0.0),
+                vec(1.0, 0.0, 0.0),
+                vec(0.0, 1.0, 0.0),
+                vec(0.0, 0.0, 1.0),
+            },
+            {1.0, 1.0, 1.0, 1.0},
+            vec(0.0, 0.0, 0.0),
+        },
+    };
+
+    for (auto const& [p, f, expect] : test_cases)
+    {
+        auto const grad = eval_gradient(p[0], p[1], p[2], p[3], f[0], f[1], f[2], f[3]);
+        ASSERT_NEAR(expect[0], grad[0], eps);
+        ASSERT_NEAR(expect[1], grad[1], eps);
+        ASSERT_NEAR(expect[2], grad[2], eps);
+    }
+}
+
+UTEST(geometry, eval_jacobian_tet)
+{
+    using namespace dr;
+
+    constexpr f64 eps = 1.0e-8;
+
+    struct TestCase
+    {
+        Vec3<f64> p[4];
+        Vec2<f64> f[4];
+        Mat<f64, 2, 3> expect;
+    };
+
+    TestCase const test_cases[] = {
+        {
+            {
+                vec(0.0, 0.0, 0.0),
+                vec(1.0, 0.0, 0.0),
+                vec(0.0, 1.0, 0.0),
+                vec(0.0, 0.0, 1.0),
+            },
+            {
+                vec(0.0, 0.0),
+                vec(0.0, 0.0),
+                vec(0.0, 0.0),
+                vec(1.0, 1.0),
+            },
+            mat(row(0.0, 0.0, 1.0), row(0.0, 0.0, 1.0)),
+        },
+        {
+            {
+                vec(0.0, 0.0, 0.0),
+                vec(1.0, 0.0, 0.0),
+                vec(0.0, 1.0, 0.0),
+                vec(0.0, 0.0, 1.0),
+            },
+            {
+                vec(0.0, 0.0),
+                vec(0.0, 0.0),
+                vec(0.0, 0.0),
+                vec(1.0, 2.0),
+            },
+            mat(row(0.0, 0.0, 1.0), row(0.0, 0.0, 2.0)),
+        },
+        {
+            {
+                vec(0.0, 0.0, 0.0),
+                vec(1.0, 0.0, 0.0),
+                vec(0.0, 1.0, 0.0),
+                vec(0.0, 0.0, 2.0),
+            },
+            {
+                vec(0.0, 0.0),
+                vec(0.0, 0.0),
+                vec(0.0, 0.0),
+                vec(1.0, 2.0),
+            },
+            mat(row(0.0, 0.0, 0.5), row(0.0, 0.0, 1.0)),
+        },
+        {
+            {
+                vec(0.0, 0.0, 0.0),
+                vec(1.0, 0.0, 0.0),
+                vec(0.0, 1.0, 0.0),
+                vec(0.0, 0.0, 1.0),
+            },
+            {
+                vec(1.0, 2.0),
+                vec(1.0, 2.0),
+                vec(1.0, 2.0),
+                vec(1.0, 2.0),
+            },
+            mat(row(0.0, 0.0, 0.0), row(0.0, 0.0, 0.0)),
+        },
+    };
+
+    for (auto const& [p, f, expect] : test_cases)
+    {
+        auto const J = eval_jacobian(p[0], p[1], p[2], p[3], f[0], f[1], f[2], f[3]);
         ASSERT_NEAR(expect(0, 0), J(0, 0), eps);
         ASSERT_NEAR(expect(0, 1), J(0, 1), eps);
         ASSERT_NEAR(expect(0, 2), J(0, 2), eps);
@@ -736,6 +924,99 @@ UTEST(geometry, to_barycentric_tri2)
         ASSERT_NEAR(expect[0], t[0], eps);
         ASSERT_NEAR(expect[1], t[1], eps);
         ASSERT_NEAR(expect[2], t[2], eps);
+    }
+}
+
+UTEST(geometry, to_barycentric_tet)
+{
+    using namespace dr;
+
+    constexpr f64 eps = 1.0e-8;
+
+    struct TestCase
+    {
+        Vec3<f64> point;
+        Vec3<f64> tet_a;
+        Vec3<f64> tet_b;
+        Vec3<f64> tet_c;
+        Vec3<f64> tet_d;
+        Vec4<f64> expect;
+    };
+
+    TestCase const test_cases[] = {
+        {
+            vec(0.0, 0.0, 0.0),
+            vec(0.0, 0.0, 0.0),
+            vec(1.0, 0.0, 0.0),
+            vec(0.0, 1.0, 0.0),
+            vec(0.0, 0.0, 1.0),
+            vec(1.0, 0.0, 0.0, 0.0),
+        },
+        {
+            vec(1.0, 0.0, 0.0),
+            vec(0.0, 0.0, 0.0),
+            vec(1.0, 0.0, 0.0),
+            vec(0.0, 1.0, 0.0),
+            vec(0.0, 0.0, 1.0),
+            vec(0.0, 1.0, 0.0, 0.0),
+        },
+        {
+            vec(0.0, 1.0, 0.0),
+            vec(0.0, 0.0, 0.0),
+            vec(1.0, 0.0, 0.0),
+            vec(0.0, 1.0, 0.0),
+            vec(0.0, 0.0, 1.0),
+            vec(0.0, 0.0, 1.0, 0.0),
+        },
+        {
+            vec(0.0, 0.0, 1.0),
+            vec(0.0, 0.0, 0.0),
+            vec(1.0, 0.0, 0.0),
+            vec(0.0, 1.0, 0.0),
+            vec(0.0, 0.0, 1.0),
+            vec(0.0, 0.0, 0.0, 1.0),
+        },
+        {
+            vec(0.5, 0.5, 0.0),
+            vec(0.0, 0.0, 0.0),
+            vec(1.0, 0.0, 0.0),
+            vec(0.0, 1.0, 0.0),
+            vec(0.0, 0.0, 1.0),
+            vec(0.0, 0.5, 0.5, 0.0),
+        },
+        {
+            vec(0.25, 0.25, 0.5),
+            vec(0.0, 0.0, 0.0),
+            vec(1.0, 0.0, 0.0),
+            vec(0.0, 1.0, 0.0),
+            vec(0.0, 0.0, 1.0),
+            vec(0.0, 0.25, 0.25, 0.5),
+        },
+        {
+            vec(1.0, 1.0, 0.0),
+            vec(0.0, 0.0, 0.0),
+            vec(1.0, 0.0, 0.0),
+            vec(0.0, 1.0, 0.0),
+            vec(0.0, 0.0, 1.0),
+            vec(-1.0, 1.0, 1.0, 0.0),
+        },
+        {
+            vec(1.0, 1.0, 1.0),
+            vec(0.0, 0.0, 0.0),
+            vec(1.0, 0.0, 0.0),
+            vec(0.0, 1.0, 0.0),
+            vec(0.0, 0.0, 1.0),
+            vec(-2.0, 1.0, 1.0, 1.0),
+        },
+    };
+
+    for (auto const& [p, tet_a, tet_b, tet_c, tet_d, expect] : test_cases)
+    {
+        auto const t = to_barycentric(p, tet_a, tet_b, tet_c, tet_d);
+        ASSERT_NEAR(expect[0], t[0], eps);
+        ASSERT_NEAR(expect[1], t[1], eps);
+        ASSERT_NEAR(expect[2], t[2], eps);
+        ASSERT_NEAR(expect[3], t[3], eps);
     }
 }
 
