@@ -624,15 +624,9 @@ Vec3<Real> cotan_weights(Vec3<Real> const& e0, Vec3<Real> const& e1, Vec3<Real> 
     // If t is the angle bw vectors u and v then
     //
     // cot(t) = cos(t) / sin(t)
-    //        = (dot(u, v) |u| |v|) / (|cross(u, v)| |u| |v|)
     //        = dot(u, v) / |cross(u, v)|
 
-    Real const inv_sin = Real{-0.5} / e0.cross(e1).norm();
-    return {
-        e1.dot(e2) * inv_sin,
-        e2.dot(e0) * inv_sin,
-        e0.dot(e1) * inv_sin,
-    };
+    return (Real{-0.5} / e0.cross(e1).norm()) * vec(e1.dot(e2), e2.dot(e0), e0.dot(e1));
 }
 
 /// Evaluates a single triangle's contributions to the divergence of n vector-valued functions
@@ -666,16 +660,16 @@ Mat<Real, n, 3> eval_laplacian(
     Vec3<Real> const& p0,
     Vec3<Real> const& p1,
     Vec3<Real> const& p2,
-    Mat<Real, n, 3> const& fe)
+    Mat<Real, n, 3> const& df)
 {
     static_assert(is_real<Real>);
 
     // Apply Hodge star to get dual 1-forms
     Vec3<Real> const hodge = cotan_weights<Real>(p1 - p0, p2 - p1, p0 - p2);
-    Mat<Real, n, 3> const dual_fe = fe * hodge.asDiagonal();
+    Mat<Real, n, 3> const dual_df = df * hodge.asDiagonal();
 
     // Integrate dual 1-forms over boundary of each vertex dual cell
-    return dual_fe - dual_fe(Eigen::all, {2, 0, 1});
+    return dual_df - dual_df(Eigen::all, {2, 0, 1});
 }
 
 } // namespace impl
@@ -692,8 +686,8 @@ Mat<Real, 1, 3> eval_laplacian(
     Real const f2)
 {
     // Compute integrated 1-form over each edge
-    auto const fe = row(f1 - f0, f2 - f1, f0 - f2);
-    return impl::eval_laplacian(p0, p1, p2, fe);
+    auto const df = row(f1 - f0, f2 - f1, f0 - f2);
+    return impl::eval_laplacian(p0, p1, p2, df);
 }
 
 /// Evaluates a single triangle's contributions to the Laplacian of a vector-valued function defined
@@ -708,8 +702,8 @@ Mat<Real, n, 3> eval_laplacian(
     Vec<Real, n> const& f2)
 {
     // Compute integrated 1-form over each edge
-    auto const fe = mat(col(f1 - f0), col(f2 - f1), col(f0 - f2));
-    return impl::eval_laplacian(p0, p1, p2, fe);
+    auto const df = mat(col(f1 - f0), col(f2 - f1), col(f0 - f2));
+    return impl::eval_laplacian(p0, p1, p2, df);
 }
 
 template <typename Scalar, int dim>
