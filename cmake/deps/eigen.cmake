@@ -6,7 +6,7 @@ include(FetchContent)
 
 FetchContent_Declare(
     eigen
-    URL https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.zip
+    URL https://gitlab.com/libeigen/eigen/-/archive/5.0.1/eigen-5.0.1.zip
 )
 
 FetchContent_GetProperties(eigen)

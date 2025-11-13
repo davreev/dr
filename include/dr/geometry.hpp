@@ -662,6 +662,8 @@ Mat<Real, n, 3> eval_laplacian(
     Vec3<Real> const& p2,
     Mat<Real, n, 3> const& df)
 {
+    using namespace Eigen::indexing;
+
     static_assert(is_real<Real>);
 
     // Apply Hodge star to get dual 1-forms
@@ -669,7 +671,7 @@ Mat<Real, n, 3> eval_laplacian(
     Mat<Real, n, 3> const dual_df = df * hodge.asDiagonal();
 
     // Integrate dual 1-forms over boundary of each vertex dual cell
-    return dual_df - dual_df(Eigen::all, {2, 0, 1});
+    return dual_df - dual_df(all, {2, 0, 1});
 }
 
 } // namespace impl
