@@ -98,7 +98,7 @@ UTEST(mesh, vertex_normals_area_weighted)
     }
 }
 
-UTEST(mesh, integrate_vertex_values)
+UTEST(mesh, integrate_vertex_func)
 {
     using namespace dr;
 
@@ -147,7 +147,7 @@ UTEST(mesh, integrate_vertex_values)
         DynamicArray<f32> vertex_values(num_verts, value);
 
         f32 area{};
-        f32 const sum = integrate_vertex_values(
+        f32 const sum = integrate_vertex_func(
             vert_coords,
             as_span(vertex_values).as_const(),
             tri_verts,

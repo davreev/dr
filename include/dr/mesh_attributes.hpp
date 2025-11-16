@@ -143,7 +143,7 @@ void face_normals(
 
 /// Returns the integral of a function defined on vertices of a discretized volume
 template <typename Real, typename Value, typename Index>
-Value integrate_vertex_values(
+Value integrate_vertex_func(
     Span<Vec3<Real> const> const& vertex_positions,
     Span<Value const> const& vertex_values,
     Span<Vec4<Index> const> const& cell_vertices,
@@ -183,7 +183,7 @@ Value integrate_vertex_values(
 
 /// Returns the integral of a function defined on vertices of a discretized surface
 template <typename Real, typename Value, typename Index>
-Value integrate_vertex_values(
+Value integrate_vertex_func(
     Span<Vec3<Real> const> const& vertex_positions,
     Span<Value const> const& vertex_values,
     Span<Vec3<Index> const> const& face_vertices,
@@ -222,7 +222,7 @@ Value integrate_vertex_values(
 
 /// Returns the integral of a function defined on vertices of a discretized curve
 template <typename Real, typename Value, typename Index>
-Value integrate_vertex_values(
+Value integrate_vertex_func(
     Span<Vec3<Real> const> const& vertex_positions,
     Span<Value const> const& vertex_values,
     Span<Vec2<Index> const> const& edge_vertices,
@@ -256,8 +256,11 @@ Vec3<Real> area_centroid(
     Span<Vec3<Index> const> const& face_vertices)
 {
     Real area{};
-    Vec3<Real> const sum =
-        integrate_vertex_values(vertex_positions, vertex_positions, face_vertices, area);
+    Vec3<Real> const sum = integrate_vertex_func(
+        vertex_positions,
+        vertex_positions,
+        face_vertices,
+        area);
 
     return sum / area;
 }
@@ -269,8 +272,11 @@ Vec3<Real> length_centroid(
     Span<Vec2<Index> const> const& edge_vertices)
 {
     Real length{};
-    Vec3<Real> const sum =
-        integrate_vertex_values(vertex_positions, vertex_positions, edge_vertices, length);
+    Vec3<Real> const sum = integrate_vertex_func(
+        vertex_positions,
+        vertex_positions,
+        edge_vertices,
+        length);
 
     return sum / length;
 }
@@ -298,7 +304,7 @@ Real winding_number(
 
 /// Returns the interpolated value at a point inside a triangle mesh using mean value coordinates
 template <typename Real, typename Value, typename Index>
-Value interp_mean_value(
+Value interpolate_mean_value(
     Span<Vec3<Real> const> const& vertex_positions,
     Span<Value const> const& vertex_values,
     Span<Vec3<Index> const> const& face_vertices,
@@ -395,7 +401,7 @@ Value interp_mean_value(
 /// The naive implementation is faster but less numerically robust particularly when evaluated near
 /// the boundary.
 template <typename Real, typename Value, typename Index>
-Value interp_mean_value_naive(
+Value interpolate_mean_value_naive(
     Span<Vec3<Real> const> const& vertex_positions,
     Span<Value const> const& vertex_values,
     Span<Vec3<Index> const> const& face_vertices,
