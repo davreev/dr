@@ -9,8 +9,8 @@ project(
 # Global config
 #
 
-set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 list(
     PREPEND CMAKE_MODULE_PATH
