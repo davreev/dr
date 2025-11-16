@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cassert>
+
 #include <dr/math_types.hpp>
 
 namespace dr

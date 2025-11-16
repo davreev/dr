@@ -4,10 +4,11 @@
     Assorted helper functions and for fixed-size math types
 */
 
+#include <cassert>
 #include <cmath>
 
-#include <dr/math_ctors.hpp>
 #include <dr/math_constants.hpp>
+#include <dr/math_ctors.hpp>
 #include <dr/math_traits.hpp>
 #include <dr/math_types.hpp>
 
@@ -256,7 +257,11 @@ bool near_equal(Vec<Real, dim> const& a, Vec<Real, dim> const& b, Real const abs
 
 /// Returns true if two vectors are within tolerance of eachother
 template <typename Real, int dim>
-bool near_equal(Vec<Real, dim> const& a, Vec<Real, dim> const& b, Real const abs_tol, Real const rel_tol)
+bool near_equal(
+    Vec<Real, dim> const& a,
+    Vec<Real, dim> const& b,
+    Real const abs_tol,
+    Real const rel_tol)
 {
     // http://realtimecollisiondetection.net/blog/?p=89
 
@@ -278,7 +283,11 @@ bool near_parallel(Vec<Real, dim> const& a, Vec<Real, dim> const& b, Real const 
 
 /// Returns true if two vectors are within tolerance of being parallel
 template <typename Real, int dim>
-bool near_parallel(Vec<Real, dim> const& a, Vec<Real, dim> const& b, Real const abs_tol, Real const rel_tol)
+bool near_parallel(
+    Vec<Real, dim> const& a,
+    Vec<Real, dim> const& b,
+    Real const abs_tol,
+    Real const rel_tol)
 {
     // http://realtimecollisiondetection.net/blog/?p=89
 
