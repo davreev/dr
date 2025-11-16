@@ -53,10 +53,10 @@ void append_elements(
     as_mat(as_span(dst).back(src.size())).array() = as_mat(src).array() + offset;
 }
 
-template <typename Real, int dim>
+template <typename Scalar, int dim>
 void append_attributes(
-    Span<Vec<Real, dim> const> const& src,
-    DynamicArray<Vec<Real, dim>>& dst)
+    Span<Vec<Scalar, dim> const> const& src,
+    DynamicArray<Vec<Scalar, dim>>& dst)
 {
     usize const num_verts = dst.size() + src.size();
     dst.reserve(next_pow2(num_verts));
