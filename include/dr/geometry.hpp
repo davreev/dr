@@ -183,7 +183,7 @@ Maybe<Vec2<Real>> intersect_line_sphere(
 
 /// Returns true if the point is inside the triangle
 template <typename Real>
-bool is_in_triangle(
+bool is_in_tri(
     Vec2<Real> const& point,
     Vec2<Real> const& tri_a,
     Vec2<Real> const& tri_b,
@@ -200,7 +200,7 @@ bool is_in_triangle(
 
 /// Returns true if the point is inside the triangle
 template <typename Real>
-bool is_in_triangle(
+bool is_in_tri(
     Vec3<Real> const& point,
     Vec3<Real> const& tri_a,
     Vec3<Real> const& tri_b,
@@ -230,7 +230,7 @@ bool is_nearest_in_triangle(
 
 /// Returns the line parameter of the intersection with a triangle
 template <typename Real>
-Maybe<Real> intersect_line_triangle(
+Maybe<Real> intersect_line_tri(
     Vec3<Real> const& line_start,
     Vec3<Real> const& line_delta,
     Vec3<Real> const& tri_a,
