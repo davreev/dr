@@ -370,7 +370,7 @@ Value interpolate_mean_value_robust(
     Span<Value const> const& vertex_values,
     Span<Vec3<Index> const> const& face_vertices,
     Vec3<Real> const& point,
-    Real const tolerance = Real{1.0e-5},
+    Real const tolerance = default_epsilon<Real>,
     isize const num_threads = 1)
 {
     // https://www.cse.wustl.edu/~taoju/research/meanvalue.pdf (section 3.3)
@@ -429,7 +429,7 @@ Value interpolate_mean_value_robust(
         h = clamp(h, Real{0.0}, pi<Real>);
 
         // Using a fixed epsilon for quantities relating to the unit sphere
-        constexpr Real eps = 1.0e-5;
+        constexpr Real eps = default_epsilon<Real>;
 
         // NOTE: If angle sum is pi then the point lies on the triangle's interior and we can use
         // barycentric coords
@@ -487,7 +487,7 @@ Value interpolate_mean_value_naive(
     Span<Value const> const& vertex_values,
     Span<Vec3<Index> const> const& face_vertices,
     Vec3<Real> const& point,
-    Real const tolerance = Real{1.0e-5},
+    Real const tolerance = default_epsilon<Real>,
     isize const num_threads = 1)
 {
     // https://www.cse.wustl.edu/~taoju/research/meanvalue.pdf (section 3.2)

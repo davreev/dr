@@ -1,5 +1,7 @@
 #pragma once
 
+#include <limits>
+
 #include <dr/math_traits.hpp>
 
 namespace dr
@@ -32,5 +34,8 @@ inline constexpr Real log2e{1.44269504088896340735992468100189213742664595415298
 
 template <typename Real, std::enable_if_t<is_real<Real>>* = nullptr>
 inline constexpr Real log10e{0.4342944819032518276511289189166050822943970058036665661144537831L};
+
+template <typename Real, std::enable_if_t<is_real<Real>>* = nullptr>
+inline constexpr Real default_epsilon = std::numeric_limits<Real>::epsilon();
 
 } // namespace dr
