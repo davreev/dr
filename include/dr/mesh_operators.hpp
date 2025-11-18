@@ -41,7 +41,10 @@ void make_cotan_laplacian(
         Vec3<Real> const& p0 = vertex_positions[f_v[0]];
         Vec3<Real> const& p1 = vertex_positions[f_v[1]];
         Vec3<Real> const& p2 = vertex_positions[f_v[2]];
-        Vec3<Real> const w = cotan_weights<Real>(p1 - p0, p2 - p1, p0 - p2);
+
+        Real w[3];
+        cotan_weights(p1 - p0, p2 - p1, p0 - p2, w[0], w[1], w[2]);
+
         add_coeffs(f_v[0], f_v[1], w[0]);
         add_coeffs(f_v[1], f_v[2], w[1]);
         add_coeffs(f_v[2], f_v[0], w[2]);

@@ -368,10 +368,11 @@ UTEST(geometry, eval_divergence)
 
     for (auto const& [p, f, expect] : test_cases)
     {
-        auto const div_f = eval_divergence(p[0], p[1], p[2], f);
-        ASSERT_NEAR(expect[0], div_f[0], eps);
-        ASSERT_NEAR(expect[1], div_f[1], eps);
-        ASSERT_NEAR(expect[2], div_f[2], eps);
+        f64 div[3]{};
+        eval_divergence(p[0], p[1], p[2], f, div[0], div[1], div[2]);
+        ASSERT_NEAR(expect[0], div[0], eps);
+        ASSERT_NEAR(expect[1], div[1], eps);
+        ASSERT_NEAR(expect[2], div[2], eps);
     }
 }
 
@@ -436,7 +437,8 @@ UTEST(geometry, eval_laplacian)
 
     for (auto const& [p, f, expect] : test_cases)
     {
-        auto const lap = eval_laplacian(p[0], p[1], p[2], f[0], f[1], f[2]);
+        f64 lap[3]{};
+        eval_laplacian(p[0], p[1], p[2], f[0], f[1], f[2], lap[0], lap[1], lap[2]);
         ASSERT_NEAR(expect[0], lap[0], eps);
         ASSERT_NEAR(expect[1], lap[1], eps);
         ASSERT_NEAR(expect[2], lap[2], eps);

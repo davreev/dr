@@ -600,7 +600,13 @@ Mat<Real, dim, 3> eval_jacobian(
 
 /// Returns the cotangent weight for each of the given triangle edges
 template <typename Real>
-Vec3<Real> cotan_weights(Vec3<Real> const& e0, Vec3<Real> const& e1, Vec3<Real> const& e2)
+void cotan_weights(
+    Vec3<Real> const& e0,
+    Vec3<Real> const& e1,
+    Vec3<Real> const& e2,
+    Real& w0,
+    Real& w1,
+    Real& w2)
 {
     static_assert(is_real<Real>);
 
@@ -613,86 +619,124 @@ Vec3<Real> cotan_weights(Vec3<Real> const& e0, Vec3<Real> const& e1, Vec3<Real> 
     // cot(t) = cos(t) / sin(t)
     //        = dot(u, v) / |cross(u, v)|
 
-    return (Real{-0.5} / e0.cross(e1).norm()) * vec(e1.dot(e2), e2.dot(e0), e0.dot(e1));
+    Real const inv_sin_t = Real{-0.5} / e0.cross(e1).norm();
+    w0 = e1.dot(e2) * inv_sin_t;
+    w1 = e2.dot(e0) * inv_sin_t;
+    w2 = e0.dot(e1) * inv_sin_t;
 }
 
-/// Evaluates a single triangle's contributions to the divergence of n vector-valued functions
-/// defined on mesh faces. Returns n integrated scalar quantities associated with each vertex.
-template <typename Real, int n>
-Mat<Real, n, 3> eval_divergence(
+/// Evaluates a single triangle's contributions to the divergence of a vector-valued function
+/// defined on mesh faces. Returns an integrated scalar quantity associated with each vertex.
+template <typename Real>
+void eval_divergence(
     Vec3<Real> const& p0,
     Vec3<Real> const& p1,
     Vec3<Real> const& p2,
-    Mat<Real, 3, n> const& f)
+    Vec3<Real> const& f,
+    Real& div0,
+    Real& div1,
+    Real& div2)
 {
     static_assert(is_real<Real>);
 
     // Compute integrated 1-form over each edge
     Vec3<Real> const e[]{p1 - p0, p2 - p1, p0 - p2};
-    Mat<Real, n, 3> const fe = f.transpose() * as_mat<3>(e);
+    Real const fe[]{e[0].dot(f), e[1].dot(f), e[2].dot(f)};
 
     // Apply Hodge star to get dual 1-form
-    Vec3<Real> const hodge = cotan_weights(e[0], e[1], e[2]);
-    Mat<Real, n, 3> const dual_fe = fe * hodge.asDiagonal();
+    Real h[3];
+    cotan_weights(e[0], e[1], e[2], h[0], h[1], h[2]);
+    Real const h_fe[]{h[0] * fe[0], h[1] * fe[1], h[2] * fe[2]};
 
     // Integrate the dual 1-form over boundary of each vertex dual cell
-    return dual_fe - dual_fe({2, 0, 1});
+    div0 = h_fe[0] - h_fe[2];
+    div1 = h_fe[1] - h_fe[0];
+    div2 = h_fe[2] - h_fe[1];
 }
 
-namespace impl
-{
-
+/// Evaluates a single triangle's contributions to the divergence of n vector-valued functions
+/// defined on mesh faces. Returns n integrated scalar quantities associated with each vertex.
 template <typename Real, int n>
-Mat<Real, n, 3> eval_laplacian(
+void eval_divergence(
     Vec3<Real> const& p0,
     Vec3<Real> const& p1,
     Vec3<Real> const& p2,
-    Mat<Real, n, 3> const& df)
+    Mat<Real, 3, n> const& f,
+    Vec<Real, n>& div0,
+    Vec<Real, n>& div1,
+    Vec<Real, n>& div2)
 {
-    using namespace Eigen::indexing;
-
     static_assert(is_real<Real>);
 
-    // Apply Hodge star to get dual 1-forms
-    Vec3<Real> const hodge = cotan_weights<Real>(p1 - p0, p2 - p1, p0 - p2);
-    Mat<Real, n, 3> const dual_df = df * hodge.asDiagonal();
+    // Compute integrated 1-form over each edge
+    Vec3<Real> const e[]{p1 - p0, p2 - p1, p0 - p2};
+    Vec<Real, n> const fe[]{e[0].transpose() * f, e[1].transpose() * f, e[2].transpose() * f};
 
-    // Integrate dual 1-forms over boundary of each vertex dual cell
-    return dual_df - dual_df(all, {2, 0, 1});
+    // Apply Hodge star to get dual 1-form
+    Real h[3];
+    cotan_weights(e[0], e[1], e[2], h[0], h[1], h[2]);
+    Vec<Real, n> const h_fe[]{h[0] * fe[0], h[1] * fe[1], h[2] * fe[2]};
+
+    // Integrate the dual 1-form over boundary of each vertex dual cell
+    div0 = h_fe[0] - h_fe[2];
+    div1 = h_fe[1] - h_fe[0];
+    div2 = h_fe[2] - h_fe[1];
 }
-
-} // namespace impl
 
 /// Evaluates a single triangle's contributions to the Laplacian of a scalar function defined on
 /// mesh vertices. Returns an integrated scalar quantity associated with each vertex.
 template <typename Real>
-Mat<Real, 1, 3> eval_laplacian(
+void eval_laplacian(
     Vec3<Real> const& p0,
     Vec3<Real> const& p1,
     Vec3<Real> const& p2,
     Real const f0,
     Real const f1,
-    Real const f2)
+    Real const f2,
+    Real& lap0,
+    Real& lap1,
+    Real& lap2)
 {
-    // Compute integrated 1-form over each edge
-    auto const df = row(f1 - f0, f2 - f1, f0 - f2);
-    return impl::eval_laplacian(p0, p1, p2, df);
+    Vec3<Real> const dp[]{p1 - p0, p2 - p1, p0 - p2};
+    Real const df[]{f1 - f0, f2 - f1, f0 - f2};
+
+    // Apply Hodge star to get dual 1-forms
+    Real h[3]{};
+    cotan_weights(dp[0], dp[1], dp[2], h[0], h[1], h[2]);
+    Real const h_df[]{h[0] * df[0], h[1] * df[1], h[2] * df[2]};
+
+    // Integrate dual 1-forms over boundary of each vertex dual cell
+    lap0 = h_df[0] - h_df[2];
+    lap1 = h_df[1] - h_df[0];
+    lap2 = h_df[2] - h_df[1];
 }
 
 /// Evaluates a single triangle's contributions to the Laplacian of a vector-valued function defined
 /// on mesh vertices. Returns an integrated vector quantity associated with each vertex.
 template <typename Real, int n>
-Mat<Real, n, 3> eval_laplacian(
+void eval_laplacian(
     Vec3<Real> const& p0,
     Vec3<Real> const& p1,
     Vec3<Real> const& p2,
     Vec<Real, n> const& f0,
     Vec<Real, n> const& f1,
-    Vec<Real, n> const& f2)
+    Vec<Real, n> const& f2,
+    Vec<Real, n>& lap0,
+    Vec<Real, n>& lap1,
+    Vec<Real, n>& lap2)
 {
-    // Compute integrated 1-form over each edge
-    auto const df = mat(col(f1 - f0), col(f2 - f1), col(f0 - f2));
-    return impl::eval_laplacian(p0, p1, p2, df);
+    Vec3<Real> const dp[]{p1 - p0, p2 - p1, p0 - p2};
+    Vec<Real, n> const df[]{f1 - f0, f2 - f1, f0 - f2};
+
+    // Apply Hodge star to get dual 1-forms
+    Real h[3]{};
+    cotan_weights(dp[0], dp[1], dp[2], h[0], h[1], h[2]);
+    Vec<Real, n> const h_df[]{h[0] * df[0], h[1] * df[1], h[2] * df[2]};
+
+    // Integrate dual 1-forms over boundary of each vertex dual cell
+    lap0 = h_df[0] - h_df[2];
+    lap1 = h_df[1] - h_df[0];
+    lap2 = h_df[2] - h_df[1];
 }
 
 template <typename Scalar, int dim>
