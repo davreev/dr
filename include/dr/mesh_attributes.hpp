@@ -105,7 +105,6 @@ void face_vector_areas(
     isize const num_threads = 1)
 {
     assert(result.size() == face_vertices.size());
-    assert(num_threads > 0);
 
     auto const loop_body = [&](isize const f) {
         auto const& f_v = face_vertices[f];
@@ -302,23 +301,86 @@ Real winding_number(
     return sum * (0.25 * inv_pi<Real>);
 }
 
+namespace impl
+{
+
+template <typename Real, typename Value, typename EvalFace>
+Value interpolate_mean_value(EvalFace&& eval_face, isize const num_faces, isize const num_threads)
+{
+    Value sum{};
+    Real weight_sum{};
+
+    if (num_threads > 1)
+    {
+        bool done = false;
+
+#pragma omp parallel num_threads(num_threads)
+        {
+            struct
+            {
+                Value sum{};
+                Real weight_sum{};
+                bool done = false;
+            } local;
+
+#pragma omp for schedule(static)
+            for (isize i = 0; i < num_faces; ++i)
+            {
+                if (!local.done)
+                    local.done = eval_face(i, local.sum, local.weight_sum);
+            }
+
+#pragma omp critical
+            {
+                if (!done)
+                {
+                    if (local.done)
+                    {
+                        sum = local.sum;
+                        weight_sum = local.weight_sum;
+                        done = true;
+                    }
+                    else
+                    {
+                        sum += local.sum;
+                        weight_sum += local.weight_sum;
+                    }
+                }
+            }
+        }
+    }
+    else
+    {
+        for (isize i = 0; i < num_faces; ++i)
+        {
+            if (eval_face(i, sum, weight_sum))
+                break;
+        }
+    }
+
+    return sum / weight_sum;
+}
+
+} // namespace impl
+
 /// Returns the interpolated value at a point inside a triangle mesh using mean value coordinates
 template <typename Real, typename Value, typename Index>
-Value interpolate_mean_value(
+Value interpolate_mean_value_robust(
     Span<Vec3<Real> const> const& vertex_positions,
     Span<Value const> const& vertex_values,
     Span<Vec3<Index> const> const& face_vertices,
     Vec3<Real> const& point,
-    Real const distance_tol = Real{1.0e-6},
-    Real const angle_tol = Real{1.0e-6})
+    Real const tolerance = Real{1.0e-5},
+    isize const num_threads = 1)
 {
-    // https://www.cse.wustl.edu/~taoju/research/meanvalue.pdf
+    // https://www.cse.wustl.edu/~taoju/research/meanvalue.pdf (section 3.3)
 
-    Value sum{};
-    Real weight_sum{};
+    assert(vertex_positions.size() == vertex_values.size());
 
-    for (auto const& f_v : face_vertices)
+    auto const eval_face = [&](isize const index, Value& sum, Real& weight_sum) -> bool //
     {
+        Vec3<Index> const& f_v = face_vertices[index];
+
         Value const& f0 = vertex_values[f_v[0]];
         Value const& f1 = vertex_values[f_v[1]];
         Value const& f2 = vertex_values[f_v[2]];
@@ -332,102 +394,147 @@ Value interpolate_mean_value(
         Real const d2 = u2.norm();
 
         // If the point is coincident with any vertex, return the corresponding value
+        if (d0 <= tolerance)
         {
-            if (d0 <= distance_tol)
-                return f0;
-
-            if (d1 <= distance_tol)
-                return f1;
-
-            if (d2 <= distance_tol)
-                return f2;
+            sum = f0;
+            weight_sum = Real{1.0};
+            return true;
+        }
+        if (d1 <= tolerance)
+        {
+            sum = f1;
+            weight_sum = Real{1.0};
+            return true;
+        }
+        if (d2 <= tolerance)
+        {
+            sum = f2;
+            weight_sum = Real{1.0};
+            return true;
         }
 
         u0 /= d0;
         u1 /= d1;
         u2 /= d2;
 
-        Real const l0 = (u1 - u2).norm();
-        Real const l1 = (u2 - u0).norm();
-        Real const l2 = (u0 - u1).norm();
+        Real const t0 = acos_safe(u1.dot(u2));
+        Real const t1 = acos_safe(u2.dot(u0));
+        Real const t2 = acos_safe(u0.dot(u1));
 
-        Real const t0 = Real{2.0} * asin_safe(l0* Real{0.5});
-        Real const t1 = Real{2.0} * asin_safe(l1* Real{0.5});
-        Real const t2 = Real{2.0} * asin_safe(l2* Real{0.5});
-
-        Real const h = Real{0.5} * (t0 + t1 + t2);
         Real const sin_t0 = std::sin(t0);
         Real const sin_t1 = std::sin(t1);
         Real const sin_t2 = std::sin(t2);
 
-        // If the point lies on the triangle, use barycentric interpolation
-        if (abs(pi<Real> - h) <= angle_tol)
+        Real h = Real{0.5} * (t0 + t1 + t2);
+        h = clamp(h, Real{0.0}, pi<Real>);
+
+        // Using a fixed epsilon for quantities relating to the unit sphere
+        constexpr Real eps = 1.0e-5;
+
+        // NOTE: If angle sum is pi then the point lies on the triangle's interior and we can use
+        // barycentric coords
+        if (abs(pi<Real> - h) <= eps)
         {
             Real const w0 = sin_t0 * d2 * d1;
             Real const w1 = sin_t1 * d0 * d2;
             Real const w2 = sin_t2 * d1 * d0;
-            return (w0 * f0 + w1 * f1 + w2 * f2) / (w0 + w1 + w2);
+
+            sum = (w0 * f0 + w1 * f1 + w2 * f2);
+            weight_sum = w0 + w1 + w2;
+            return true;
         }
-        else
+
+        Real const two_sin_h = Real{2.0} * std::sin(h);
+
+        // Cosine of the dihedral angles between planar faces of spherical pyramid
+        Real const cos_p0 = (two_sin_h * std::sin(h - t0)) / (sin_t1 * sin_t2) - Real{1.0};
+        Real const cos_p1 = (two_sin_h * std::sin(h - t1)) / (sin_t2 * sin_t0) - Real{1.0};
+        Real const cos_p2 = (two_sin_h * std::sin(h - t2)) / (sin_t0 * sin_t1) - Real{1.0};
+
+        // Sine of the dihedral angles between planar faces of spherical pyramid
+        Real const sin_p0 = sqrt_safe(Real{1.0} - cos_p0 * cos_p0);
+        Real const sin_p1 = sqrt_safe(Real{1.0} - cos_p1 * cos_p1);
+        Real const sin_p2 = sqrt_safe(Real{1.0} - cos_p2 * cos_p2);
+
+        // NOTE: If point lies outside the triangle but in the same plane then the triangle
+        // can be ignored since its projected area onto the unit sphere is zero
+        if (sin_p0 > eps && sin_p1 > eps && sin_p2 > eps)
         {
-            Real const two_sin_h = Real{2.0} * std::sin(h);
-            Real const c0 = (two_sin_h * std::sin(h - t0)) / (sin_t1 * sin_t2) - Real{1.0};
-            Real const c1 = (two_sin_h * std::sin(h - t1)) / (sin_t2 * sin_t0) - Real{1.0};
-            Real const c2 = (two_sin_h * std::sin(h - t2)) / (sin_t0 * sin_t1) - Real{1.0};
-
-            Real const s0 = sqrt_safe(Real{1.0} - c0 * c0);
-            Real const s1 = sqrt_safe(Real{1.0} - c1 * c1);
-            Real const s2 = sqrt_safe(Real{1.0} - c2 * c2);
-
-            // If the point lies outside the triangle but in the same plane then the triangle is
-            // ignored since its area when projected onto the unit sphere is zero
-            if (s0 <= angle_tol || s1 <= angle_tol || s2 <= angle_tol)
-                continue;
-
             Real const sign_det_U = sign(mat(u0, u1, u2).determinant());
-            Real const w0 = (t0 - c1 * t2 - c2 * t1) / (d0 * sin_t1 * s2 * sign_det_U);
-            Real const w1 = (t1 - c2 * t0 - c0 * t2) / (d1 * sin_t2 * s0 * sign_det_U);
-            Real const w2 = (t2 - c0 * t1 - c1 * t0) / (d2 * sin_t0 * s1 * sign_det_U);
+            Real const w0 = sign_det_U * (t0 - cos_p1 * t2 - cos_p2 * t1) / (d0 * sin_t1 * sin_p2);
+            Real const w1 = sign_det_U * (t1 - cos_p2 * t0 - cos_p0 * t2) / (d1 * sin_t2 * sin_p0);
+            Real const w2 = sign_det_U * (t2 - cos_p0 * t1 - cos_p1 * t0) / (d2 * sin_t0 * sin_p1);
 
             sum += w0 * f0 + w1 * f1 + w2 * f2;
             weight_sum += w0 + w1 + w2;
         }
-    }
 
-    return sum / weight_sum;
+        return false;
+    };
+
+    return impl::interpolate_mean_value<Real, Value>(eval_face, face_vertices.size(), num_threads);
 }
 
 /// Returns the interpolated value at a point inside a triangle mesh using mean value coordinates.
-/// The naive implementation is faster but less numerically robust particularly when evaluated near
-/// the boundary.
+///
+/// Compared to the robust implementation, this version is less expensive but also less numerically
+/// stable for non-convex shapes and exteriors of convex shapes. It offers *much* better accuracy
+/// for interiors of convex shapes however.
+///
 template <typename Real, typename Value, typename Index>
 Value interpolate_mean_value_naive(
     Span<Vec3<Real> const> const& vertex_positions,
     Span<Value const> const& vertex_values,
     Span<Vec3<Index> const> const& face_vertices,
-    Vec3<Real> const& point)
+    Vec3<Real> const& point,
+    Real const tolerance = Real{1.0e-5},
+    isize const num_threads = 1)
 {
-    // https://www.cse.wustl.edu/~taoju/research/meanvalue.pdf
+    // https://www.cse.wustl.edu/~taoju/research/meanvalue.pdf (section 3.2)
 
-    Value sum{};
-    Real weight_sum{};
+    assert(vertex_positions.size() == vertex_values.size());
 
-    for (auto const& f_v : face_vertices)
+    auto const eval_face = [&](isize const index, Value& sum, Real& weight_sum) -> bool //
     {
+        Vec3<Index> const& f_v = face_vertices[index];
+
+        Vec3<Real> const& p0 = vertex_positions[f_v[0]];
+        Vec3<Real> const& p1 = vertex_positions[f_v[1]];
+        Vec3<Real> const& p2 = vertex_positions[f_v[2]];
+
         Value const& f0 = vertex_values[f_v[0]];
         Value const& f1 = vertex_values[f_v[1]];
         Value const& f2 = vertex_values[f_v[2]];
 
-        Vec3<Real> const d0 = vertex_positions[f_v[0]] - point;
-        Vec3<Real> const d1 = vertex_positions[f_v[1]] - point;
-        Vec3<Real> const d2 = vertex_positions[f_v[2]] - point;
+        Vec3<Real> const d0 = p0 - point;
+        Vec3<Real> const d1 = p1 - point;
+        Vec3<Real> const d2 = p2 - point;
 
-        // Wedge unit normals
+        Vec3<Real> const tri_norm = (p1 - p0).cross(p2 - p0).normalized();
+        if (abs(d0.dot(tri_norm)) <= tolerance)
+        {
+            // Point is on the plane of the triangle
+            Vec3<Real> const w = to_barycentric(point, p0, p1, p2);
+            if ((w.array() < Real{0.0}).any())
+            {
+                // Point is outside the triangle, can ignore contribution from triangle
+                return false;
+            }
+            else
+            {
+                // Point is inside the triangle, can use barycentric interpolation
+                sum = w[0] * f0 + w[1] * f1 + w[2] * f2;
+                weight_sum = w.sum();
+                return true;
+            }
+        }
+
+        // Normals of planar faces of spherical pyramid
         Vec3<Real> const n0 = d1.cross(d2).normalized();
         Vec3<Real> const n1 = d2.cross(d0).normalized();
         Vec3<Real> const n2 = d0.cross(d1).normalized();
 
-        // Wedge areas
+        // Areas of planar faces of spherical pyramid
         Real const a0 = angle(d1, d2);
         Real const a1 = angle(d2, d0);
         Real const a2 = angle(d0, d1);
@@ -443,9 +550,11 @@ Value interpolate_mean_value_naive(
         // Take weighted sum
         sum += w0 * f0 + w1 * f1 + w2 * f2;
         weight_sum += w0 + w1 + w2;
-    }
 
-    return sum / weight_sum;
+        return false;
+    };
+
+    return impl::interpolate_mean_value<Real, Value>(eval_face, face_vertices.size(), num_threads);
 }
 
 } // namespace dr

@@ -1,8 +1,10 @@
 #include <utest.h>
 
 #include <dr/dynamic_array.hpp>
+#include <dr/linalg_reshape.hpp>
 #include <dr/mesh_attributes.hpp>
 #include <dr/mesh_primitives.hpp>
+#include <dr/random.hpp>
 
 UTEST(mesh, area_centroid)
 {
@@ -14,7 +16,7 @@ UTEST(mesh, area_centroid)
     {
         Span<Vec3<f32> const> vertex_positions;
         Span<Vec3<i16> const> face_vertices;
-        Vec3<f32> result;
+        Vec3<f32> expect;
     };
 
     using MeshPrims = MeshPrimitives::Tri;
@@ -42,12 +44,12 @@ UTEST(mesh, area_centroid)
         },
     };
 
-    for (auto const& [vert_coords, tri_verts, result] : test_cases)
+    for (auto const& [vert_coords, tri_verts, expect] : test_cases)
     {
         Vec3<f32> const p = area_centroid(vert_coords, tri_verts);
-        ASSERT_NEAR(result[0], p[0], eps);
-        ASSERT_NEAR(result[1], p[1], eps);
-        ASSERT_NEAR(result[2], p[2], eps);
+        ASSERT_NEAR(expect[0], p[0], eps);
+        ASSERT_NEAR(expect[1], p[1], eps);
+        ASSERT_NEAR(expect[2], p[2], eps);
     }
 }
 
@@ -109,7 +111,7 @@ UTEST(mesh, integrate_vertex_func)
         Span<Vec3<f32> const> vert_coords;
         Span<Vec3<i16> const> tri_verts;
         f32 value;
-        f32 result;
+        f32 expect;
     };
 
     auto const mesh = MeshPrimitives::Tri::cube();
@@ -141,7 +143,7 @@ UTEST(mesh, integrate_vertex_func)
         },
     };
 
-    for (auto const& [vert_coords, tri_verts, value, result] : test_cases)
+    for (auto const& [vert_coords, tri_verts, value, expect] : test_cases)
     {
         isize const num_verts = vert_coords.size();
         DynamicArray<f32> vertex_values(num_verts, value);
@@ -153,7 +155,74 @@ UTEST(mesh, integrate_vertex_func)
             tri_verts,
             area);
 
-        ASSERT_NEAR(result, sum, eps);
-        ASSERT_NEAR(result, area * value, eps);
+        ASSERT_NEAR(expect, sum, eps);
+        ASSERT_NEAR(expect, area * value, eps);
+    }
+}
+
+UTEST(mesh, interpolate_mean_value)
+{
+    using namespace dr;
+
+    constexpr isize num_samples = 1000;
+    constexpr f32 eps = 1.0e-5;
+
+    constexpr auto do_test = //
+        [](Span<Vec3<f32> const> const& v_p,
+           Span<Vec3<i16> const> const& f_v) -> isize //
+    {
+        Interval3<f32> box = bounding_interval(v_p);
+
+        Random rand{1};
+        auto gen = rand.generator(0.0f, 1.0f);
+
+        auto const box_point_at = [&](Vec3<f32> const& t) -> Vec3<f32> {
+            return box.from.array() + box.delta().array() * t.array();
+        };
+
+        // NOTE: Mean value interpolation of the coordinate function should be equal to the sample
+        // point. This is checked at random sample points within the bounding box of the mesh.
+        isize num_equal = 0;
+
+        for (isize i = 0; i < num_samples; ++i)
+        {
+            Vec3<f32> const p = box_point_at({gen(), gen(), gen()});
+
+            // NOTE: Naive impl has better accuracy on convex shape interiors
+            Vec3<f32> const result = interpolate_mean_value_naive(v_p, v_p, f_v, p);
+            // Vec3<f32> const result = interpolate_mean_value_robust(v_p, v_p, f_v, p);
+
+            if (near_equal(p, result, eps))
+                ++num_equal;
+        }
+
+        return num_equal;
+    };
+
+    {
+        auto const& mesh = MeshPrimitives::Tri::icosahedron();
+        isize const num_eq = do_test(
+            as<Vec3<f32>>(mesh.vertex_positions),
+            as<Vec3<i16>>(mesh.face_vertices));
+
+        ASSERT_EQ(num_samples, num_eq);
+    }
+
+    {
+        auto const& mesh = MeshPrimitives::Tri::octahedron();
+        isize const num_eq = do_test(
+            as<Vec3<f32>>(mesh.vertex_positions),
+            as<Vec3<i16>>(mesh.face_vertices));
+
+        ASSERT_EQ(num_samples, num_eq);
+    }
+
+    {
+        auto const& mesh = MeshPrimitives::Tri::cube();
+        isize const num_eq = do_test(
+            as<Vec3<f32>>(mesh.vertex_positions),
+            as<Vec3<i16>>(mesh.face_vertices));
+
+        ASSERT_EQ(num_samples, num_eq);
     }
 }
