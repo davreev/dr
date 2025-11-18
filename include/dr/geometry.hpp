@@ -215,19 +215,6 @@ bool is_in_tri(
     return d1.cross(d2).dot(dir) >= Real{0.0} && d2.cross(d0).dot(dir) >= Real{0.0};
 }
 
-/// Returns true if the closest point on the plane of the triangle is inside the triangle
-template <typename Real>
-bool is_nearest_in_triangle(
-    Vec3<Real> const& point,
-    Vec3<Real> const& tri_a,
-    Vec3<Real> const& tri_b,
-    Vec3<Real> const& tri_c)
-{
-    static_assert(is_real<Real>);
-    Vec3<Real> const cp = nearest_point_plane(point, tri_a, (tri_b - tri_a).cross(tri_c - tri_b));
-    return is_in_triangle(cp, tri_a, tri_b, tri_c);
-}
-
 /// Returns the line parameter of the intersection with a triangle
 template <typename Real>
 Maybe<Real> intersect_line_tri(
