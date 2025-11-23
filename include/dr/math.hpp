@@ -222,6 +222,20 @@ Vec3<Scalar> cross_z(Vec3<Scalar> const& v)
     return Vec3<Scalar>(v.y(), -v.x(), Scalar{0});
 }
 
+/// Returns the perpendicular vector rotated a quarter turn counterclockwise
+template <typename Scalar>
+Vec2<Scalar> perp_ccw(Vec2<Scalar> const& v)
+{
+    return {-v.y(), v.x()};
+}
+
+/// Returns the perpendicular vector rotated a quarter turn clockwise
+template <typename Scalar>
+Vec2<Scalar> perp_cw(Vec2<Scalar> const& v)
+{
+    return {v.y(), -v.x()};
+}
+
 /// Returns the projection of one vector onto another
 template <typename Real, int dim>
 Vec<Real, dim> project(Vec<Real, dim> const& a, Vec<Real, dim> const& b)

@@ -2,6 +2,7 @@
 
 #include <dr/dynamic_array.hpp>
 #include <dr/geometry.hpp>
+#include <dr/random.hpp>
 #include <dr/result.hpp>
 
 UTEST(geometry, eval_gradient_tri)
@@ -1247,5 +1248,141 @@ UTEST(geometry, vector_area)
         ASSERT_NEAR(expect[0], v[0], eps);
         ASSERT_NEAR(expect[1], v[1], eps);
         ASSERT_NEAR(expect[2], v[2], eps);
+    }
+}
+
+UTEST(geometry, dihedral_angle)
+{
+    using namespace dr;
+
+    constexpr f64 eps = 1.0e-8;
+
+    struct TestCase
+    {
+        Vec3<f64> p[4]{};
+        f64 expected;
+    };
+
+    TestCase const test_cases[] = {
+        {
+            {
+                {0.0, 0.0, 0.0},
+                {0.0, 0.0, 1.0},
+                {1.0, 1.0, 0.0},
+                {1.0, 0.0, 0.0},
+            },
+            1.75 * pi<f64>,
+        },
+        {
+            {
+                {0.0, 0.0, 0.0},
+                {0.0, 0.0, 1.0},
+                {0.0, 1.0, 0.0},
+                {1.0, 0.0, 0.0},
+            },
+            1.5 * pi<f64>,
+        },
+        {
+            {
+                {0.0, 0.0, 0.0},
+                {0.0, 0.0, 1.0},
+                {-1.0, 1.0, 0.0},
+                {1.0, 0.0, 0.0},
+            },
+            1.25 * pi<f64>,
+        },
+        {
+            {
+                {0.0, 0.0, 0.0},
+                {0.0, 0.0, 1.0},
+                {-1.0, 0.0, 0.0},
+                {1.0, 0.0, 0.0},
+            },
+            pi<f64>,
+        },
+    };
+
+    for (auto const& [p, expect] : test_cases)
+    {
+        f64 const actual = dihedral_angle(p[0], p[1], p[2], p[3]);
+        ASSERT_NEAR(expect, actual, eps);
+    }
+}
+
+UTEST(geometry, tri_centers)
+{
+    using namespace dr;
+
+    constexpr f64 eps = 1.0e-8;
+
+    Random rand{1};
+    auto rand_val = rand.generator(-1.0, 1.0);
+
+    auto const rand_tri = [&](Vec2<f64> p[3]) {
+        p[0] = {rand_val(), rand_val()};
+        p[1] = {rand_val(), rand_val()};
+        p[2] = {rand_val(), rand_val()};
+    };
+
+    constexpr isize num_cases = 10;
+    for (isize i = 0; i < num_cases; ++i)
+    {
+        Vec2<f64> p[3]{};
+        rand_tri(p);
+
+        Vec2<f64> const d[]{
+            p[1] - p[0],
+            p[2] - p[1],
+            p[0] - p[2],
+        };
+
+        // Skip tiny tris
+        if (abs(cross(d[0], d[1])) <= eps)
+            continue;
+
+        // Circumcenter
+        {
+            Vec2<f64> const cen = circumcenter(p[0], p[1], p[2]);
+
+            // Projection onto each edge should be half the edge vector
+            Vec2<f64> const proj[]{
+                project((cen - p[0]).eval(), d[0]),
+                project((cen - p[1]).eval(), d[1]),
+                project((cen - p[2]).eval(), d[2]),
+            };
+            ASSERT_TRUE(near_equal(proj[0], (0.5 * d[0]).eval(), eps));
+            ASSERT_TRUE(near_equal(proj[1], (0.5 * d[1]).eval(), eps));
+            ASSERT_TRUE(near_equal(proj[2], (0.5 * d[2]).eval(), eps));
+        }
+
+        // Incenter
+        {
+            Vec2<f64> const cen = incenter(p[0], p[1], p[2]);
+
+            // Rejection onto each edge should be the same length (i.e. incircle radius)
+            f64 const rad[]{
+                reject((cen - p[0]).eval(), d[0]).norm(),
+                reject((cen - p[1]).eval(), d[1]).norm(),
+                reject((cen - p[2]).eval(), d[2]).norm(),
+            };
+            ASSERT_TRUE(near_equal(rad[0], rad[1], eps));
+            ASSERT_TRUE(near_equal(rad[1], rad[2], eps));
+            ASSERT_TRUE(near_equal(rad[2], rad[0], eps));
+        }
+
+        // Orthocenter
+        {
+            Vec2<f64> const cen = orthocenter(p[0], p[1], p[2]);
+
+            // Vectors to orthocenter should be parallel with altitudes
+            Vec2<f64> const alt[]{
+                reject(d[0], d[1]),
+                reject(d[1], d[2]),
+                reject(d[2], d[0]),
+            };
+            ASSERT_TRUE(near_parallel(alt[0], (cen - p[0]).eval(), eps));
+            ASSERT_TRUE(near_parallel(alt[1], (cen - p[1]).eval(), eps));
+            ASSERT_TRUE(near_parallel(alt[2], (cen - p[2]).eval(), eps));
+        }
     }
 }

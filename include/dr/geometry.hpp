@@ -293,6 +293,84 @@ Vec4<Real> to_barycentric(
     return {Real{1.0} - x.sum(), x[0], x[1], x[2]};
 }
 
+/// Returns the circumcenter of a triangle
+template <typename Real, int dim>
+Vec<Real, dim> circumcenter(
+    Vec<Real, dim> const& p0,
+    Vec<Real, dim> const& p1,
+    Vec<Real, dim> const& p2)
+{
+    static_assert(dim == 2 || dim == 3);
+
+    Vec<Real, dim> const d[]{
+        p1 - p0,
+        p2 - p0,
+    };
+
+    if constexpr (dim == 3)
+    {
+        Vec<Real, dim> const n = d[0].cross(d[1]);
+        return p0
+            + (d[0].squaredNorm() * d[1] - d[1].squaredNorm() * d[0]).cross(n)
+            / (Real{2.0} * n.squaredNorm());
+    }
+    else if constexpr (dim == 2)
+    {
+        return p0
+            + perp_cw<Real>(d[0].squaredNorm() * d[1] - d[1].squaredNorm() * d[0])
+            / (Real{2.0} * cross(d[0], d[1]));
+    }
+}
+
+/// Returns the incenter of a triangle
+template <typename Real, int dim>
+Vec<Real, dim> incenter(
+    Vec<Real, dim> const& p0,
+    Vec<Real, dim> const& p1,
+    Vec<Real, dim> const& p2)
+{
+    static_assert(dim == 2 || dim == 3);
+
+    Real const d[]{
+        (p1 - p0).norm(),
+        (p2 - p1).norm(),
+        (p0 - p2).norm(),
+    };
+    Real const inv_perim = Real{1.0} / (d[0] + d[1] + d[2]);
+    return p0 * (d[1] * inv_perim) + p1 * (d[2] * inv_perim) + p2 * (d[0] * inv_perim);
+}
+
+/// Returns the orthocenter of a triangle
+template <typename Real, int dim>
+Vec<Real, dim> orthocenter(
+    Vec<Real, dim> const& p0,
+    Vec<Real, dim> const& p1,
+    Vec<Real, dim> const& p2)
+{
+    static_assert(dim == 2 || dim == 3);
+
+    Vec<Real, dim> const d[]{
+        p1 - p0,
+        p2 - p0,
+    };
+    Vec<Real, dim> const rej = reject(d[0], (p2 - p1).eval());
+    return p0 + (d[1].dot(d[0]) / d[1].dot(rej)) * rej;
+}
+
+/// Returns the dihedral angle between a pair of triangles sharing an edge
+template <typename Real>
+Real dihedral_angle(
+    Vec3<Real> const& edge_start,
+    Vec3<Real> const& edge_end,
+    Vec3<Real> const& left_point,
+    Vec3<Real> const& right_point)
+{
+    Vec3<Real> const e = edge_end - edge_start;
+    Vec3<Real> const n0 = e.cross(left_point - edge_start);
+    Vec3<Real> const n1 = e.cross(edge_start - right_point);
+    return signed_angle(n0, n1, e) + pi<Real>;
+}
+
 /// Returns the solid angle of a triangle as viewed from a point
 template <typename Real>
 Real solid_angle(
@@ -472,6 +550,30 @@ Real signed_volume(
 
     constexpr Real inv6 = Real{1.0} / Real{6.0};
     return inv6 * mat((b - a).eval(), (c - a).eval(), (d - a).eval()).determinant();
+}
+
+// Evaluates the gradient of triangle area with respect to each vertex
+template <typename Real>
+void eval_area_gradient(
+    Vec3<Real> const& p0,
+    Vec3<Real> const& p1,
+    Vec3<Real> const& p2,
+    Covec3<Real>& g0,
+    Covec3<Real>& g1,
+    Covec3<Real>& g2)
+{
+    // http://www.cs.cmu.edu/~kmcrane/Projects/Other/TriangleMeshDerivativesCheatSheet.pdf
+
+    static_assert(is_real<Real>);
+
+    Vec3<Real> const d0 = p1 - p0;
+    Vec3<Real> const d1 = p2 - p1;
+    Vec3<Real> const d2 = p0 - p2;
+    Vec3<Real> const norm = d0.cross(d1).normalized();
+
+    g0 = Real{0.5} * norm.cross(d1);
+    g1 = Real{0.5} * norm.cross(d2);
+    g2 = -(g0 + g1);
 }
 
 /// Evaluates the (constant) gradient of a function defined on vertices of a triangle
