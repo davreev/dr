@@ -2,8 +2,7 @@
 
 #include <random>
 
-#include <dr/basic_types.hpp>
-#include <dr/math_traits.hpp>
+#include <dr/basic_traits.hpp>
 
 namespace dr
 {

@@ -2,11 +2,11 @@
 
 #include <algorithm>
 
+#include <dr/basic_traits.hpp>
 #include <dr/constants.hpp>
 #include <dr/container_utils.hpp>
 #include <dr/hash_map.hpp>
 #include <dr/linalg_reshape.hpp>
-#include <dr/math_traits.hpp>
 #include <dr/math_types.hpp>
 #include <dr/memory.hpp>
 #include <dr/span.hpp>

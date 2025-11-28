@@ -1,6 +1,7 @@
 #include <utest.h>
 
 #include <dr/math.hpp>
+#include <dr/math_traits.hpp>
 
 UTEST(math, solve_least_squares)
 {

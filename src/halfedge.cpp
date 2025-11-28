@@ -1,7 +1,7 @@
 #include <dr/halfedge.hpp>
 
+#include <dr/basic_traits.hpp>
 #include <dr/linalg_reshape.hpp>
-#include <dr/math_traits.hpp>
 #include <dr/meta.hpp>
 
 namespace dr

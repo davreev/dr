@@ -1,7 +1,7 @@
 #pragma once
 
+#include <dr/basic_traits.hpp>
 #include <dr/dynamic_array.hpp>
-#include <dr/math_traits.hpp>
 #include <dr/math_types.hpp>
 #include <dr/span.hpp>
 #include <dr/sparse_linalg_types.hpp>

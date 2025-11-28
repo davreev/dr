@@ -7,9 +7,9 @@
 #include <cassert>
 #include <cmath>
 
+#include <dr/basic_traits.hpp>
 #include <dr/math_constants.hpp>
 #include <dr/math_ctors.hpp>
-#include <dr/math_traits.hpp>
 #include <dr/math_types.hpp>
 
 namespace dr

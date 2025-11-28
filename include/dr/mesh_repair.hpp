@@ -1,9 +1,9 @@
 #pragma once
 
+#include <dr/basic_traits.hpp>
 #include <dr/dynamic_array.hpp>
 #include <dr/hash_grid.hpp>
 #include <dr/math.hpp>
-#include <dr/math_traits.hpp>
 #include <dr/span.hpp>
 
 namespace dr

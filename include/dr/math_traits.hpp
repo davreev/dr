@@ -3,23 +3,11 @@
 #include <type_traits>
 
 #include <dr/math_types.hpp>
-#include <dr/meta.hpp>
 
 namespace dr
 {
 namespace impl
 {
-
-using NaturalTypes = TypePack<
-    unsigned char,
-    unsigned short int,
-    unsigned int,
-    unsigned long int,
-    unsigned long long int>;
-
-using IntegerTypes = TypePack<signed char, short int, int, long int, long long int>;
-
-using RealTypes = TypePack<float, double, long double>;
 
 template <typename T>
 struct IsComplex
@@ -46,18 +34,6 @@ struct IsQuaternion<Quat<T>>
 };
 
 } // namespace impl
-
-/// True if T models the set of natural numbers (N) (including zero)
-template <typename T>
-inline constexpr bool is_natural = impl::NaturalTypes::includes<std::decay_t<T>>;
-
-/// True if T models the set of integers (Z)
-template <typename T>
-inline constexpr bool is_integer = impl::IntegerTypes::includes<std::decay_t<T>>;
-
-/// True if T models the set of real numbers (R)
-template <typename T>
-inline constexpr bool is_real = impl::RealTypes::includes<std::decay_t<T>>;
 
 /// True if T models the set of complex numbers (C)
 template <typename T>
