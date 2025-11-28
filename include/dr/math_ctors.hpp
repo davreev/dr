@@ -136,7 +136,7 @@ auto col(MatExpr<Derived> const& expr)
 {
     using Result = typename MatExpr<Derived>::EvalReturnType;
     static_assert(Result::ColsAtCompileTime == 1);
-    static_assert(Result::RowsAtCompileTime != Eigen::Dynamic);
+    static_assert(Result::RowsAtCompileTime != dynamic_size);
     return expr.eval();
 }
 
@@ -193,7 +193,7 @@ auto row(MatExpr<Derived> const& expr)
 {
     using Result = typename MatExpr<Derived>::EvalReturnType;
     static_assert(Result::RowsAtCompileTime == 1);
-    static_assert(Result::ColsAtCompileTime != Eigen::Dynamic);
+    static_assert(Result::ColsAtCompileTime != dynamic_size);
     return expr.eval();
 }
 

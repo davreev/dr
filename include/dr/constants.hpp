@@ -11,4 +11,6 @@ inline constexpr Index invalid_index{~0};
 template <typename T>
 inline constexpr bool always_false{false};
 
+inline constexpr int dynamic_size = -1;
+
 } // namespace dr

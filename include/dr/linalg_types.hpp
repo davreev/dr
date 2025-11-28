@@ -7,14 +7,17 @@
 #include <Eigen/Dense>
 
 #include <dr/basic_types.hpp>
+#include <dr/constants.hpp>
 
 namespace dr
 {
 
+static_assert(dynamic_size == Eigen::Dynamic);
+
 template <int rows, int cols>
 constexpr int default_mat_options()
 {
-    if constexpr(rows == 1 && cols != 1)
+    if constexpr (rows == 1 && cols != 1)
         return Eigen::RowMajor;
     else
         return Eigen::ColMajor;
@@ -22,22 +25,22 @@ constexpr int default_mat_options()
 
 template <
     typename Scalar,
-    int rows = Eigen::Dynamic,
-    int cols = Eigen::Dynamic,
+    int rows = dynamic_size,
+    int cols = dynamic_size,
     int options = default_mat_options<rows, cols>()>
 using Mat = Eigen::Matrix<Scalar, rows, cols, options>;
 
-template <typename Scalar, int size = Eigen::Dynamic>
+template <typename Scalar, int size = dynamic_size>
 using Vec = Mat<Scalar, size, 1, Eigen::ColMajor>;
 
 template <typename Scalar, int size>
-using VecArray = Mat<Scalar, size, Eigen::Dynamic, Eigen::ColMajor>;
+using VecArray = Mat<Scalar, size, dynamic_size, Eigen::ColMajor>;
 
-template <typename Scalar, int size = Eigen::Dynamic>
+template <typename Scalar, int size = dynamic_size>
 using Covec = Mat<Scalar, 1, size, Eigen::RowMajor>;
 
 template <typename Scalar, int size>
-using CovecArray = Mat<Scalar, Eigen::Dynamic, size, Eigen::RowMajor>;
+using CovecArray = Mat<Scalar, dynamic_size, size, Eigen::RowMajor>;
 
 template <typename Derived>
 using MatExpr = Eigen::MatrixBase<Derived>;

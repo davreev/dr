@@ -295,7 +295,7 @@ auto unpack(MatExpr<Derived> const& expr)
 
     constexpr usize m = Derived::RowsAtCompileTime;
     constexpr usize n = Derived::ColsAtCompileTime;
-    static_assert(m != Eigen::Dynamic && n != Eigen::Dynamic);
+    static_assert(m != dynamic_size && n != dynamic_size);
 
     std::array<Scalar, m * n> result{};
     as_mat<m, n>(result.data()) = expr;
