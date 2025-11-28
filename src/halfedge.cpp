@@ -43,7 +43,9 @@ Builder::Error Builder::make_from_face_vertex(
     static_assert(SupportedIndexTypes::includes<SrcIndex>);
 
     return make_from_face_vertex<SrcIndex>(
-        [&](Index f) { return face_vertices[f]; },
+        [&](Index f) {
+            return face_vertices[f];
+        },
         face_vertices.num_slices(),
         result,
         include_previous,
@@ -61,7 +63,9 @@ Builder::Error Builder::make_from_face_vertex(
     static_assert(SupportedFaceSizes::includes<size>);
 
     return make_from_face_vertex<SrcIndex>(
-        [&](Index f) { return as_span(face_vertices[f]); },
+        [&](Index f) {
+            return as_span(face_vertices[f]);
+        },
         face_vertices.size(),
         result,
         include_previous,
@@ -294,46 +298,46 @@ Builder::Error Builder::make_from_face_vertex(
 
 // Explicit template instantiation
 
-#define DR_INSTANTIATE(SrcIndex)                                                                   \
+#define DR_TEMPLATE(SrcIndex)                                                                      \
     template Builder::Error Builder::make_from_face_vertex(                                        \
         SlicedArray<SrcIndex> const& face_vertices,                                                \
         HalfedgeMesh& result,                                                                      \
         bool include_previous,                                                                     \
         bool include_holes);
 
-DR_INSTANTIATE(i16)
-DR_INSTANTIATE(i32)
-DR_INSTANTIATE(i64)
+DR_TEMPLATE(i16)
+DR_TEMPLATE(i32)
+DR_TEMPLATE(i64)
 
-DR_INSTANTIATE(u16)
-DR_INSTANTIATE(u32)
-DR_INSTANTIATE(u64)
+DR_TEMPLATE(u16)
+DR_TEMPLATE(u32)
+DR_TEMPLATE(u64)
 
-#undef DR_INSTANTIATE
+#undef DR_TEMPLATE
 
-#define DR_INSTANTIATE(SrcIndex, size)                                                             \
+#define DR_TEMPLATE(SrcIndex, size)                                                                \
     template Builder::Error Builder::make_from_face_vertex(                                        \
         Span<Vec<SrcIndex, size> const> const& face_vertices,                                      \
         HalfedgeMesh& result,                                                                      \
         bool include_previous,                                                                     \
         bool include_holes);
 
-DR_INSTANTIATE(i16, 3)
-DR_INSTANTIATE(i32, 3)
-DR_INSTANTIATE(i64, 3)
+DR_TEMPLATE(i16, 3)
+DR_TEMPLATE(i32, 3)
+DR_TEMPLATE(i64, 3)
 
-DR_INSTANTIATE(u16, 3)
-DR_INSTANTIATE(u32, 3)
-DR_INSTANTIATE(u64, 3)
+DR_TEMPLATE(u16, 3)
+DR_TEMPLATE(u32, 3)
+DR_TEMPLATE(u64, 3)
 
-DR_INSTANTIATE(i16, 4)
-DR_INSTANTIATE(i32, 4)
-DR_INSTANTIATE(i64, 4)
+DR_TEMPLATE(i16, 4)
+DR_TEMPLATE(i32, 4)
+DR_TEMPLATE(i64, 4)
 
-DR_INSTANTIATE(u16, 4)
-DR_INSTANTIATE(u32, 4)
-DR_INSTANTIATE(u64, 4)
+DR_TEMPLATE(u16, 4)
+DR_TEMPLATE(u32, 4)
+DR_TEMPLATE(u64, 4)
 
-#undef DR_INSTANTIATE
+#undef DR_TEMPLATE
 
 } // namespace dr

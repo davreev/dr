@@ -20,16 +20,12 @@ add_library(utest::utest ALIAS utest)
 
 target_include_directories(
     utest 
-    SYSTEM # Suppresses warnings from third party headers
+    SYSTEM # Suppress warnings from third party headers
     INTERFACE 
         "${utest_SOURCE_DIR}"
 )
 
 # Avoid windows.h min/max macro clash
 if(WIN32)
-    target_compile_definitions(
-        utest
-        INTERFACE
-            NOMINMAX
-    )
+    target_compile_definitions(utest INTERFACE NOMINMAX)
 endif()

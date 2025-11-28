@@ -456,8 +456,8 @@ Value interpolate_mean_value_robust(
         Real const sin_p1 = sqrt_safe(Real{1.0} - cos_p1 * cos_p1);
         Real const sin_p2 = sqrt_safe(Real{1.0} - cos_p2 * cos_p2);
 
-        // NOTE: If point lies outside the triangle but in the same plane then the triangle
-        // can be ignored since its projected area onto the unit sphere is zero
+        // NOTE: If point lies outside the triangle but in the same plane then the triangle can be
+        // ignored since its projected area onto the unit sphere is zero
         if (sin_p0 > eps && sin_p1 > eps && sin_p2 > eps)
         {
             Real const sign_det_U = sign(mat(u0, u1, u2).determinant());

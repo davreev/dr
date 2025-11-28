@@ -19,7 +19,7 @@ add_library(Eigen3::Eigen ALIAS Eigen3_Eigen)
 
 target_include_directories(
     Eigen3_Eigen
-    SYSTEM # Suppresses warnings from third party headers
+    SYSTEM # Suppress warnings from third party headers
     INTERFACE
         "${eigen_SOURCE_DIR}"
 )

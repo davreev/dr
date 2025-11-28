@@ -1,7 +1,5 @@
 #include <dr/mesh_primitives.hpp>
 
-#include <dr/container_utils.hpp>
-
 namespace dr
 {
 
@@ -44,10 +42,10 @@ MeshPrimitives::Tri::Mesh const& MeshPrimitives::Tri::tetrahedron()
     };
 
     static constexpr Mesh mesh{
-        as_span(vert_positions),
-        as_span(edge_verts),
-        as_span(face_verts),
-        as_span(face_edges),
+        vert_positions,
+        edge_verts,
+        face_verts,
+        face_edges,
     };
 
     return mesh;
@@ -116,10 +114,10 @@ MeshPrimitives::Tri::Mesh const& MeshPrimitives::Tri::octahedron()
     };
 
     static constexpr Mesh mesh{
-        as_span(vert_positions),
-        as_span(edge_verts),
-        as_span(face_verts),
-        as_span(face_edges),
+        vert_positions,
+        edge_verts,
+        face_verts,
+        face_edges,
     };
 
     return mesh;
@@ -261,10 +259,10 @@ MeshPrimitives::Tri::Mesh const& MeshPrimitives::Tri::icosahedron()
     // clang-format on
 
     static constexpr Mesh mesh{
-        as_span(vert_positions),
-        as_span(edge_verts),
-        as_span(face_verts),
-        as_span(face_edges),
+        vert_positions,
+        edge_verts,
+        face_verts,
+        face_edges,
     };
 
     return mesh;
@@ -355,10 +353,10 @@ MeshPrimitives::Tri::Mesh const& MeshPrimitives::Tri::cube()
     };
 
     static constexpr Mesh mesh{
-        as_span(vert_positions),
-        as_span(edge_verts),
-        as_span(face_verts),
-        as_span(face_edges),
+        vert_positions,
+        edge_verts,
+        face_verts,
+        face_edges,
     };
 
     return mesh;
@@ -415,9 +413,9 @@ MeshPrimitives::Quad::Mesh const& MeshPrimitives::Quad::cube()
 
     static Mesh const mesh{
         Tri::cube().vertex_positions,
-        as_span(edge_verts),
-        as_span(face_verts),
-        as_span(face_edges),
+        edge_verts,
+        face_verts,
+        face_edges,
     };
 
     return mesh;
@@ -566,12 +564,12 @@ MeshPrimitives::Tet::Mesh const& MeshPrimitives::Tet::cube()
 
     static Mesh const mesh{
         Tri::cube().vertex_positions,
-        as_span(edge_verts),
-        as_span(face_verts),
-        as_span(face_edges),
-        as_span(cell_verts),
-        as_span(cell_edges),
-        as_span(cell_faces),
+        edge_verts,
+        face_verts,
+        face_edges,
+        cell_verts,
+        cell_edges,
+        cell_faces,
     };
 
     return mesh;
