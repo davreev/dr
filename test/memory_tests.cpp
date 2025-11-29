@@ -42,19 +42,3 @@ UTEST(memory, as_bytes)
 
     ASSERT_TRUE(all_equal(as_bytes(vec), as<u8>(as_span(arr))));
 }
-
-UTEST(memory, scoped_alloc)
-{
-    using namespace dr;
-
-    DebugMemoryResource mem{};
-
-    {
-        using T = i32;
-        constexpr usize n = 10;
-        ScopedAlloc<alignof(T)> block{sizeof(T) * n, &mem};
-        ASSERT_EQ(sizeof(T) * n, mem.bytes_allocated);
-    }
-
-    ASSERT_EQ(0u, mem.bytes_allocated);
-}

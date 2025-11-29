@@ -39,7 +39,7 @@ bool is_aligned(void const* const ptr)
 template <typename T>
 T* as(void* const ptr)
 {
-    if constexpr(alignof(T) == 1)
+    if constexpr (alignof(T) == 1)
     {
         return static_cast<T*>(ptr);
     }
@@ -57,7 +57,7 @@ T* as(void* const ptr)
 template <typename T>
 T const* as(void const* const ptr)
 {
-    if constexpr(alignof(T) == 1)
+    if constexpr (alignof(T) == 1)
     {
         return static_cast<T const*>(ptr);
     }
@@ -129,49 +129,6 @@ Span<u8 const> as_bytes(T const& item)
 /// Deleted to avoid creating a span over a temporary
 template <typename T>
 Span<u8 const> as_bytes(T const&& item) = delete;
-
-/// Simple RAII-style heap allocation
-template <usize alignment>
-struct ScopedAlloc final
-{
-    ScopedAlloc(usize size, Allocator alloc = {}) :
-        data_{alloc.allocate_bytes(size, alignment)}, size_{size}, alloc_{alloc}
-    {
-    }
-
-    ~ScopedAlloc() { alloc_.deallocate_bytes(data_, size_, alignment); }
-
-    ScopedAlloc(ScopedAlloc const&) = delete;
-    ScopedAlloc& operator=(ScopedAlloc const&) = delete;
-
-    Span<u8> data() { return {static_cast<u8*>(data_), isize(size_)}; }
-
-    Span<u8 const> data() const
-    {
-        return {static_cast<u8 const*>(data_), isize(size_)};
-    }
-
-    template <typename T>
-    Span<T> data_as()
-    {
-        static_assert(std::is_trivially_destructible_v<T>);
-        static_assert(alignof(T) <= alignment);
-        return {static_cast<T*>(data_), isize(size_ / sizeof(T))};
-    }
-
-    template <typename T>
-    Span<T const> data_as() const
-    {
-        static_assert(std::is_trivially_destructible_v<T>);
-        static_assert(alignof(T) <= alignment);
-        return {static_cast<T const*>(data_), isize(size_ / sizeof(T))};
-    }
-
-  private:
-    void* data_;
-    usize size_;
-    Allocator alloc_;
-};
 
 /// Deleter for allocator-backed unique pointers
 struct DeleteUnique
