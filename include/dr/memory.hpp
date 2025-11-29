@@ -135,11 +135,11 @@ template <usize alignment>
 struct ScopedAlloc final
 {
     ScopedAlloc(usize size, Allocator alloc = {}) :
-        data_{alloc.allocate(size, alignment)}, size_{size}, alloc_{alloc}
+        data_{alloc.allocate_bytes(size, alignment)}, size_{size}, alloc_{alloc}
     {
     }
 
-    ~ScopedAlloc() { alloc_.deallocate(data_, size_, alignment); }
+    ~ScopedAlloc() { alloc_.deallocate_bytes(data_, size_, alignment); }
 
     ScopedAlloc(ScopedAlloc const&) = delete;
     ScopedAlloc& operator=(ScopedAlloc const&) = delete;
