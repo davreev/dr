@@ -45,13 +45,7 @@ struct SlotMap : AllocatorAware
         {
             Index const index{slots_.size()};
             constexpr Index version{1};
-
-            // If T is allocator-aware, share this container's allocator
-            if constexpr (is_allocator_aware<T>)
-                slots_.push_back({T(std::forward<Args>(args)..., allocator()), {version, 0}});
-            else
-                slots_.push_back({T(std::forward<Args>(args)...), {version, 0}});
-
+            slots_.push_back({make_item(std::forward<Args>(args)...), {version, 0}});
             return {index, version};
         }
         else
@@ -61,7 +55,7 @@ struct SlotMap : AllocatorAware
 
             // Use existing slot
             Slot& slot = slots_[index];
-            allocator().construct(&slot.item, std::forward<Args>(args)...);
+            slot.item = make_item(std::forward<Args>(args)...);
 
             return {index, slot.status.version};
         }
@@ -74,7 +68,8 @@ struct SlotMap : AllocatorAware
 
         if (Slot& slot = slots_[handle.index]; slot.status.version == handle.version)
         {
-            allocator().destroy(&slot.item);
+            // Reset the slot's item
+            slot.item = make_item();
 
             // Mark slot as free
             slot.status.flags |= Flag_Free;
@@ -141,6 +136,16 @@ struct SlotMap : AllocatorAware
         Flag_Free = 1,
         // ...
     };
+
+    template <typename... Args>
+    T make_item(Args&&... args)
+    {
+        // If T is allocator-aware, share this container's allocator
+        if constexpr (is_allocator_aware<T>)
+            return T(std::forward<Args>(args)..., allocator());
+        else
+            return T(std::forward<Args>(args)...);
+    }
 
     DynamicArray<Slot> slots_;
     DynamicArray<Index> free_indices_;
