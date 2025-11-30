@@ -43,7 +43,7 @@ void make_cotan_laplacian(
         Vec3<Real> const& p2 = vertex_positions[f_v[2]];
 
         Real w[3];
-        cotan_weights(p1 - p0, p2 - p1, p0 - p2, w[0], w[1], w[2]);
+        cotan_weights<Real>(p1 - p0, p2 - p1, p0 - p2, w[0], w[1], w[2]);
 
         add_coeffs(f_v[0], f_v[1], w[0]);
         add_coeffs(f_v[1], f_v[2], w[1]);
@@ -255,15 +255,19 @@ void eval_divergence(
     {
         auto const& f_v = face_vertices[f];
 
-        Vec3<Real> const f_v_div = eval_divergence(
+        Real div[3]{};
+        eval_divergence(
             vertex_positions[f_v[0]],
             vertex_positions[f_v[1]],
             vertex_positions[f_v[2]],
-            face_vectors[f]);
+            face_vectors[f],
+            div[0],
+            div[1],
+            div[2]);
 
-        result[f_v[0]] += f_v_div[0];
-        result[f_v[1]] += f_v_div[1];
-        result[f_v[2]] += f_v_div[2];
+        result[f_v[0]] += div[0];
+        result[f_v[1]] += div[1];
+        result[f_v[2]] += div[2];
     }
 }
 
@@ -286,17 +290,21 @@ void eval_laplacian(
     {
         auto const& f_v = face_vertices[f];
 
-        Vec3<Real> const f_v_lap = eval_laplacian(
+        Real lap[3];
+        eval_laplacian(
             vertex_positions[f_v[0]],
             vertex_positions[f_v[1]],
             vertex_positions[f_v[2]],
             vertex_scalars[f_v[0]],
             vertex_scalars[f_v[1]],
-            vertex_scalars[f_v[2]]);
+            vertex_scalars[f_v[2]],
+            lap[0],
+            lap[1],
+            lap[2]);
 
-        result[f_v[0]] += f_v_lap[0];
-        result[f_v[1]] += f_v_lap[1];
-        result[f_v[2]] += f_v_lap[2];
+        result[f_v[0]] += lap[0];
+        result[f_v[1]] += lap[1];
+        result[f_v[2]] += lap[2];
     }
 }
 
@@ -319,17 +327,21 @@ void eval_laplacian(
     {
         auto const& f_v = face_vertices[f];
 
-        Mat<Real, dim, 3> const f_v_lap = eval_laplacian(
+        Vec<Real, dim> lap[3];
+        eval_laplacian(
             vertex_positions[f_v[0]],
             vertex_positions[f_v[1]],
             vertex_positions[f_v[2]],
             vertex_vectors[f_v[0]],
             vertex_vectors[f_v[1]],
-            vertex_vectors[f_v[2]]);
+            vertex_vectors[f_v[2]],
+            lap[0],
+            lap[1],
+            lap[2]);
 
-        result[f_v[0]] += f_v_lap.col(0);
-        result[f_v[1]] += f_v_lap.col(1);
-        result[f_v[2]] += f_v_lap.col(2);
+        result[f_v[0]] += lap[0];
+        result[f_v[1]] += lap[1];
+        result[f_v[2]] += lap[2];
     }
 }
 
