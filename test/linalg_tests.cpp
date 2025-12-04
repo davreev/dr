@@ -5,7 +5,11 @@
 #include <dr/math_ctors.hpp>
 #include <dr/math_types.hpp>
 
-UTEST(linalg, default_mat_options)
+namespace
+{
+
+[[maybe_unused]]
+void check_default_mat_options()
 {
     using namespace dr;
 
@@ -13,9 +17,9 @@ UTEST(linalg, default_mat_options)
     static_assert(default_mat_options<3, 1>() == Eigen::ColMajor);
     static_assert(default_mat_options<1, 3>() == Eigen::RowMajor);
     static_assert(default_mat_options<1, 1>() == Eigen::ColMajor);
-    
-    ASSERT_TRUE(true);
 }
+
+} // namespace
 
 UTEST(linalg_reshape, alignment)
 {

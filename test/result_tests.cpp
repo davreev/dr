@@ -1,12 +1,17 @@
 #include <utest.h>
 
+#include <dr/basic_types.hpp>
 #include <dr/result.hpp>
 
-UTEST(result, sanity)
+namespace
+{
+
+[[maybe_unused]]
+void check_result_behavior()
 {
     using namespace dr;
 
-    enum Error
+    enum Error : u8
     {
         Error_None = 0,
         Error_Reason,
@@ -15,43 +20,54 @@ UTEST(result, sanity)
     };
 
     {
-        constexpr auto expr = []() -> Result<int, Error> { return ErrorResult{Error_Reason}; };
+        constexpr auto expr = []() -> Result<int, Error> {
+            return ErrorResult{Error_Reason};
+        };
         static_assert(expr().error == Error_Reason);
 
-        auto const [val, err] = expr();
-        ASSERT_EQ(0, val);
-        ASSERT_EQ(Error_Reason, err);
+        constexpr Result res = expr();
+        static_assert(res.value == 0);
+        static_assert(res.error == Error_Reason);
     }
 
     {
-        constexpr auto expr = []() -> Result<int, Error> { return {1}; };
+        constexpr auto expr = []() -> Result<int, Error> {
+            return {1};
+        };
         static_assert(expr().value == 1);
 
-        auto const [val, err] = expr();
-        ASSERT_EQ(1, val);
-        ASSERT_EQ(Error_None, err);
+        constexpr Result res = expr();
+        static_assert(res.value == 1);
+        static_assert(res.error == Error_None);
     }
 }
 
-UTEST(maybe, sanity)
+[[maybe_unused]]
+void check_maybe_behavior()
 {
     using namespace dr;
 
     {
-        constexpr auto expr = []() -> Maybe<int> { return {}; };
+        constexpr auto expr = []() -> Maybe<int> {
+            return {};
+        };
         static_assert(!expr().has_value);
 
-        auto const [val, ok] = expr();
-        ASSERT_EQ(0, val);
-        ASSERT_EQ(false, ok);
+        constexpr Maybe mb = expr();
+        static_assert(mb.value == 0);
+        static_assert(!mb.has_value);
     }
 
     {
-        constexpr auto expr = []() -> Maybe<int> { return 1; };
+        constexpr auto expr = []() -> Maybe<int> {
+            return 1;
+        };
         static_assert(expr().value == 1);
 
-        auto const [val, ok] = expr();
-        ASSERT_EQ(1, val);
-        ASSERT_EQ(true, ok);
+        constexpr Maybe mb = expr();
+        static_assert(mb.value == 1);
+        static_assert(mb.has_value);
     }
 }
+
+} // namespace
