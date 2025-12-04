@@ -27,6 +27,7 @@ add_executable(
     span_tests.cpp
     sparse_min_quad_tests.cpp
     spline_tests.cpp
+    template_checks.cpp
     transform_tests.cpp
     triangulate_tests.cpp
 )
