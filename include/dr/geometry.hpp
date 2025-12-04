@@ -541,10 +541,10 @@ Real signed_area(Span<Vec2<Real> const> const& polygon)
 /// Returns the signed volume of a tetrahedron
 template <typename Real>
 Real signed_volume(
-    Vec2<Real> const& a,
-    Vec2<Real> const& b,
-    Vec2<Real> const& c,
-    Vec2<Real> const& d)
+    Vec3<Real> const& a,
+    Vec3<Real> const& b,
+    Vec3<Real> const& c,
+    Vec3<Real> const& d)
 {
     static_assert(is_real<Real>);
 
