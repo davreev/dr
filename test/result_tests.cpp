@@ -3,14 +3,18 @@
 #include <dr/basic_types.hpp>
 #include <dr/result.hpp>
 
+/*
+    Compile-time checks
+*/
+
+namespace dr
+{
 namespace
 {
 
 [[maybe_unused]]
 void check_result_behavior()
 {
-    using namespace dr;
-
     enum Error : u8
     {
         Error_None = 0,
@@ -45,8 +49,6 @@ void check_result_behavior()
 [[maybe_unused]]
 void check_maybe_behavior()
 {
-    using namespace dr;
-
     {
         constexpr auto expr = []() -> Maybe<int> {
             return {};
@@ -71,3 +73,4 @@ void check_maybe_behavior()
 }
 
 } // namespace
+} // namespace dr

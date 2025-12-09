@@ -228,7 +228,7 @@ UTEST(mesh, interpolate_mean_value)
 }
 
 /*
-    Explicitly instantiating templated types and functions to catch compile time errors
+    Compile-time checks
 */
 
 namespace dr

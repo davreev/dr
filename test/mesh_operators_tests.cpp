@@ -1,7 +1,7 @@
 #include <dr/mesh_operators.hpp>
 
 /*
-    Explicitly instantiating templated types and functions to catch compile time errors
+    Compile-time checks
 */
 
 namespace dr
