@@ -226,3 +226,84 @@ UTEST(mesh, interpolate_mean_value)
         ASSERT_EQ(num_samples, num_eq);
     }
 }
+
+/*
+    Explicitly instantiating templated types and functions to catch compile time errors
+*/
+
+namespace dr
+{
+
+template void vertex_vector_areas(
+    Span<Vec3<f32> const> const&,
+    Span<Vec3<i32> const> const&,
+    Span<Vec3<f32>> const&);
+
+template void vertex_normals_area_weighted(
+    Span<Vec3<f32> const> const&,
+    Span<Vec3<i32> const> const&,
+    Span<Vec3<f32>> const&);
+
+template void vertex_areas_barycentric(
+    Span<Vec3<f32> const> const&,
+    Span<Vec3<i32> const> const&,
+    Span<f32> const&);
+
+template void vertex_degrees(Span<Vec3<i32> const> const&, Span<f32> const&);
+
+template void face_vector_areas(
+    Span<Vec3<f32> const> const&,
+    Span<Vec3<i32> const> const&,
+    Span<Vec3<f32>> const&,
+    isize const);
+
+template void face_normals(
+    Span<Vec3<f32> const> const&,
+    Span<Vec3<i32> const> const&,
+    Span<Vec3<f32>> const&,
+    isize const);
+
+template Vec2<f32> integrate_vertex_func(
+    Span<Vec3<f32> const> const&,
+    Span<Vec2<f32> const> const&,
+    Span<Vec4<i32> const> const&,
+    f32&);
+
+template Vec2<f32> integrate_vertex_func(
+    Span<Vec3<f32> const> const&,
+    Span<Vec2<f32> const> const&,
+    Span<Vec3<i32> const> const&,
+    f32&);
+
+template Vec2<f32> integrate_vertex_func(
+    Span<Vec3<f32> const> const&,
+    Span<Vec2<f32> const> const&,
+    Span<Vec2<i32> const> const&,
+    f32&);
+
+template Vec3<f32> area_centroid(Span<Vec3<f32> const> const&, Span<Vec3<i32> const> const&);
+
+template Vec3<f32> length_centroid(Span<Vec3<f32> const> const&, Span<Vec2<i32> const> const&);
+
+template f32 winding_number(
+    Span<Vec3<f32> const> const&,
+    Span<Vec3<i32> const> const&,
+    Vec3<f32> const&);
+
+template Vec2<f32> interpolate_mean_value_robust(
+    Span<Vec3<f32> const> const&,
+    Span<Vec2<f32> const> const&,
+    Span<Vec3<i32> const> const&,
+    Vec3<f32> const&,
+    f32 const,
+    isize const);
+
+template Vec2<f32> interpolate_mean_value_naive(
+    Span<Vec3<f32> const> const&,
+    Span<Vec2<f32> const> const&,
+    Span<Vec3<i32> const> const&,
+    Vec3<f32> const&,
+    f32 const,
+    isize const);
+
+} // namespace dr

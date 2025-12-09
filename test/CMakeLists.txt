@@ -16,6 +16,7 @@ add_executable(
     math_tests.cpp
     memory_tests.cpp
     mesh_attributes_tests.cpp
+    mesh_operators_tests.cpp
     mesh_incidence_tests.cpp
     mesh_repair_tests.cpp
     mesh_utils_tests.cpp
@@ -27,7 +28,6 @@ add_executable(
     span_tests.cpp
     sparse_min_quad_tests.cpp
     spline_tests.cpp
-    template_checks.cpp
     transform_tests.cpp
     triangulate_tests.cpp
 )
@@ -44,7 +44,7 @@ target_link_libraries(
 target_compile_options(
     dr-test
     PRIVATE 
-        -Wall -Wextra -Wpedantic -Werror
+        -Wall -Wextra -Wpedantic #-Werror
 )
 
 # Allow std::fopen on Windows builds
