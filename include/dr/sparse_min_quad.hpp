@@ -12,13 +12,13 @@ namespace dr
 {
 
 template <typename T, typename Enable = void>
-struct SelectSolver;
+struct Traits;
 
 /// Minimizes a convex quadratic objective with fixed value constraints
 template <typename Scalar, typename Index = i32, SolverType solver_type = SolverType_Direct>
 struct SparseMinQuadFixed
 {
-    using Solver = typename SelectSolver<SparseMinQuadFixed>::Type;
+    using Solver = typename Traits<SparseMinQuadFixed>::Solver;
 
     /// Isolates unknown variables and factorizes/preconditions the linear system
     template <typename Predicate>
@@ -138,15 +138,15 @@ struct SparseMinQuadFixed
 };
 
 template <typename Scalar, typename Index>
-struct SelectSolver<SparseMinQuadFixed<Scalar, Index, SolverType_Direct>>
+struct Traits<SparseMinQuadFixed<Scalar, Index, SolverType_Direct>>
 {
-    using Type = Eigen::SimplicialLDLT<SparseMat<Scalar, Index>>;
+    using Solver = Eigen::SimplicialLDLT<SparseMat<Scalar, Index>>;
 };
 
 template <typename Scalar, typename Index>
-struct SelectSolver<SparseMinQuadFixed<Scalar, Index, SolverType_Iterative>>
+struct Traits<SparseMinQuadFixed<Scalar, Index, SolverType_Iterative>>
 {
-    using Type = Eigen::ConjugateGradient<
+    using Solver = Eigen::ConjugateGradient<
         SparseMat<Scalar, Index>,
         Eigen::Lower | Eigen::Upper,
         Eigen::IncompleteCholesky<Scalar>>;
