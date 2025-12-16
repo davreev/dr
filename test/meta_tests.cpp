@@ -2,14 +2,18 @@
 
 #include <dr/meta.hpp>
 
+/*
+    Compile-time checks
+*/
+
+namespace dr
+{
 namespace
 {
 
 [[maybe_unused]]
 void check_type_pack_append_prepend()
 {
-    using namespace dr;
-
     using TypesA = TypePack<i16, i32>;
 
     using TypesB = TypesA::Append<i64>;
@@ -24,8 +28,6 @@ void check_type_pack_append_prepend()
 [[maybe_unused]]
 void check_type_pack_join()
 {
-    using namespace dr;
-
     using TypesA = TypePack<i8, i16>;
     using TypesB = TypePack<u8, u16>;
 
@@ -39,8 +41,6 @@ void check_type_pack_join()
 [[maybe_unused]]
 void check_type_pack_includes_all()
 {
-    using namespace dr;
-
     using TypesA = TypePack<i8, i16, i32, i64>;
     static_assert(TypesA::includes_all<i8, i16, i32>);
     static_assert(!TypesA::includes_all<i8, i16, i32, u8>);
@@ -49,8 +49,6 @@ void check_type_pack_includes_all()
 [[maybe_unused]]
 void check_value_pack_append_prepend()
 {
-    using namespace dr;
-
     using ValuesA = ValuePack<i32, 1, 2>;
 
     using ValuesB = ValuesA::Append<3>;
@@ -65,8 +63,6 @@ void check_value_pack_append_prepend()
 [[maybe_unused]]
 void check_value_pack_join()
 {
-    using namespace dr;
-
     using TypesA = ValuePack<i32, 0, 1>;
     using TypesB = ValuePack<i32, 2, 3>;
 
@@ -80,11 +76,10 @@ void check_value_pack_join()
 [[maybe_unused]]
 void check_value_pack_includes_all()
 {
-    using namespace dr;
-
     using TypesA = ValuePack<i32, 0, 1, 2, 3, 4>;
     static_assert(TypesA::includes_all<0, 2, 4>);
     static_assert(!TypesA::includes_all<0, 2, 4, 5>);
 }
 
 } // namespace
+} // namespace dr
