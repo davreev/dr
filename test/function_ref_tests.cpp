@@ -81,3 +81,24 @@ UTEST(function_ref, is_valid)
         ASSERT_TRUE(fn.is_valid());
     }
 }
+
+/*
+    Compile-time checks
+*/
+
+namespace dr
+{
+namespace
+{
+
+[[maybe_unused]]
+void check_arg_value_categories()
+{
+    FunctionRef<void(int, int&, int const&, int const&, int&&, int*, int const*)> fn;
+    int x = 2;
+    int const y = 3;
+    fn(1, x, y, 4, 5, &x, &y);
+}
+
+} // namespace
+} // namespace dr

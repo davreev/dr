@@ -28,7 +28,7 @@ struct Function<Return(Args...)> final : AllocatorAware
         // Move fn to location provided by the given allocator
         ptr_.obj = alloc_.new_object<DecayFn>(std::forward<Fn>(fn));
 
-        invoke_ = [](Ptr const& ptr, Args&&... args) -> Return {
+        invoke_ = [](Ptr const& ptr, Args... args) -> Return {
             return ((*static_cast<DecayFn*>(ptr.obj))(std::forward<Args>(args)...));
         };
 
@@ -52,7 +52,7 @@ struct Function<Return(Args...)> final : AllocatorAware
         if (fn != nullptr)
         {
             ptr_.fn = reinterpret_cast<void (*)()>(fn);
-            invoke_ = [](Ptr const& ptr, Args&&... args) -> Return {
+            invoke_ = [](Ptr const& ptr, Args... args) -> Return {
                 return (reinterpret_cast<Fn>(ptr.fn))(std::forward<Args>(args)...);
             };
         }
@@ -116,7 +116,7 @@ struct Function<Return(Args...)> final : AllocatorAware
     }
 
     /// Invokes the function
-    constexpr Return operator()(Args&&... args) const
+    constexpr Return operator()(Args... args) const
     {
         return invoke_(ptr_, std::forward<Args>(args)...);
     }
@@ -129,7 +129,7 @@ struct Function<Return(Args...)> final : AllocatorAware
     };
 
     Ptr ptr_{};
-    Return (*invoke_)(Ptr const&, Args&&...){};
+    Return (*invoke_)(Ptr const&, Args...){};
     Ptr (*clone_)(Ptr const&, Allocator){};
     void (*delete_)(Ptr const&, Allocator){};
     Allocator alloc_{};

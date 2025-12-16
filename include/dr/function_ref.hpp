@@ -29,7 +29,7 @@ struct FunctionRef<Return(Args...)>
             else
                 ptr_.obj = src;
 
-            invoke_ = [](Ptr const& ptr, Args&&... args) -> Return {
+            invoke_ = [](Ptr const& ptr, Args... args) -> Return {
                 return (*static_cast<Src*>(ptr.obj))(std::forward<Args>(args)...);
             };
         }
@@ -43,14 +43,14 @@ struct FunctionRef<Return(Args...)>
         if (src != nullptr)
         {
             ptr_.fn = reinterpret_cast<void (*)()>(src);
-            invoke_ = [](Ptr const& ptr, Args&&... args) -> Return {
+            invoke_ = [](Ptr const& ptr, Args... args) -> Return {
                 return (reinterpret_cast<Src>(ptr.fn))(std::forward<Args>(args)...);
             };
         }
     }
 
     /// Invokes the referenced function
-    constexpr Return operator()(Args&&... args) const
+    constexpr Return operator()(Args... args) const
     {
         return invoke_(ptr_, std::forward<Args>(args)...);
     }
@@ -67,7 +67,7 @@ struct FunctionRef<Return(Args...)>
     };
 
     Ptr ptr_{};
-    Return (*invoke_)(Ptr const&, Args&&...){};
+    Return (*invoke_)(Ptr const&, Args...){};
 };
 
 } // namespace dr

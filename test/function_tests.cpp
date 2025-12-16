@@ -85,3 +85,28 @@ UTEST(function, function_ptr)
         ASSERT_EQ(25, fn_move(5));
     }
 }
+
+/*
+    Compile-time checks
+*/
+
+namespace dr
+{
+namespace
+{
+
+[[maybe_unused]]
+void check_arg_value_categories()
+{
+    auto const foo = [](int, int&, int const&, int const&, int&&, int*, int const*) {
+        // ...
+    };
+
+    Function<void(int, int&, int const&, int const&, int&&, int*, int const*)> fn{foo};
+    int x = 2;
+    int const y = 3;
+    fn(1, x, y, 4, 5, &x, &y);
+}
+
+} // namespace
+} // namespace dr
