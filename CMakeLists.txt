@@ -58,6 +58,13 @@ target_compile_options(
         -Wall -Wextra -Wpedantic -Werror
 )
 
+# For C++20 designated init
+target_compile_options(
+    dr
+    PUBLIC
+        -Wno-c++20-extensions
+)
+
 target_compile_definitions(
     dr
     PUBLIC
