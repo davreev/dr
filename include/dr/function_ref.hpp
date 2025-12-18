@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cassert>
 #include <type_traits>
 #include <utility>
 
@@ -25,9 +26,9 @@ struct FunctionRef<Return(Args...)>
         if (src != nullptr)
         {
             if constexpr (std::is_const_v<Src>)
-                ptr_.obj = const_cast<void*>(static_cast<void const*>(src));
+                ptr_ = {.obj = const_cast<void*>(static_cast<void const*>(src))};
             else
-                ptr_.obj = src;
+                ptr_ = {.obj = src};
 
             invoke_ = [](Ptr const& ptr, Args... args) -> Return {
                 return (*static_cast<Src*>(ptr.obj))(std::forward<Args>(args)...);
@@ -42,7 +43,7 @@ struct FunctionRef<Return(Args...)>
 
         if (src != nullptr)
         {
-            ptr_.fn = reinterpret_cast<void (*)()>(src);
+            ptr_ = {.fn = reinterpret_cast<void (*)()>(src)};
             invoke_ = [](Ptr const& ptr, Args... args) -> Return {
                 return (reinterpret_cast<Src>(ptr.fn))(std::forward<Args>(args)...);
             };
@@ -52,10 +53,11 @@ struct FunctionRef<Return(Args...)>
     /// Invokes the referenced function
     constexpr Return operator()(Args... args) const
     {
+        assert(invoke_);
         return invoke_(ptr_, std::forward<Args>(args)...);
     }
 
-    /// Returns true if the instance refers to a valid memory address
+    /// Returns true if the instance refers to a valid function target
     constexpr bool is_valid() const { return invoke_ != nullptr; }
     constexpr explicit operator bool() const { return is_valid(); }
 
@@ -66,8 +68,10 @@ struct FunctionRef<Return(Args...)>
         void (*fn)();
     };
 
+    using InvokePtr = Return(Ptr const&, Args...);
+
     Ptr ptr_{};
-    Return (*invoke_)(Ptr const&, Args...){};
+    InvokePtr* invoke_{};
 };
 
 } // namespace dr

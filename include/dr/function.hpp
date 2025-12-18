@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cassert>
 #include <type_traits>
 #include <utility>
 
@@ -16,6 +17,8 @@ struct Function;
 template <typename Return, typename... Args>
 struct Function<Return(Args...)> final : AllocatorAware
 {
+    Function(Allocator alloc = {}) : alloc_{alloc} {}
+
     /// Creates an instance from a function object
     template <
         typename Fn,
@@ -25,22 +28,22 @@ struct Function<Return(Args...)> final : AllocatorAware
     {
         static_assert(std::is_invocable_r_v<Return, DecayFn, Args...>);
 
-        // Move fn to location provided by the given allocator
-        ptr_.obj = alloc_.new_object<DecayFn>(std::forward<Fn>(fn));
-
-        invoke_ = [](Ptr const& ptr, Args... args) -> Return {
-            return ((*static_cast<DecayFn*>(ptr.obj))(std::forward<Args>(args)...));
-        };
-
-        delete_ = [](Ptr const& ptr, Allocator alloc) {
-            if (ptr.obj != nullptr)
+        // Move function object to location given by allocator
+        ptr_ = {.obj = alloc_.new_object<DecayFn>(std::forward<Fn>(fn))};
+        vtable_ = {
+            .invoke = [](Ptr const& ptr, Args... args) -> Return {
+                assert(ptr.obj);
+                return (*static_cast<DecayFn*>(ptr.obj))(std::forward<Args>(args)...);
+            },
+            .clone = [](Ptr const& ptr, Allocator alloc) -> Ptr {
+                assert(ptr.obj);
+                return {.obj = alloc.new_object<DecayFn>(*static_cast<DecayFn const*>(ptr.obj))};
+            },
+            .release = [](Ptr& ptr, Allocator alloc) -> void {
+                assert(ptr.obj);
                 alloc.delete_object(static_cast<DecayFn*>(ptr.obj));
-        };
-
-        clone_ = [](Ptr const& ptr, Allocator alloc) -> Ptr {
-            Ptr result{};
-            result.obj = alloc.new_object<DecayFn>(*static_cast<DecayFn const*>(ptr.obj));
-            return result;
+                ptr.obj = nullptr;
+            },
         };
     }
 
@@ -51,45 +54,61 @@ struct Function<Return(Args...)> final : AllocatorAware
 
         if (fn != nullptr)
         {
-            ptr_.fn = reinterpret_cast<void (*)()>(fn);
-            invoke_ = [](Ptr const& ptr, Args... args) -> Return {
-                return (reinterpret_cast<Fn>(ptr.fn))(std::forward<Args>(args)...);
+            ptr_ = {.fn = reinterpret_cast<void (*)()>(fn)};
+            vtable_ = {
+                .invoke = [](Ptr const& ptr, Args... args) -> Return {
+                    assert(ptr.fn);
+                    return (reinterpret_cast<Fn>(ptr.fn))(std::forward<Args>(args)...);
+                },
+                .clone = [](Ptr const& ptr, Allocator) -> Ptr {
+                    assert(ptr.fn);
+                    return ptr;
+                },
+                .release = [](Ptr& ptr, Allocator) -> void {
+                    assert(ptr.fn);
+                    ptr.fn = nullptr;
+                },
             };
         }
-
-        delete_ = [](Ptr const&, Allocator) { /*no-op*/ };
-        clone_ = [](Ptr const& ptr, Allocator) -> Ptr { return ptr; };
     }
 
-    Function(Function const& other, Allocator alloc = {}) :
-        ptr_{other.clone_ptr(alloc)},
-        invoke_{other.invoke_},
-        clone_{other.clone_},
-        delete_{other.delete_},
-        alloc_{alloc}
+    Function(Function const& other, Allocator alloc = {}) : alloc_{alloc}
     {
+        if (other.is_valid())
+        {
+            ptr_ = other.clone_ptr(alloc_);
+            vtable_ = other.vtable_;
+        }
     }
 
     Function(Function&& other) noexcept :
-        ptr_{other.ptr_},
-        invoke_{other.invoke_},
-        clone_{other.clone_},
-        delete_{other.delete_},
-        alloc_{other.alloc_}
+        ptr_{other.ptr_}, vtable_{other.vtable_}, alloc_{other.alloc_}
     {
         other.ptr_ = {};
+        other.vtable_ = {};
     }
 
-    ~Function() { delete_ptr(); }
+    ~Function()
+    {
+        if (is_valid())
+            release_ptr();
+    }
 
     Function& operator=(Function const& other)
     {
-        delete_ptr();
+        if (is_valid())
+            release_ptr();
 
-        ptr_ = other.clone_ptr(alloc_);
-        invoke_ = other.invoke_;
-        clone_ = other.clone_;
-        delete_ = other.delete_;
+        if (other.is_valid())
+        {
+            ptr_ = other.clone_ptr(alloc_);
+            vtable_ = other.vtable_;
+        }
+        else
+        {
+            ptr_ = {};
+            vtable_ = {};
+        }
 
         return *this;
     }
@@ -98,17 +117,16 @@ struct Function<Return(Args...)> final : AllocatorAware
     {
         if (alloc_ == other.alloc_)
         {
-            // If both use the same allocator, then we can just steal the pointer as usual
+            // If both use the same allocator, then can just steal the pointer as usual
             ptr_ = other.ptr_;
-            invoke_ = other.invoke_;
-            clone_ = other.clone_;
-            delete_ = other.delete_;
+            vtable_ = other.vtable_;
 
             other.ptr_ = {};
+            other.vtable_ = {};
         }
         else
         {
-            // If they use different allocators, then we have to perform a copy assign
+            // If they use different allocators, then fall back to a copy assign
             *this = other;
         }
 
@@ -116,10 +134,15 @@ struct Function<Return(Args...)> final : AllocatorAware
     }
 
     /// Invokes the function
-    constexpr Return operator()(Args... args) const
+    Return operator()(Args... args) const
     {
-        return invoke_(ptr_, std::forward<Args>(args)...);
+        assert(vtable_.invoke);
+        return vtable_.invoke(ptr_, std::forward<Args>(args)...);
     }
+
+    /// Returns true if the instance has a valid function target
+    bool is_valid() const { return vtable_.invoke != nullptr; }
+    explicit operator bool() const { return is_valid(); }
 
   private:
     union Ptr
@@ -128,14 +151,30 @@ struct Function<Return(Args...)> final : AllocatorAware
         void (*fn)();
     };
 
+    using InvokePtr = Return(Ptr const&, Args...);
+    using ClonePtr = Ptr(Ptr const&, Allocator);
+    using ReleasePtr = void(Ptr&, Allocator);
+
     Ptr ptr_{};
-    Return (*invoke_)(Ptr const&, Args...){};
-    Ptr (*clone_)(Ptr const&, Allocator){};
-    void (*delete_)(Ptr const&, Allocator){};
+    struct
+    {
+        InvokePtr* invoke{};
+        ClonePtr* clone{};
+        ReleasePtr* release{};
+    } vtable_;
     Allocator alloc_{};
 
-    Ptr clone_ptr(Allocator alloc) const { return clone_(ptr_, alloc); }
-    void delete_ptr() const { delete_(ptr_, alloc_); }
+    Ptr clone_ptr(Allocator alloc) const
+    {
+        assert(vtable_.clone);
+        return vtable_.clone(ptr_, alloc);
+    }
+
+    void release_ptr()
+    {
+        assert(vtable_.release);
+        vtable_.release(ptr_, alloc_);
+    }
 };
 
 } // namespace dr
