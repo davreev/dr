@@ -20,13 +20,10 @@ struct Function<Return(Args...)> final : AllocatorAware
     Function(Allocator alloc = {}) : alloc_{alloc} {}
 
     /// Creates an instance from a function object
-    template <
-        typename Fn,
-        typename DecayFn = std::decay_t<Fn>,
-        std::enable_if_t<!std::is_same_v<DecayFn, Function>>* = nullptr>
+    template <typename Fn, std::enable_if_t<std::is_invocable_r_v<Return, Fn, Args...>>* = nullptr>
     Function(Fn&& fn, Allocator alloc = {}) : alloc_{alloc}
     {
-        static_assert(std::is_invocable_r_v<Return, DecayFn, Args...>);
+        using DecayFn = std::decay_t<Fn>;
 
         // Move function object to location given by allocator
         ptr_ = {.obj = alloc_.new_object<DecayFn>(std::forward<Fn>(fn))};

@@ -18,7 +18,7 @@ struct FunctionRef<Return(Args...)>
     constexpr FunctionRef() = default;
 
     /// Creates an instance from a function object
-    template <typename Fn>
+    template <typename Fn, std::enable_if_t<std::is_invocable_r_v<Return, Fn, Args...>>* = nullptr>
     constexpr FunctionRef(Fn* fn)
     {
         if (fn != nullptr)

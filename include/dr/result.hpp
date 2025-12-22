@@ -26,7 +26,7 @@ struct Result
     Value value{};
     Error error{};
 
-    template <typename Value_>
+    template <typename Value_, std::enable_if_t<std::is_convertible_v<Value_, Value>>* = nullptr>
     constexpr Result(Value_&& value) : value{std::forward<Value_>(value)}, error{no_error}
     {
     }
@@ -42,7 +42,7 @@ struct Maybe
     Value value{};
     bool has_value{};
 
-    template <typename Value_>
+    template <typename Value_, std::enable_if_t<std::is_convertible_v<Value_, Value>>* = nullptr>
     constexpr Maybe(Value_&& value) : value{std::forward<Value_>(value)}, has_value{true}
     {
     }
