@@ -56,19 +56,17 @@ struct SlicedArray : AllocatorAware
     Index num_slices() const { return size_as<Index>(slice_ends); }
 
     /// Returns the slice at the given index
-    Span<T const> operator[](Index const index) const
-    {
-        const Range range = slice_range(index);
-        assert(is_valid(range));
-        return {items.data() + range.start, range.size()};
-    }
-
-    /// Returns the slice at the given index
     Span<T> operator[](Index const index)
     {
         Range const range = slice_range(index);
         assert(is_valid(range));
         return {items.data() + range.start, range.size()};
+    }
+
+    /// Returns the slice at the given index
+    Span<T const> operator[](Index const index) const
+    {
+        return const_cast<SlicedArray<T, Index>&>(*this)[index];
     }
 
     /// Appends a slice to the back of the array
