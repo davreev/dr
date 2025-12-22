@@ -18,34 +18,32 @@ struct FunctionRef<Return(Args...)>
     constexpr FunctionRef() = default;
 
     /// Creates an instance from a function object
-    template <typename Src>
-    constexpr FunctionRef(Src* src)
+    template <typename Fn>
+    constexpr FunctionRef(Fn* fn)
     {
-        static_assert(std::is_invocable_r_v<Return, Src, Args...>);
-
-        if (src != nullptr)
+        if (fn != nullptr)
         {
-            if constexpr (std::is_const_v<Src>)
-                ptr_ = {.obj = const_cast<void*>(static_cast<void const*>(src))};
+            if constexpr (std::is_const_v<Fn>)
+                ptr_ = {.obj = const_cast<void*>(static_cast<void const*>(fn))};
             else
-                ptr_ = {.obj = src};
+                ptr_ = {.obj = fn};
 
             invoke_ = [](Ptr const& ptr, Args... args) -> Return {
-                return (*static_cast<Src*>(ptr.obj))(std::forward<Args>(args)...);
+                return (*static_cast<Fn*>(ptr.obj))(std::forward<Args>(args)...);
             };
         }
     }
 
     /// Creates an instance from a function pointer
-    constexpr FunctionRef(Return (*src)(Args...))
+    constexpr FunctionRef(Return (*fn)(Args...))
     {
-        using Src = decltype(src);
+        using Fn = decltype(fn);
 
-        if (src != nullptr)
+        if (fn != nullptr)
         {
-            ptr_ = {.fn = reinterpret_cast<void (*)()>(src)};
+            ptr_ = {.fn = reinterpret_cast<void (*)()>(fn)};
             invoke_ = [](Ptr const& ptr, Args... args) -> Return {
-                return (reinterpret_cast<Src>(ptr.fn))(std::forward<Args>(args)...);
+                return (reinterpret_cast<Fn>(ptr.fn))(std::forward<Args>(args)...);
             };
         }
     }
