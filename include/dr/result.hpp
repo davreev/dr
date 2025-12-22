@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cassert>
+
 #include <type_traits>
 #include <utility>
 
@@ -23,33 +25,58 @@ struct Result
 {
     static_assert(std::is_integral_v<Error> || std::is_enum_v<Error>);
 
-    Value value{};
-    Error error{};
-
     template <typename Value_, std::enable_if_t<std::is_convertible_v<Value_, Value>>* = nullptr>
-    constexpr Result(Value_&& value) : value{std::forward<Value_>(value)}, error{no_error}
+    constexpr Result(Value_&& value) : value_{std::forward<Value_>(value)}, error_{no_error}
     {
     }
 
-    constexpr Result(ErrorResult<Error>&& result) : error{result.error} {}
+    constexpr Result(ErrorResult<Error>&& result) : error_{result.error} {}
 
-    constexpr explicit operator bool() const { return error == no_error; }
+    constexpr bool has_value() const { return error_ == no_error; }
+    constexpr explicit operator bool() const { return has_value(); }
+
+    constexpr Value& value()
+    {
+        assert(has_value());
+        return value_;
+    }
+
+    constexpr Value const& value() const
+    {
+        return const_cast<Result<Value, Error>*>(this)->value();
+    }
+
+    constexpr Error error() const { return error_; }
+
+  private:
+    Value value_{};
+    Error error_{};
 };
 
 template <typename Value>
 struct Maybe
 {
-    Value value{};
-    bool has_value{};
-
     template <typename Value_, std::enable_if_t<std::is_convertible_v<Value_, Value>>* = nullptr>
-    constexpr Maybe(Value_&& value) : value{std::forward<Value_>(value)}, has_value{true}
+    constexpr Maybe(Value_&& value) : value_{std::forward<Value_>(value)}, has_value_{true}
     {
     }
 
     constexpr Maybe() = default;
 
-    constexpr explicit operator bool() const { return has_value; }
+    constexpr bool has_value() const { return has_value_; }
+    constexpr explicit operator bool() const { return has_value_; }
+
+    constexpr Value& value()
+    {
+        assert(has_value());
+        return value_;
+    }
+
+    constexpr Value const& value() const { return const_cast<Maybe<Value>*>(this)->value(); }
+
+  private:
+    Value value_{};
+    bool has_value_{};
 };
 
 } // namespace dr

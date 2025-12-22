@@ -674,10 +674,10 @@ UTEST(geometry, intersect_line_line)
     {
         auto const t = intersect_line_line(a_start, a_delta, b_start, b_delta);
 
-        if (t.has_value)
+        if (t.has_value())
         {
-            ASSERT_NEAR(expect.value[0], t.value[0], eps);
-            ASSERT_NEAR(expect.value[1], t.value[1], eps);
+            ASSERT_NEAR(expect.value()[0], t.value()[0], eps);
+            ASSERT_NEAR(expect.value()[1], t.value()[1], eps);
         }
     }
 }
@@ -732,10 +732,10 @@ UTEST(geometry, intersect_line_plane)
     {
         auto const t = intersect_line_plane(ln_start, ln_delta, pl_orig, pl_norm);
 
-        if (t.has_value)
+        if (t.has_value())
         {
-            ASSERT_TRUE(expect.has_value);
-            ASSERT_NEAR(expect.value, t.value, eps);
+            ASSERT_TRUE(expect.has_value());
+            ASSERT_NEAR(expect.value(), t.value(), eps);
         }
     }
 }
@@ -798,10 +798,10 @@ UTEST(geometry, intersect_line_sphere)
     {
         auto const t = intersect_line_sphere(ln_start, ln_delta, sp_orig, sp_rad);
 
-        if (t.has_value)
+        if (t.has_value())
         {
-            ASSERT_NEAR(expect.value[0], t.value[0], eps);
-            ASSERT_NEAR(expect.value[1], t.value[1], eps);
+            ASSERT_NEAR(expect.value()[0], t.value()[0], eps);
+            ASSERT_NEAR(expect.value()[1], t.value()[1], eps);
         }
     }
 }
