@@ -31,7 +31,7 @@ struct SlotMap : AllocatorAware
 
     SlotMap(SlotMap&& other) noexcept = default;
     SlotMap& operator=(SlotMap const& other) = default;
-    SlotMap& operator=(SlotMap&& other) noexcept = default;
+    SlotMap& operator=(SlotMap&& other) = default;
 
     /// Returns the allocator used by this container
     Allocator allocator() const { return slots_.get_allocator(); }

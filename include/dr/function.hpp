@@ -110,7 +110,7 @@ struct Function<Return(Args...)> final : AllocatorAware
         return *this;
     }
 
-    Function& operator=(Function&& other) noexcept
+    Function& operator=(Function&& other)
     {
         if (alloc_ == other.alloc_)
         {

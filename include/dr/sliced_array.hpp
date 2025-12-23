@@ -41,7 +41,7 @@ struct SlicedArray : AllocatorAware
 
     SlicedArray(SlicedArray&& other) noexcept = default;
     SlicedArray& operator=(SlicedArray const& other) = default;
-    SlicedArray& operator=(SlicedArray&& other) noexcept = default;
+    SlicedArray& operator=(SlicedArray&& other) = default;
 
     /// Returns the allocator used by this container
     Allocator allocator() const

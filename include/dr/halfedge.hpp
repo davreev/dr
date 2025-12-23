@@ -127,7 +127,7 @@ struct HalfedgeMesh : AllocatorAware
 
         Builder(Builder&& other) noexcept = default;
         Builder& operator=(Builder const& other) = default;
-        Builder& operator=(Builder&& other) noexcept = default;
+        Builder& operator=(Builder&& other) = default;
 
         /// Returns the allocator used by this instance
         Allocator allocator() const { return v_to_he_.get_allocator(); }
@@ -196,7 +196,7 @@ struct HalfedgeMesh : AllocatorAware
 
     HalfedgeMesh(HalfedgeMesh&& other) noexcept = default;
     HalfedgeMesh& operator=(HalfedgeMesh const& other) = default;
-    HalfedgeMesh& operator=(HalfedgeMesh&& other) noexcept = default;
+    HalfedgeMesh& operator=(HalfedgeMesh&& other) = default;
 
     /// Returns the allocator used by this data structure
     Allocator allocator() const { return hedge_next_.get_allocator(); }

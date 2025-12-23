@@ -35,7 +35,7 @@ struct HashGrid : AllocatorAware
 
     HashGrid(HashGrid&& other) noexcept = default;
     HashGrid& operator=(HashGrid const& other) = default;
-    HashGrid& operator=(HashGrid&& other) noexcept = default;
+    HashGrid& operator=(HashGrid&& other) = default;
 
     /// Returns the allocator used by this container
     Allocator allocator() const { return buckets_.get_allocator(); }
@@ -127,7 +127,7 @@ struct HashGrid : AllocatorAware
 
         Bucket(Bucket&& other) noexcept = default;
         Bucket& operator=(Bucket const& other) = default;
-        Bucket& operator=(Bucket&& other) noexcept = default;
+        Bucket& operator=(Bucket&& other) = default;
     };
 
     struct KeyHash
