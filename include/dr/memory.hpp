@@ -24,10 +24,8 @@ bool is_aligned(void const* const ptr)
 }
 
 /*
-    NOTE: When type punning via as<T>(), care must be taken to avoid violating the strict
-    aliasing rule which states that two objects of different types cannot occupy the same location
-    in memory. When strict aliasing is enabled (e.g. in Release builds), the compiler assumes this
-    rule to be true and optimizes accordingly.
+    NOTE: Type punning via `as` relies on UB (violates strict aliasing rule). When using, be sure to
+    test behavior in optimized builds with relevant compilers.
 
     Refs
     - https://cellperformance.beyond3d.com/articles/2006/06/understanding-strict-aliasing.html
