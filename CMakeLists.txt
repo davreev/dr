@@ -63,6 +63,7 @@ target_compile_options(
     dr
     PUBLIC
         -Wno-c++20-extensions
+        -Wno-missing-field-initializers
 )
 
 target_compile_definitions(
