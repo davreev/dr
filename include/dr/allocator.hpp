@@ -22,7 +22,7 @@ struct Allocator : impl::AllocatorBase
     // Expose constructors of base type for compatibility with pmr containers
     using impl::AllocatorBase::AllocatorBase;
 
-#if __cplusplus == 202002L
+#if __cplusplus >= 202002L
     // C++20
 
     template <typename T>
