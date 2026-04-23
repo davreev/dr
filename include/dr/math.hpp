@@ -105,12 +105,19 @@ Scalar mod(Scalar const x, Scalar const y)
     else if constexpr (is_integer<Scalar>)
     {
         Scalar const rem = x % y;
-        return (rem * y < 0) ? rem + y : rem;
+        return (rem != 0 && (rem ^ y) < 0) ? rem + y : rem;
     }
     else if constexpr (is_natural<Scalar>)
     {
         return x % y;
     }
+}
+
+template <typename Scalar>
+Scalar wrap(Scalar const x, Scalar const x0, Scalar const x1)
+{
+    static_assert(is_real<Scalar> || is_integer<Scalar>);
+    return mod(x - x0, x1 - x0) + x0;
 }
 
 /// Returns the fractional component of a number

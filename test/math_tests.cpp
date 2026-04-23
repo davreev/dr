@@ -18,26 +18,17 @@ UTEST(math, solve_least_squares)
 
     TestCase const test_cases[] = {
         {
-            mat(
-                vec(1.0, 0.0, 0.0, 0.0),
-                vec(0.0, 1.0, 0.0, 0.0),
-                vec(0.0, 0.0, 1.0, 0.0)),
+            mat(vec(1.0, 0.0, 0.0, 0.0), vec(0.0, 1.0, 0.0, 0.0), vec(0.0, 0.0, 1.0, 0.0)),
             vec(0.0, 0.0, 0.0, 1.0),
             vec(0.0, 0.0, 0.0),
         },
         {
-            mat(
-                vec(1.0, 0.0, 0.0, 0.0),
-                vec(0.0, 1.0, 0.0, 0.0),
-                vec(0.0, 0.0, 1.0, 0.0)),
+            mat(vec(1.0, 0.0, 0.0, 0.0), vec(0.0, 1.0, 0.0, 0.0), vec(0.0, 0.0, 1.0, 0.0)),
             vec(1.0, 1.0, 0.0, 1.0),
             vec(1.0, 1.0, 0.0),
         },
         {
-            mat(
-                vec(1.0, 1.0, 0.0, 0.0),
-                vec(-1.0, 1.0, 0.0, 0.0),
-                vec(0.0, 0.0, 1.0, 0.0)),
+            mat(vec(1.0, 1.0, 0.0, 0.0), vec(-1.0, 1.0, 0.0, 0.0), vec(0.0, 0.0, 1.0, 0.0)),
             vec(0.0, 2.0, 1.0, 1.0),
             vec(1.0, 1.0, 1.0),
         },
@@ -168,22 +159,98 @@ UTEST(math, mod)
 
     ASSERT_NEAR(0.0, mod(0.0, 1.0), eps);
     ASSERT_NEAR(0.0, mod(1.0, 1.0), eps);
+    ASSERT_NEAR(0.0, mod(2.0, 1.0), eps);
+    ASSERT_NEAR(0.0, mod(-1.0, 1.0), eps);
+
+    ASSERT_NEAR(0.0, mod(0.0, -1.0), eps);
+    ASSERT_NEAR(0.0, mod(-1.0, -1.0), eps);
+    ASSERT_NEAR(0.0, mod(-2.0, -1.0), eps);
+    ASSERT_NEAR(0.0, mod(1.0, -1.0), eps);
+
+    ASSERT_NEAR(0.1, mod(0.1, 1.0), eps);
     ASSERT_NEAR(0.1, mod(1.1, 1.0), eps);
-    ASSERT_NEAR(0.9, mod(-0.1, 1.0), eps);
+    ASSERT_NEAR(0.1, mod(2.1, 1.0), eps);
+    ASSERT_NEAR(0.1, mod(-0.9, 1.0), eps);
+
     ASSERT_NEAR(-0.9, mod(0.1, -1.0), eps);
-    ASSERT_NEAR(-0.1, mod(-0.1, -1.0), eps);
+    ASSERT_NEAR(-0.9, mod(-0.9, -1.0), eps);
+    ASSERT_NEAR(-0.9, mod(-1.9, -1.0), eps);
+    ASSERT_NEAR(-0.9, mod(1.1, -1.0), eps);
 
-    ASSERT_NEAR(0, mod(0, 5), eps);
-    ASSERT_NEAR(0, mod(5, 5), eps);
-    ASSERT_NEAR(1, mod(6, 5), eps);
-    ASSERT_NEAR(4, mod(-1, 5), eps);
-    ASSERT_NEAR(-4, mod(1, -5), eps);
-    ASSERT_NEAR(-1, mod(-1, -5), eps);
+    ASSERT_EQ(0, mod(0, 5));
+    ASSERT_EQ(0, mod(5, 5));
+    ASSERT_EQ(0, mod(10, 5));
+    ASSERT_EQ(0, mod(-5, 5));
 
-    ASSERT_NEAR(0u, mod(0u, 5u), eps);
-    ASSERT_NEAR(0u, mod(5u, 5u), eps);
-    ASSERT_NEAR(1u, mod(6u, 5u), eps);
-    ASSERT_NEAR(1u, mod(11u, 5u), eps);
+    ASSERT_EQ(0, mod(0, -5));
+    ASSERT_EQ(0, mod(-5, -5));
+    ASSERT_EQ(0, mod(-10, -5));
+    ASSERT_EQ(0, mod(5, -5));
+
+    ASSERT_EQ(1, mod(1, 5));
+    ASSERT_EQ(1, mod(6, 5));
+    ASSERT_EQ(1, mod(11, 5));
+    ASSERT_EQ(1, mod(-4, 5));
+
+    ASSERT_EQ(-4, mod(1, -5));
+    ASSERT_EQ(-4, mod(-4, -5));
+    ASSERT_EQ(-4, mod(-9, -5));
+    ASSERT_EQ(-4, mod(6, -5));
+
+    ASSERT_EQ(0u, mod(0u, 5u));
+    ASSERT_EQ(0u, mod(5u, 5u));
+    ASSERT_EQ(0u, mod(10u, 5u));
+
+    ASSERT_EQ(1u, mod(1u, 5u));
+    ASSERT_EQ(1u, mod(6u, 5u));
+    ASSERT_EQ(1u, mod(11u, 5u));
+}
+
+UTEST(math, wrap)
+{
+    using namespace dr;
+
+    constexpr f64 eps = 1.0e-8;
+
+    ASSERT_NEAR(1.0, wrap(1.0, 1.0, 2.0), eps);
+    ASSERT_NEAR(1.0, wrap(2.0, 1.0, 2.0), eps);
+    ASSERT_NEAR(1.0, wrap(3.0, 1.0, 2.0), eps);
+    ASSERT_NEAR(1.0, wrap(0.0, 1.0, 2.0), eps);
+
+    ASSERT_NEAR(1.1, wrap(1.1, 1.0, 2.0), eps);
+    ASSERT_NEAR(1.1, wrap(2.1, 1.0, 2.0), eps);
+    ASSERT_NEAR(1.1, wrap(3.1, 1.0, 2.0), eps);
+    ASSERT_NEAR(1.1, wrap(0.1, 1.0, 2.0), eps);
+
+    ASSERT_NEAR(2.0, wrap(2.0, 2.0, 1.0), eps);
+    ASSERT_NEAR(2.0, wrap(1.0, 2.0, 1.0), eps);
+    ASSERT_NEAR(2.0, wrap(0.0, 2.0, 1.0), eps);
+    ASSERT_NEAR(2.0, wrap(3.0, 2.0, 1.0), eps);
+
+    ASSERT_NEAR(1.1, wrap(2.1, 2.0, 1.0), eps);
+    ASSERT_NEAR(1.1, wrap(1.1, 2.0, 1.0), eps);
+    ASSERT_NEAR(1.1, wrap(0.1, 2.0, 1.0), eps);
+    ASSERT_NEAR(1.1, wrap(3.1, 2.0, 1.0), eps);
+
+    ASSERT_EQ(5, wrap(5, 5, 10));
+    ASSERT_EQ(5, wrap(10, 5, 10));
+    ASSERT_EQ(5, wrap(15, 5, 10));
+    ASSERT_EQ(5, wrap(0, 5, 10));
+
+    ASSERT_EQ(6, wrap(6, 5, 10));
+    ASSERT_EQ(6, wrap(11, 5, 10));
+    ASSERT_EQ(6, wrap(16, 5, 10));
+    ASSERT_EQ(6, wrap(1, 5, 10));
+
+    ASSERT_EQ(10, wrap(10, 10, 5));
+    ASSERT_EQ(10, wrap(5, 10, 5));
+    ASSERT_EQ(10, wrap(0, 10, 5));
+    ASSERT_EQ(10, wrap(15, 10, 5));
+
+    ASSERT_EQ(6, wrap(11, 10, 5));
+    ASSERT_EQ(6, wrap(6, 10, 5));
+    ASSERT_EQ(6, wrap(1, 10, 5));
+    ASSERT_EQ(6, wrap(16, 10, 5));
 }
 
 UTEST(math, near_equal_scalar)
@@ -217,7 +284,7 @@ UTEST(math, near_equal_scalar)
 UTEST(math_traits, is_natural)
 {
     using namespace dr;
-    
+
     ASSERT_TRUE(is_natural<unsigned int>);
     ASSERT_TRUE(is_natural<std::size_t>);
 
@@ -234,7 +301,7 @@ UTEST(math_traits, is_natural)
 UTEST(math_traits, is_integer)
 {
     using namespace dr;
-    
+
     ASSERT_TRUE(is_integer<int>);
     ASSERT_TRUE(is_integer<std::ptrdiff_t>);
 
@@ -251,7 +318,7 @@ UTEST(math_traits, is_integer)
 UTEST(math_traits, is_real)
 {
     using namespace dr;
-    
+
     ASSERT_TRUE(is_real<float>);
     ASSERT_TRUE(is_real<double>);
 
@@ -268,7 +335,7 @@ UTEST(math_traits, is_real)
 UTEST(math_traits, is_complex)
 {
     using namespace dr;
-    
+
     ASSERT_TRUE(is_complex<std::complex<float>>);
     ASSERT_TRUE(is_complex<std::complex<double>>);
 
