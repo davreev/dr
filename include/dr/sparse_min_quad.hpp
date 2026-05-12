@@ -7,12 +7,10 @@
 
 #include <dr/linalg_reshape.hpp>
 #include <dr/sparse_linalg_types.hpp>
+#include <dr/traits.hpp>
 
 namespace dr
 {
-
-template <typename T, typename Enable = void>
-struct Traits;
 
 /// Minimizes a convex quadratic objective with fixed value constraints
 template <typename Scalar, typename Index = i32, SolverType solver_type = SolverType_Direct>
