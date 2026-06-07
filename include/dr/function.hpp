@@ -93,18 +93,21 @@ struct Function<Return(Args...)> final : AllocatorAware
 
     Function& operator=(Function const& other)
     {
-        if (is_valid())
-            release_ptr();
+        if (this != &other)
+        {
+            if (is_valid())
+                release_ptr();
 
-        if (other.is_valid())
-        {
-            ptr_ = other.clone_ptr(alloc_);
-            vtable_ = other.vtable_;
-        }
-        else
-        {
-            ptr_ = {};
-            vtable_ = {};
+            if (other.is_valid())
+            {
+                ptr_ = other.clone_ptr(alloc_);
+                vtable_ = other.vtable_;
+            }
+            else
+            {
+                ptr_ = {};
+                vtable_ = {};
+            }
         }
 
         return *this;
@@ -112,19 +115,25 @@ struct Function<Return(Args...)> final : AllocatorAware
 
     Function& operator=(Function&& other)
     {
-        if (alloc_ == other.alloc_)
+        if (this != &other)
         {
-            // If both use the same allocator, then can just steal the pointer as usual
-            ptr_ = other.ptr_;
-            vtable_ = other.vtable_;
+            // If both use the same allocator, then can just steal the pointer as usual. Otherwise,
+            // fall back to copy assignment.
+            if (alloc_ == other.alloc_)
+            {
+                if (is_valid())
+                    release_ptr();
 
-            other.ptr_ = {};
-            other.vtable_ = {};
-        }
-        else
-        {
-            // If they use different allocators, then fall back to a copy assign
-            *this = other;
+                ptr_ = other.ptr_;
+                vtable_ = other.vtable_;
+
+                other.ptr_ = {};
+                other.vtable_ = {};
+            }
+            else
+            {
+                *this = other;
+            }
         }
 
         return *this;
