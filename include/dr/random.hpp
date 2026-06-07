@@ -21,6 +21,8 @@ struct UniformDistribution<Real, std::enable_if_t<is_real<Real>>>
 template <typename Int>
 struct UniformDistribution<Int, std::enable_if_t<(is_integer<Int> || is_natural<Int>)>>
 {
+    // NOTE(dr): std::uniform_int_distribution is undefined for i8/u8
+    static_assert(sizeof(Int) > 1);
     using Type = std::uniform_int_distribution<Int>;
 };
 
