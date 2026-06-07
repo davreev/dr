@@ -420,14 +420,14 @@ struct BernsteinBasis<3> : SplineBasis<3, 4>
             }
             else if constexpr (order == 2)
             {
-                result[0] = Real{6.0} - Real{2.0} * t;
+                result[0] = Real{6.0} - Real{6.0} * t;
                 result[1] = Real{18.0} * t - Real{12.0};
                 result[2] = Real{6.0} - Real{18.0} * t;
                 result[3] = Real{6.0} * t;
             }
             else if constexpr (order == 3)
             {
-                result[0] = Real{-2.0};
+                result[0] = Real{-6.0};
                 result[1] = Real{18.0};
                 result[2] = Real{-18.0};
                 result[3] = Real{6.0};
