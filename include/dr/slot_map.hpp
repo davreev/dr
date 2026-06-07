@@ -88,7 +88,7 @@ struct SlotMap : AllocatorAware
     }
 
     /// Returns true if the handle refers to a valid item
-    bool is_valid(Handle const handle)
+    bool is_valid(Handle const handle) const
     {
         assert(handle.index < Index(slots_.size()));
         return slots_[handle.index].status.version == handle.version;
@@ -109,7 +109,7 @@ struct SlotMap : AllocatorAware
 
     /// Returns the handle to the item at the given index if one exists. Otherwise, returns an
     /// invalid handle.
-    Handle handle_at(Index const index)
+    Handle handle_at(Index const index) const
     {
         assert(index < Index(slots_.size()));
         auto const& slot = slots_[index];
@@ -119,10 +119,10 @@ struct SlotMap : AllocatorAware
     }
 
     /// Returns the number of items in the map
-    isize num_items() { return isize(slots_.size() - free_indices_.size()); }
+    isize num_items() const { return isize(slots_.size() - free_indices_.size()); }
 
     /// Returns the number of slots in the map
-    isize num_slots() { return isize(slots_.size()); }
+    isize num_slots() const { return isize(slots_.size()); }
 
   private:
     static constexpr auto flag_bits = index_bits;
@@ -144,7 +144,7 @@ struct SlotMap : AllocatorAware
     };
 
     template <typename... Args>
-    T make_item(Args&&... args)
+    T make_item(Args&&... args) const
     {
         // If T is allocator-aware, share this container's allocator
         if constexpr (is_allocator_aware<T>)
