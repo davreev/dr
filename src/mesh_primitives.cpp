@@ -539,11 +539,11 @@ MeshPrimitives::Tet::Mesh const& MeshPrimitives::Tet::cube()
     // clang-format on
 
     static constexpr i16 cell_verts[][4] = {
-        {0, 3, 5, 6},
-        {0, 1, 5, 3},
-        {3, 2, 6, 0},
-        {4, 6, 0, 5},
-        {7, 5, 3, 6},
+        {0, 3, 6, 5},
+        {0, 1, 3, 5},
+        {3, 2, 0, 6},
+        {4, 6, 5, 0},
+        {7, 5, 6, 3},
     };
 
     static constexpr i16 cell_edges[][6] = {
