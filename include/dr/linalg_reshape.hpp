@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <cassert>
 
 #include <dr/container_utils.hpp>
 #include <dr/linalg_types.hpp>
@@ -195,6 +196,7 @@ auto as_covec(Span<Scalar const> const& coeffs)
 template <typename Scalar>
 auto as_mat(Span<Scalar> const& coeffs, isize const rows)
 {
+    assert(rows > 0);
     return MatView<Mat<Scalar>>{coeffs.data(), rows, coeffs.size() / rows};
 }
 
@@ -202,6 +204,7 @@ auto as_mat(Span<Scalar> const& coeffs, isize const rows)
 template <typename Scalar>
 auto as_mat(Span<Scalar const> const& coeffs, isize const rows)
 {
+    assert(rows > 0);
     return MatView<Mat<Scalar> const>{coeffs.data(), rows, coeffs.size() / rows};
 }
 
