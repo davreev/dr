@@ -56,6 +56,7 @@ struct SlotMap : AllocatorAware
             // Use existing slot
             Slot& slot = slots_[index];
             slot.item = make_item(std::forward<Args>(args)...);
+            slot.status.flags &= ~Flag_Free;
 
             return {index, slot.status.version};
         }

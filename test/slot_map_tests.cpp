@@ -119,6 +119,45 @@ UTEST(slot_map, allocator_propagation)
     }
 }
 
+UTEST(slot_map, slot_status)
+{
+    using namespace dr;
+
+    using SlotMap = SlotMap<std::string>;
+    using Handle = SlotMap::Handle;
+
+    SlotMap map{};
+
+    // If a slot is active, a handle created from the slot's index should be valid (version > 0)
+    Handle const h0 = map.insert("One");
+    {
+        Handle const at = map.handle_at(h0.index);
+        ASSERT_EQ(h0.index, at.index);
+        ASSERT_EQ(1u, at.version);
+        ASSERT_TRUE(map.is_valid(at));
+    }
+
+    // After removal, the slot is no longer active so the handle should be invalid (version == 0)
+    ASSERT_TRUE(map.remove(h0));
+    {
+        Handle const at = map.handle_at(h0.index);
+        ASSERT_EQ(h0.index, at.index);
+        ASSERT_EQ(0u, at.version);
+        ASSERT_FALSE(map.is_valid(h0));
+    }
+
+    // Inserting activates the slot again so the handle should be valid
+    Handle const h1 = map.insert("Two");
+    ASSERT_EQ(h0.index, h1.index);
+    ASSERT_EQ(2u, h1.version);
+    {
+        Handle const at = map.handle_at(h1.index);
+        ASSERT_EQ(h1.index, at.index);
+        ASSERT_EQ(h1.version, at.version);
+        ASSERT_TRUE(map.is_valid(h1));
+    }
+}
+
 /*
     Compile-time checks
 */
