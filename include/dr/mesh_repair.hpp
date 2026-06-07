@@ -61,12 +61,19 @@ bool gather_points(
         return max_sqr_dist <= tol * tol;
     };
 
-    Real const t = Real{1.0} / (max_iters - 1);
-    for (int i = 0; i < max_iters; ++i)
+    // Always take at least one step using the start radius
+    step(radius_start);
+
+    // Take additional steps, interpolating bw start/end radii
+    if (max_iters > 1)
     {
-        Real const radius = lerp(radius_start, radius_end, t * i);
-        if (step(radius))
-            return true;
+        Real const t = Real{1.0} / (max_iters - 1);
+        for (int i = 1; i < max_iters; ++i)
+        {
+            Real const radius = lerp(radius_start, radius_end, t * i);
+            if (step(radius))
+                return true;
+        }
     }
 
     return false;
