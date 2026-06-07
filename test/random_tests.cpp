@@ -56,3 +56,26 @@ UTEST(random, generate)
     ASSERT_TRUE(check_random_int<u16>(0u, 1000u));
     ASSERT_TRUE(check_random_int<i32>(-1000, 1000));
 }
+
+/*
+    Compile-time checks
+*/
+
+namespace dr
+{
+
+/*
+    Explicit instantiation of templates to catch compile errors
+*/
+
+template struct Random<std::default_random_engine>;
+template struct Random<std::default_random_engine>::Generator<f64>;
+template struct Random<std::default_random_engine>::Generator<i32>;
+
+template Random<std::default_random_engine>::Generator<f64>
+Random<std::default_random_engine>::generator<f64>(f64 const, f64 const);
+
+template Random<std::default_random_engine>::Generator<i32>
+Random<std::default_random_engine>::generator<i32>(i32 const, i32 const);
+
+} // namespace dr

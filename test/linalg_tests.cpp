@@ -189,4 +189,55 @@ void check_default_mat_options()
 }
 
 } // namespace
+
+/*
+    Explicit instantiation of templates to catch compile errors
+*/
+
+template int default_mat_options<3, 3>();
+
+template auto as_vec<f64, 3>(f64 (&)[3]);
+template auto as_vec<f64, 3>(f64 const (&)[3]);
+template auto as_vec<3, f64>(f64*);
+template auto as_vec<3, f64>(f64 const*);
+template auto as_vec<f64>(Span<f64> const&);
+template auto as_vec<f64>(Span<f64 const> const&);
+
+template auto as_col<f64, 3>(f64 (&)[3]);
+template auto as_col<f64, 3>(f64 const (&)[3]);
+template auto as_col<3, f64>(f64*);
+template auto as_col<3, f64>(f64 const*);
+
+template auto as_covec<f64, 3>(f64 (&)[3]);
+template auto as_covec<f64, 3>(f64 const (&)[3]);
+template auto as_covec<3, f64>(f64*);
+template auto as_covec<3, f64>(f64 const*);
+template auto as_covec<f64>(Span<f64> const&);
+template auto as_covec<f64>(Span<f64 const> const&);
+
+template auto as_row<f64, 3>(f64 (&)[3]);
+template auto as_row<f64, 3>(f64 const (&)[3]);
+template auto as_row<3, f64>(f64*);
+template auto as_row<3, f64>(f64 const*);
+
+template auto as_mat<3, 3, f64>(f64*);
+template auto as_mat<3, 3, f64>(f64 const*);
+template auto as_mat<3>(Vec<f64, 3>*);
+template auto as_mat<3>(Vec<f64, 3> const*);
+template auto as_mat<3>(Covec<f64, 3>*);
+template auto as_mat<3>(Covec<f64, 3> const*);
+template auto as_mat<f64>(Span<f64> const&, isize);
+template auto as_mat(Span<Vec<f64, 3>> const&);
+template auto as_mat(Span<Vec<f64, 3> const> const&);
+template auto as_mat(Span<Covec<f64, 3>> const&);
+
+template Span<f64> as_span(Mat<f64, 3, 3, Eigen::ColMajor>&);
+template Span<f64 const> as_span(Mat<f64, 3, 3, Eigen::ColMajor> const&);
+template Span<Vec<f64, 3>> as_span(VecArray<f64, 3>&);
+template Span<Vec<f64, 3> const> as_span(VecArray<f64, 3> const&);
+template Span<Covec<f64, 3>> as_span(CovecArray<f64, 3>&);
+template Span<Covec<f64, 3> const> as_span(CovecArray<f64, 3> const&);
+
+template auto unpack(MatExpr<Vec3<f64>> const&);
+
 } // namespace dr

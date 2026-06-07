@@ -164,3 +164,24 @@ UTEST(grid, world_to_grid)
         ASSERT_NEAR(expect.grid_pt[2], grid_pt[2], eps);
     }
 }
+
+/*
+    Compile-time checks
+*/
+
+namespace dr
+{
+
+/*
+    Explicit instantiation of templates to catch compile errors
+*/
+
+template Vec<i32, 3> grid_stride(Vec<i32, 3> const&);
+
+template i32 grid_to_index(Vec<i32, 3> const&, Vec<i32, 3> const&);
+
+template Vec<i32, 3> index_to_grid(i32, Vec<i32, 3> const&);
+
+template struct Grid<f64, 3>;
+
+} // namespace dr

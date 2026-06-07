@@ -71,3 +71,29 @@ UTEST(bitwise, prev_pow2)
         ASSERT_EQ(x >> 1, prev_pow2(x - 1));
     }
 }
+
+
+/*
+    Compile-time checks
+*/
+
+namespace dr
+{
+
+/*
+    Explicit instantiation of templates to catch compile errors
+*/
+
+template u8 bit_sum(u32);
+
+template bool is_pow2(u32);
+
+template u32 next_pow2(u32);
+
+template u32 prev_pow2(u32);
+
+template void unit_square_corner(u8, f64[2]);
+
+template void unit_cube_corner(u8, f64[3]);
+
+} // namespace dr

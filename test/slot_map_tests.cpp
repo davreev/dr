@@ -118,3 +118,18 @@ UTEST(slot_map, allocator_propagation)
         ASSERT_TRUE(map[h2]->get_allocator().resource()->is_equal(mem[1]));
     }
 }
+
+/*
+    Compile-time checks
+*/
+
+namespace dr
+{
+
+/*
+    Explicit instantiation of templates to catch compile errors
+*/
+
+template struct SlotMap<i32, i32>;
+
+} // namespace dr

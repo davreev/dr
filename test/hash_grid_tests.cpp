@@ -117,3 +117,22 @@ UTEST(hash_grid, insert_find)
         ASSERT_TRUE(all_equal(as_span(found_indices), as_span(result)));
     }
 }
+
+/*
+    Compile-time checks
+*/
+
+namespace dr
+{
+
+/*
+    Explicit instantiation of templates to catch compile errors
+*/
+
+template struct HashGrid<f64, 3>;
+
+template void HashGrid<f64, 3>::find<void (*)(HashGrid<f64, 3>::Index)>(
+    Interval<f64, 3> const&,
+    void (*&&)(HashGrid<f64, 3>::Index)) const;
+
+} // namespace dr

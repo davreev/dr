@@ -1,5 +1,6 @@
 #include <utest.h>
 
+#include <dr/basic_types.hpp>
 #include <dr/function.hpp>
 #include <dr/memory.hpp>
 
@@ -119,4 +120,11 @@ void check_arg_value_categories()
 }
 
 } // namespace
+
+/*
+    Explicit instantiation of templates to catch compile errors
+*/
+
+template struct Function<i32(i32)>;
+
 } // namespace dr

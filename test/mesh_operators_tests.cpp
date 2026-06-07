@@ -7,19 +7,41 @@
 namespace dr
 {
 
+/*
+    Explicit instantiation of templates to catch compile errors
+*/
+
 template void make_cotan_laplacian(
     Span<Vec3<f32> const> const&,
     Span<Vec3<i32> const> const&,
     DynamicArray<Triplet<f32, i32>>&);
 
+template void make_cotan_laplacian(
+    Span<Vec3<f32> const> const&,
+    Span<Vec3<i32> const> const&,
+    SparseMat<f32, i32>&,
+    Allocator);
+
 template void make_incidence_matrix(
     Span<Vec<i32, 2> const> const&,
     DynamicArray<Triplet<f32, i32>>&);
+
+template void make_incidence_matrix(
+    Span<Vec<i32, 2> const> const&,
+    SparseMat<f32, i32>&,
+    i32,
+    Allocator);
 
 template void make_vector_area_matrix(
     Span<Vec2<i32> const> const&,
     DynamicArray<Triplet<f32, i32>>&,
     i32);
+
+template void make_vector_area_matrix(
+    Span<Vec2<i32> const> const&,
+    SparseMat<f32, i32>&,
+    i32,
+    Allocator);
 
 template void eval_gradient(
     Span<Vec3<f32> const> const&,

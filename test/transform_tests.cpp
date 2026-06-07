@@ -21,7 +21,8 @@ UTEST(rigid3, apply_forward_inverse)
         Vec3<f64> const b = xform.apply_inverse(xform.apply(a));
         ASSERT_TRUE(near_equal(a, b, eps));
 
-        Vec3<f64> const c = (xform.inverse_to_matrix() * (xform.to_matrix() * a.homogeneous())).head<3>();
+        Vec3<f64> const c = (xform.inverse_to_matrix() * (xform.to_matrix() * a.homogeneous()))
+                                .head<3>();
         ASSERT_TRUE(near_equal(a, c, eps));
     }
 }
@@ -44,7 +45,8 @@ UTEST(rigid2, apply_forward_inverse)
         Vec2<f64> const b = xform.apply_inverse(xform.apply(a));
         ASSERT_TRUE(near_equal(a, b, eps));
 
-        Vec2<f64> const c = (xform.inverse_to_matrix() * (xform.to_matrix() * a.homogeneous())).head<2>();
+        Vec2<f64> const c = (xform.inverse_to_matrix() * (xform.to_matrix() * a.homogeneous()))
+                                .head<2>();
         ASSERT_TRUE(near_equal(a, c, eps));
     }
 }
@@ -69,7 +71,8 @@ UTEST(conformal3, apply_forward_inverse)
         Vec3<f64> const b = xform.apply_inverse(xform.apply(a));
         ASSERT_TRUE(near_equal(a, b, eps));
 
-        Vec3<f64> const c = (xform.inverse_to_matrix() * (xform.to_matrix() * a.homogeneous())).head<3>();
+        Vec3<f64> const c = (xform.inverse_to_matrix() * (xform.to_matrix() * a.homogeneous()))
+                                .head<3>();
         ASSERT_TRUE(near_equal(a, c, eps));
     }
 }
@@ -94,7 +97,8 @@ UTEST(conformal2, apply_forward_inverse)
         Vec2<f64> const b = xform.apply_inverse(xform.apply(a));
         ASSERT_TRUE(near_equal(a, b, eps));
 
-        Vec2<f64> const c = (xform.inverse_to_matrix() * (xform.to_matrix() * a.homogeneous())).head<2>();
+        Vec2<f64> const c = (xform.inverse_to_matrix() * (xform.to_matrix() * a.homogeneous()))
+                                .head<2>();
         ASSERT_TRUE(near_equal(a, c, eps));
     }
 }
@@ -113,7 +117,8 @@ UTEST(affine3, apply_forward_inverse)
         Vec3<f64> const b = xform.inverse().apply(xform.apply(a));
         ASSERT_TRUE(near_equal(a, b, eps));
 
-        Vec3<f64> const c = (xform.inverse_to_matrix() * (xform.to_matrix() * a.homogeneous())).head<3>();
+        Vec3<f64> const c = (xform.inverse_to_matrix() * (xform.to_matrix() * a.homogeneous()))
+                                .head<3>();
         ASSERT_TRUE(near_equal(a, c, eps));
     }
 }
@@ -132,7 +137,8 @@ UTEST(affine2, apply_forward_inverse)
         Vec2<f64> const b = xform.inverse().apply(xform.apply(a));
         ASSERT_TRUE(near_equal(a, b, eps));
 
-        Vec2<f64> const c = (xform.inverse_to_matrix() * (xform.to_matrix() * a.homogeneous())).head<2>();
+        Vec2<f64> const c = (xform.inverse_to_matrix() * (xform.to_matrix() * a.homogeneous()))
+                                .head<2>();
         ASSERT_TRUE(near_equal(a, c, eps));
     }
 }
@@ -268,3 +274,28 @@ UTEST(affine2, apply_inverse_self)
         ASSERT_TRUE(all_near_equal(as_span(b.translation), as_span(identity.translation), eps));
     }
 }
+
+/*
+    Compile-time checks
+*/
+
+namespace dr
+{
+
+/*
+    Explicit instantiation of templates to catch compile errors
+*/
+
+template struct Affine<f64, 2>;
+template struct Affine<f64, 3>;
+
+template struct Rotation<f64, 2>;
+template struct Rotation<f64, 3>;
+
+template struct Conformal<f64, 2>;
+template struct Conformal<f64, 3>;
+
+template struct Rigid<f64, 2>;
+template struct Rigid<f64, 3>;
+
+} // namespace dr

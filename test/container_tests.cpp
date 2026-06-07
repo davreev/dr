@@ -58,3 +58,24 @@ UTEST(container_traits, is_contiguous)
 
     ASSERT_FALSE(is_contiguous<std::unordered_set<int>>);
 }
+
+/*
+    Compile-time checks
+*/
+
+namespace dr
+{
+
+/*
+    Explicit instantiation of templates to catch compile errors
+*/
+
+template Span<i32> as_span(i32*, isize);
+
+template Span<i32> as_span<i32, 4>(i32 (&)[4]);
+
+template Span<i32> as_span(std::vector<i32>&);
+
+template Span<i32 const> as_span(std::vector<i32> const&);
+
+} // namespace dr

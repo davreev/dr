@@ -98,3 +98,18 @@ UTEST(sliced_array, allocator_propagation)
         ASSERT_TRUE(dst.allocator().resource()->is_equal(mem[1]));
     }
 }
+
+/*
+    Compile-time checks
+*/
+
+namespace dr
+{
+
+/*
+    Explicit instantiation of templates to catch compile errors
+*/
+
+template struct SlicedArray<i32, i32>;
+
+} // namespace dr

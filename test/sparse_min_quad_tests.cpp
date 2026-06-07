@@ -14,7 +14,7 @@ namespace
 {
 
 template <bool use_iterative_solver>
-bool solve_common()
+void solve_common(int* const utest_result)
 {
     constexpr f64 eps = 1.0e-8;
 
@@ -131,27 +131,71 @@ bool solve_common()
         SparseMat<f64> A(n, n);
         A.setFromTriplets(tc.coeffs.begin(), tc.coeffs.end());
 
-        solver.init(A, [&](i32 const i) -> bool { return tc.is_fixed[i]; });
+        solver.init(A, [&](i32 const i) -> bool {
+            return tc.is_fixed[i];
+        });
 
         DynamicArray<f64> x = tc.expect.x;
         solver.solve(as_vec(as_span(tc.b)), as_vec(as_span(x)));
 
-        if(!all_near_equal(as_span(tc.expect.x), as_span(x).as_const(), eps))
-            return false;
+        ASSERT_TRUE(all_near_equal(as_span(tc.expect.x), as_span(x).as_const(), eps));
     }
-
-    return true;
 }
 
 } // namespace
 } // namespace dr
 
-UTEST(sparse_min_quad, solve_direct)
-{
-    ASSERT_TRUE(dr::solve_common<false>());
-}
+UTEST(sparse_min_quad, solve_direct) { dr::solve_common<false>(utest_result); }
 
-UTEST(sparse_min_quad, solve_iterative)
+UTEST(sparse_min_quad, solve_iterative) { dr::solve_common<true>(utest_result); }
+
+/*
+    Compile-time checks
+*/
+
+namespace dr
 {
-    ASSERT_TRUE(dr::solve_common<true>());
-}
+
+/*
+    Explicit instantiation of templates to catch compile errors
+*/
+
+template struct SparseMinQuadFixed<f64, i32, SolverType_Direct>;
+
+template struct SparseMinQuadFixed<f64, i32, SolverType_Iterative>;
+
+template bool SparseMinQuadFixed<f64, i32, SolverType_Direct>::init<bool (*)(i32)>(
+    SparseMat<f64, i32> const&,
+    bool (*&&)(i32));
+
+template bool SparseMinQuadFixed<f64, i32, SolverType_Iterative>::init<bool (*)(i32)>(
+    SparseMat<f64, i32> const&,
+    bool (*&&)(i32));
+
+template void SparseMinQuadFixed<f64, i32, SolverType_Direct>::solve<Mat<f64>, Mat<f64>>(
+    MatExpr<Mat<f64>> const&,
+    MatExpr<Mat<f64>>&);
+
+template void SparseMinQuadFixed<f64, i32, SolverType_Iterative>::solve<Mat<f64>, Mat<f64>>(
+    MatExpr<Mat<f64>> const&,
+    MatExpr<Mat<f64>>&);
+
+template void SparseMinQuadFixed<f64, i32, SolverType_Direct>::solve<Mat<f64>, Mat<f64>>(
+    MatExpr<Mat<f64>> const&,
+    MatView<Mat<f64>>);
+
+template void SparseMinQuadFixed<f64, i32, SolverType_Iterative>::solve<Mat<f64>, Mat<f64>>(
+    MatExpr<Mat<f64>> const&,
+    MatView<Mat<f64>>);
+
+template void SparseMinQuadFixed<f64, i32, SolverType_Direct>::solve<Mat<f64>>(MatExpr<Mat<f64>>&);
+
+template void SparseMinQuadFixed<f64, i32, SolverType_Iterative>::solve<Mat<f64>>(
+    MatExpr<Mat<f64>>&);
+
+template void SparseMinQuadFixed<f64, i32, SolverType_Direct>::solve<Mat<f64>>(MatView<Mat<f64>>);
+
+template void SparseMinQuadFixed<f64, i32, SolverType_Iterative>::solve<Mat<f64>>(
+    MatView<Mat<f64>>);
+
+} // namespace dr

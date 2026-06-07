@@ -325,14 +325,14 @@ Quat<Real> nlerp(Quat<Real> const& q0, Quat<Real> const& q1, Real const t)
 {
     static_assert(is_real<Real>);
 
-    auto v0 = q0.vec();
-    auto v1 = q1.vec();
+    auto c0 = q0.coeffs();
+    auto c1 = q1.coeffs();
 
     // Ensure the shortest path is taken bw the two rotations
-    if (v0.dot(v1) < Real{0.0})
-        return Quat<Real>(v0 - (v1 + v0) * t).normalized();
+    if (c0.dot(c1) < Real{0.0})
+        return Quat<Real>(c0 - (c1 + c0) * t).normalized();
     else
-        return Quat<Real>(v0 + (v1 - v0) * t).normalized();
+        return Quat<Real>(c0 + (c1 - c0) * t).normalized();
 }
 
 template <typename Real>

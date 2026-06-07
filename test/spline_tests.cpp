@@ -813,3 +813,90 @@ UTEST(spline, trilinear)
         ASSERT_NEAR(expect.dw, dw, eps);
     }
 }
+
+/*
+    Compile-time checks
+*/
+
+namespace dr
+{
+
+/*
+    Explicit instantiation of templates to catch compile errors
+*/
+
+template f64 eval_linear(f64 const[2], f64);
+template f64 eval_linear_dt(f64 const[2], f64);
+
+template f64 eval_bilinear(f64 const[4], f64, f64);
+template void eval_bilinear(f64 const[4], f64, f64, f64[1], f64[2]);
+template f64 eval_bilinear_du(f64 const[4], f64, f64);
+template f64 eval_bilinear_dv(f64 const[4], f64, f64);
+
+template f64 eval_trilinear(f64 const[8], f64, f64, f64);
+template void eval_trilinear(f64 const[8], f64, f64, f64, f64[1], f64[3]);
+template f64 eval_trilinear_du(f64 const[8], f64, f64, f64);
+template f64 eval_trilinear_dv(f64 const[8], f64, f64, f64);
+template f64 eval_trilinear_dw(f64 const[8], f64, f64, f64);
+
+template f64 eval_cubic(f64 const[4], f64);
+template f64 eval_cubic_dt(f64 const[4], f64);
+
+template f64 eval_bicubic(f64 const[16], f64, f64);
+template void eval_bicubic(f64 const[16], f64, f64, f64[1], f64[2]);
+template f64 eval_bicubic_du(f64 const[16], f64, f64);
+template f64 eval_bicubic_dv(f64 const[16], f64, f64);
+
+template f64 eval_tricubic(f64 const[64], f64, f64, f64);
+template void eval_tricubic(f64 const[64], f64, f64, f64, f64[1], f64[3]);
+template f64 eval_tricubic_du(f64 const[64], f64, f64, f64);
+template f64 eval_tricubic_dv(f64 const[64], f64, f64, f64);
+template f64 eval_tricubic_dw(f64 const[64], f64, f64, f64);
+
+template f64 eval_bezier_quadratic(f64 const[3], f64);
+template f64 eval_bezier_quadratic_dt(f64 const[3], f64);
+
+template f64 eval_bezier_biquadratic(f64 const[9], f64, f64);
+template void eval_bezier_biquadratic(f64 const[9], f64, f64, f64[1], f64[2]);
+template f64 eval_bezier_biquadratic_du(f64 const[9], f64, f64);
+template f64 eval_bezier_biquadratic_dv(f64 const[9], f64, f64);
+
+template f64 eval_bezier_triquadratic(f64 const[27], f64, f64, f64);
+template void eval_bezier_triquadratic(f64 const[27], f64, f64, f64, f64[1], f64[3]);
+template f64 eval_bezier_triquadratic_du(f64 const[27], f64, f64, f64);
+template f64 eval_bezier_triquadratic_dv(f64 const[27], f64, f64, f64);
+template f64 eval_bezier_triquadratic_dw(f64 const[27], f64, f64, f64);
+
+template f64 eval_bezier_cubic(f64 const[4], f64);
+template f64 eval_bezier_cubic_dt(f64 const[4], f64);
+
+template f64 eval_bezier_bicubic(f64 const[16], f64, f64);
+template void eval_bezier_bicubic(f64 const[16], f64, f64, f64[1], f64[2]);
+template f64 eval_bezier_bicubic_du(f64 const[16], f64, f64);
+template f64 eval_bezier_bicubic_dv(f64 const[16], f64, f64);
+
+template f64 eval_bezier_tricubic(f64 const[64], f64, f64, f64);
+template void eval_bezier_tricubic(f64 const[64], f64, f64, f64, f64[1], f64[3]);
+template f64 eval_bezier_tricubic_du(f64 const[64], f64, f64, f64);
+template f64 eval_bezier_tricubic_dv(f64 const[64], f64, f64, f64);
+template f64 eval_bezier_tricubic_dw(f64 const[64], f64, f64, f64);
+
+template void LinearBasis::eval<f64>(f64, f64[2]);
+template void LinearBasis::Diff<1>::eval<f64>(f64, f64[2]);
+template void LinearBasis::Diff<2>::eval<f64>(f64, f64[2]);
+
+template void CatmullRomBasis::eval<f64>(f64, f64[4]);
+template void CatmullRomBasis::Diff<1>::eval<f64>(f64, f64[4]);
+template void CatmullRomBasis::Diff<2>::eval<f64>(f64, f64[4]);
+template void CatmullRomBasis::Diff<3>::eval<f64>(f64, f64[4]);
+
+template void BernsteinBasis<2>::eval<f64>(f64, f64[3]);
+template void BernsteinBasis<2>::Diff<1>::eval<f64>(f64, f64[3]);
+template void BernsteinBasis<2>::Diff<2>::eval<f64>(f64, f64[3]);
+
+template void BernsteinBasis<3>::eval<f64>(f64, f64[4]);
+template void BernsteinBasis<3>::Diff<1>::eval<f64>(f64, f64[4]);
+template void BernsteinBasis<3>::Diff<2>::eval<f64>(f64, f64[4]);
+template void BernsteinBasis<3>::Diff<3>::eval<f64>(f64, f64[4]);
+
+} // namespace dr

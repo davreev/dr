@@ -72,3 +72,33 @@ UTEST(mesh, element_count)
         ASSERT_EQ(nh, num_holes(nv, ne, nf));
     }
 }
+
+/*
+    Compile-time checks
+*/
+
+namespace dr
+{
+
+/*
+    Explicit instantiation of templates to catch compile errors
+*/
+
+template i32 num_vertices(i32, i32, i32);
+
+template i32 num_edges(i32, i32, i32);
+
+template i32 num_faces(i32, i32, i32);
+
+template i32 num_holes(i32, i32, i32);
+
+template void append_elements(
+    Span<Vec<i32, 3> const> const&,
+    i32,
+    DynamicArray<Vec<i32, 3>>&);
+
+template void append_attributes(
+    Span<Vec<f64, 3> const> const&,
+    DynamicArray<Vec<f64, 3>>&);
+
+} // namespace dr

@@ -101,4 +101,11 @@ void check_arg_value_categories()
 }
 
 } // namespace
+
+/*
+    Explicit instantiation of templates to catch compile errors
+*/
+
+template struct FunctionRef<i32(i32)>;
+
 } // namespace dr

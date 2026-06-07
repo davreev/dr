@@ -230,7 +230,7 @@ Maybe<Real> intersect_line_tri(
     if (auto t = intersect_line_plane(line_start, line_delta, tri_a, norm))
     {
         Vec3<Real> const p = line_start + line_delta * t.value();
-        if (is_in_triangle(p, tri_a, tri_b, tri_c))
+        if (is_in_tri(p, tri_a, tri_b, tri_c))
             return t;
     }
 
@@ -418,7 +418,10 @@ Real solid_angle(Span<Vec3<Real> const> const& polygon, Vec3<Real> const& point)
     for (isize i = 0; i < n; ++i)
     {
         Vec3<Real> const p2 = to_sphere(polygon[mod(i + 2, n)]);
-        sum += signed_angle<Real>(reject<Real>(p1 - p0, p1), reject<Real>(p2 - p1, p1), p1);
+        sum += signed_angle(
+            reject((p1 - p0).eval(), p1).eval(),
+            reject((p2 - p1).eval(), p1).eval(),
+            p1);
         p0 = p1;
         p1 = p2;
     }

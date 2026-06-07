@@ -287,3 +287,39 @@ UTEST(mesh_repair, merge_vertices)
         ASSERT_TRUE(all_equal(merged_faces, as_span(result.merged_faces)));
     }
 }
+
+/*
+    Compile-time checks
+*/
+
+namespace dr
+{
+
+/*
+    Explicit instantiation of templates to catch compile errors
+*/
+
+template bool gather_points(
+    Span<Vec<f64, 3>> const&,
+    HashGrid<f64, 3>&,
+    f64,
+    f64,
+    isize);
+
+template void find_unique_points(
+    Span<Vec<f64, 3> const> const&,
+    HashGrid<f64, 3>&,
+    f64,
+    DynamicArray<i32>&,
+    Span<i32> const&);
+
+template Span<Vec<f64, 3>> merge_vertices(
+    Span<Vec<f64, 3>> const&,
+    Span<i32 const> const&);
+
+template Span<Vec3<i32>> reindex_faces(
+    Span<Vec3<i32>> const&,
+    Span<i32 const> const&,
+    bool);
+
+} // namespace dr

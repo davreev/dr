@@ -42,3 +42,35 @@ UTEST(memory, as_bytes)
 
     ASSERT_TRUE(all_equal(as_bytes(vec), as<u8>(as_span(arr))));
 }
+
+/*
+    Compile-time checks
+*/
+
+namespace dr
+{
+
+/*
+    Explicit instantiation of templates to catch compile errors
+*/
+
+template bool is_aligned<f64>(void const*);
+
+template f64* as<f64>(void*);
+template f64 const* as<f64>(void const*);
+
+template i32* as<i32, f64>(f64*);
+template i32 const* as<i32, f64>(f64 const*);
+
+template f64* as<f64, i32>(i32*);
+template f64 const* as<f64, i32>(i32 const*);
+
+template Span<i32> as<i32, f64>(Span<f64> const&);
+template Span<i32 const> as<i32, f64>(Span<f64 const> const&);
+
+template Span<u8> as_bytes<f64>(f64&);
+template Span<u8 const> as_bytes<f64>(f64 const&);
+
+template UniquePtr<f64> make_unique<f64>(Allocator);
+
+} // namespace dr

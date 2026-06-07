@@ -134,9 +134,8 @@ Vec<Scalar, 4> col(Scalar const x, Scalar const y, Scalar const z, Scalar const 
 template <typename Derived>
 auto col(MatExpr<Derived> const& expr)
 {
-    using Result = typename MatExpr<Derived>::EvalReturnType;
-    static_assert(Result::ColsAtCompileTime == 1);
-    static_assert(Result::RowsAtCompileTime != dynamic_size);
+    static_assert(Derived::ColsAtCompileTime == 1);
+    static_assert(Derived::RowsAtCompileTime != dynamic_size);
     return expr.eval();
 }
 
@@ -191,9 +190,8 @@ Covec<Scalar, 4> row(Scalar const x, Scalar const y, Scalar const z, Scalar cons
 template <typename Derived>
 auto row(MatExpr<Derived> const& expr)
 {
-    using Result = typename MatExpr<Derived>::EvalReturnType;
-    static_assert(Result::RowsAtCompileTime == 1);
-    static_assert(Result::ColsAtCompileTime != dynamic_size);
+    static_assert(Derived::RowsAtCompileTime == 1);
+    static_assert(Derived::ColsAtCompileTime != dynamic_size);
     return expr.eval();
 }
 

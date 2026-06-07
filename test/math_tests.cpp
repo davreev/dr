@@ -348,3 +348,180 @@ UTEST(math_traits, is_complex)
     ASSERT_FALSE(is_complex<unsigned int>);
     ASSERT_FALSE(is_complex<std::size_t>);
 }
+
+/*
+    Compile-time checks
+*/
+
+namespace dr
+{
+
+/*
+    Explicit instantiation of templates to catch compile errors
+*/
+
+template f64 deg_to_rad(f64);
+
+template f64 rad_to_deg(f64);
+
+template f64 sign(f64);
+
+template f64 min(f64, f64);
+
+template f64 max(f64, f64);
+
+template f64 saturate(f64);
+
+template f64 clamp(f64, f64, f64);
+
+template f64 abs(f64);
+
+template bool near_equal(f64, f64, f64);
+
+template bool near_equal(f64, f64, f64, f64);
+
+template f64 mod(f64, f64);
+
+template f64 wrap(f64, f64, f64);
+
+template f64 fract(f64);
+
+template f64 fract(f64, f64&);
+
+template f64 lerp(f64, f64, f64);
+
+template f64 inv_lerp(f64, f64, f64);
+
+template f64 remap(f64, f64, f64, f64, f64);
+
+template f64 hermite_c1(f64);
+
+template f64 smooth_step(f64);
+
+template f64 smooth_step(f64, f64, f64);
+
+template f64 smooth_pulse(f64, f64, f64);
+
+template f64 ramp(f64, f64, f64);
+
+template f64 cross(Vec2<f64> const&, Vec2<f64> const&);
+
+template Vec3<f64> cross_x(Vec3<f64> const&);
+
+template Vec3<f64> cross_y(Vec3<f64> const&);
+
+template Vec3<f64> cross_z(Vec3<f64> const&);
+
+template Vec2<f64> perp_ccw(Vec2<f64> const&);
+
+template Vec2<f64> perp_cw(Vec2<f64> const&);
+
+template Vec<f64, 3> project(Vec<f64, 3> const&, Vec<f64, 3> const&);
+
+template Vec<f64, 3> reject(Vec<f64, 3> const&, Vec<f64, 3> const&);
+
+template Vec<f64, 3> reflect(Vec<f64, 3> const&, Vec<f64, 3> const&);
+
+template bool near_equal(Vec<f64, 3> const&, Vec<f64, 3> const&, f64);
+
+template bool near_equal(Vec<f64, 3> const&, Vec<f64, 3> const&, f64, f64);
+
+template bool near_parallel(Vec<f64, 3> const&, Vec<f64, 3> const&, f64);
+
+template bool near_parallel(Vec<f64, 3> const&, Vec<f64, 3> const&, f64, f64);
+
+template Quat<f64> nlerp(Quat<f64> const&, Quat<f64> const&, f64);
+
+template f64 sqrt_safe(f64);
+
+template f64 asin_safe(f64);
+
+template f64 acos_safe(f64);
+
+template f64 angle(Vec<f64, 3> const&, Vec<f64, 3> const&);
+
+template f64 signed_angle(Vec2<f64> const&, Vec2<f64> const&);
+
+template f64 signed_angle(Vec3<f64> const&, Vec3<f64> const&, Vec3<f64> const&);
+
+template f64 angle_in_plane(Vec3<f64> const&, Vec3<f64> const&, Vec3<f64> const&);
+
+template f64 sin_angle(Vec3<f64> const&, Vec3<f64>&);
+
+template f64 cos_angle(Vec3<f64> const&, Vec3<f64>&);
+
+template f64 tan_angle(Vec3<f64> const&, Vec3<f64>&);
+
+template f64 cot_angle(Vec3<f64> const&, Vec3<f64>&);
+
+template Vec<f64, 2> solve_least_squares(Mat<f64, 3, 2> const&, Vec<f64, 3> const&);
+
+template Mat<f64, 3, 3> mat<3, f64>(f64);
+
+template Mat<f64, 3, 3> mat<3, f64>(Vec<f64, 3> const&);
+
+template Mat<f64, 3, 3> mat<3, f64>(Covec<f64, 3> const&);
+
+template Mat<f64, 3, 2> mat(Vec<f64, 3> const&, Vec<f64, 3> const&);
+
+template Mat<f64, 3, 3> mat(Vec<f64, 3> const&, Vec<f64, 3> const&, Vec<f64, 3> const&);
+
+template Mat<f64, 3, 4> mat(
+    Vec<f64, 3> const&,
+    Vec<f64, 3> const&,
+    Vec<f64, 3> const&,
+    Vec<f64, 3> const&);
+
+template Mat<f64, 2, 3> mat(Covec<f64, 3> const&, Covec<f64, 3> const&);
+
+template Mat<f64, 3, 3> mat(Covec<f64, 3> const&, Covec<f64, 3> const&, Covec<f64, 3> const&);
+
+template Mat<f64, 4, 3> mat(
+    Covec<f64, 3> const&,
+    Covec<f64, 3> const&,
+    Covec<f64, 3> const&,
+    Covec<f64, 3> const&);
+
+template Vec<f64, 3> vec<3, f64>(f64);
+
+template Vec<f64, 2> vec(f64, f64);
+
+template Vec<f64, 3> vec(f64, f64, f64);
+
+template Vec<f64, 4> vec(f64, f64, f64, f64);
+
+template Vec<f64, 3> col<3, f64>(f64);
+
+template Vec<f64, 2> col(f64, f64);
+
+template Vec<f64, 3> col(f64, f64, f64);
+
+template Vec<f64, 4> col(f64, f64, f64, f64);
+
+template auto col(MatExpr<Vec3<f64>> const&);
+
+template Covec<f64, 3> covec<3, f64>(f64);
+
+template Covec<f64, 2> covec(f64, f64);
+
+template Covec<f64, 3> covec(f64, f64, f64);
+
+template Covec<f64, 4> covec(f64, f64, f64, f64);
+
+template Covec<f64, 3> row<3, f64>(f64);
+
+template Covec<f64, 2> row(f64, f64);
+
+template Covec<f64, 3> row(f64, f64, f64);
+
+template Covec<f64, 4> row(f64, f64, f64, f64);
+
+template auto row(MatExpr<Covec<f64, 3>> const&);
+
+template Complex<f64> complex(f64, f64);
+
+template Quat<f64> quat(f64, f64, f64, f64);
+
+template Quat<f64> quat(f64, Vec3<f64> const&);
+
+} // namespace dr

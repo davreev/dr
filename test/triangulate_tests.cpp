@@ -127,3 +127,19 @@ UTEST(mesh, strip_triangulator)
         ASSERT_EQ(expect.num_tris, tri_count);
     }
 }
+
+/*
+    Compile-time checks
+*/
+
+namespace dr
+{
+
+/*
+    Explicit instantiation of templates to catch compile errors
+*/
+
+template struct FanTriangulator<i32>;
+template struct StripTriangulator<i32>;
+
+} // namespace dr

@@ -1386,3 +1386,233 @@ UTEST(geometry, tri_centers)
         }
     }
 }
+
+/*
+    Compile-time checks
+*/
+
+namespace dr
+{
+
+/*
+    Explicit instantiation of templates to catch compile errors
+*/
+
+template Maybe<f64> intersect_line_tri(
+    Vec3<f64> const&,
+    Vec3<f64> const&,
+    Vec3<f64> const&,
+    Vec3<f64> const&,
+    Vec3<f64> const&);
+
+template f64 nearest_point_line(Vec3<f64> const&, Vec3<f64> const&, Vec3<f64> const&);
+
+template f64 nearest_point_segment(Vec3<f64> const&, Vec3<f64> const&, Vec3<f64> const&);
+
+template Vec3<f64> nearest_point_plane(Vec3<f64> const&, Vec3<f64> const&, Vec3<f64> const&);
+
+template Vec2<f64> nearest_line_line(
+    Vec3<f64> const&,
+    Vec3<f64> const&,
+    Vec3<f64> const&,
+    Vec3<f64> const&);
+
+template Vec2<f64> nearest_segment_line(
+    Vec3<f64> const&,
+    Vec3<f64> const&,
+    Vec3<f64> const&,
+    Vec3<f64> const&);
+
+template Vec2<f64> nearest_segment_segment(
+    Vec3<f64> const&,
+    Vec3<f64> const&,
+    Vec3<f64> const&,
+    Vec3<f64> const&);
+
+template Maybe<Vec2<f64>> intersect_line_line(
+    Vec2<f64> const&,
+    Vec2<f64> const&,
+    Vec2<f64> const&,
+    Vec2<f64> const&);
+
+template Maybe<f64> intersect_line_plane(
+    Vec3<f64> const&,
+    Vec3<f64> const&,
+    Vec3<f64> const&,
+    Vec3<f64> const&);
+
+template Maybe<f64> intersect_line_disk(
+    Vec3<f64> const&,
+    Vec3<f64> const&,
+    Vec3<f64> const&,
+    Vec3<f64> const&,
+    f64);
+
+template Maybe<Vec2<f64>> intersect_line_sphere(
+    Vec3<f64> const&,
+    Vec3<f64> const&,
+    Vec3<f64> const&,
+    f64);
+
+template bool is_in_tri(Vec2<f64> const&, Vec2<f64> const&, Vec2<f64> const&, Vec2<f64> const&);
+
+template bool is_in_tri(Vec3<f64> const&, Vec3<f64> const&, Vec3<f64> const&, Vec3<f64> const&);
+
+template Vec3<f64> to_barycentric(
+    Vec2<f64> const&,
+    Vec2<f64> const&,
+    Vec2<f64> const&,
+    Vec2<f64> const&);
+
+template Vec3<f64> to_barycentric(
+    Vec3<f64> const&,
+    Vec3<f64> const&,
+    Vec3<f64> const&,
+    Vec3<f64> const&);
+
+template Vec4<f64> to_barycentric(
+    Vec3<f64> const&,
+    Vec3<f64> const&,
+    Vec3<f64> const&,
+    Vec3<f64> const&,
+    Vec3<f64> const&);
+
+template Vec<f64, 2> circumcenter(Vec<f64, 2> const&, Vec<f64, 2> const&, Vec<f64, 2> const&);
+
+template Vec<f64, 3> circumcenter(Vec<f64, 3> const&, Vec<f64, 3> const&, Vec<f64, 3> const&);
+
+template Vec<f64, 2> incenter(Vec<f64, 2> const&, Vec<f64, 2> const&, Vec<f64, 2> const&);
+
+template Vec<f64, 3> incenter(Vec<f64, 3> const&, Vec<f64, 3> const&, Vec<f64, 3> const&);
+
+template Vec<f64, 2> orthocenter(Vec<f64, 2> const&, Vec<f64, 2> const&, Vec<f64, 2> const&);
+
+template Vec<f64, 3> orthocenter(Vec<f64, 3> const&, Vec<f64, 3> const&, Vec<f64, 3> const&);
+
+template f64 dihedral_angle(Vec3<f64> const&, Vec3<f64> const&, Vec3<f64> const&, Vec3<f64> const&);
+
+template f64 solid_angle(Vec3<f64> const&, Vec3<f64> const&, Vec3<f64> const&, Vec3<f64> const&);
+
+template f64 solid_angle(Span<Vec3<f64> const> const&, Vec3<f64> const&);
+
+template Vec3<f64> vector_area(Vec3<f64> const&, Vec3<f64> const&, Vec3<f64> const&);
+
+template Vec3<f64> vector_area(
+    Vec3<f64> const&,
+    Vec3<f64> const&,
+    Vec3<f64> const&,
+    Vec3<f64> const&);
+
+template Vec3<f64> vector_area(Span<Vec3<f64> const> const&);
+
+template f64 signed_area(Vec2<f64> const&, Vec2<f64> const&, Vec2<f64> const&);
+
+template f64 signed_area(Vec2<f64> const&, Vec2<f64> const&, Vec2<f64> const&, Vec2<f64> const&);
+
+template f64 signed_area(Span<Vec2<f64> const> const&);
+
+template f64 signed_volume(Vec3<f64> const&, Vec3<f64> const&, Vec3<f64> const&, Vec3<f64> const&);
+
+template void eval_area_gradient(
+    Vec3<f64> const&,
+    Vec3<f64> const&,
+    Vec3<f64> const&,
+    Covec3<f64>&,
+    Covec3<f64>&,
+    Covec3<f64>&);
+
+template Covec3<f64> eval_gradient(
+    Vec3<f64> const&,
+    Vec3<f64> const&,
+    Vec3<f64> const&,
+    f64,
+    f64,
+    f64);
+
+template Covec3<f64> eval_gradient(
+    Vec3<f64> const&,
+    Vec3<f64> const&,
+    Vec3<f64> const&,
+    Vec3<f64> const&,
+    f64,
+    f64,
+    f64,
+    f64);
+
+template Mat<f64, 2, 3> eval_jacobian(
+    Vec3<f64> const&,
+    Vec3<f64> const&,
+    Vec3<f64> const&,
+    Vec<f64, 2> const&,
+    Vec<f64, 2> const&,
+    Vec<f64, 2> const&);
+
+template Mat<f64, 2, 3> eval_jacobian(
+    Vec3<f64> const&,
+    Vec3<f64> const&,
+    Vec3<f64> const&,
+    Vec3<f64> const&,
+    Vec<f64, 2> const&,
+    Vec<f64, 2> const&,
+    Vec<f64, 2> const&,
+    Vec<f64, 2> const&);
+
+template void cotan_weights(
+    Vec3<f64> const&,
+    Vec3<f64> const&,
+    Vec3<f64> const&,
+    f64&,
+    f64&,
+    f64&);
+
+template void eval_divergence(
+    Vec3<f64> const&,
+    Vec3<f64> const&,
+    Vec3<f64> const&,
+    Vec3<f64> const&,
+    f64&,
+    f64&,
+    f64&);
+
+template void eval_divergence(
+    Vec3<f64> const&,
+    Vec3<f64> const&,
+    Vec3<f64> const&,
+    Mat<f64, 3, 2> const&,
+    Vec<f64, 2>&,
+    Vec<f64, 2>&,
+    Vec<f64, 2>&);
+
+template void eval_laplacian(
+    Vec3<f64> const&,
+    Vec3<f64> const&,
+    Vec3<f64> const&,
+    f64,
+    f64,
+    f64,
+    f64&,
+    f64&,
+    f64&);
+
+template void eval_laplacian(
+    Vec3<f64> const&,
+    Vec3<f64> const&,
+    Vec3<f64> const&,
+    Vec<f64, 2> const&,
+    Vec<f64, 2> const&,
+    Vec<f64, 2> const&,
+    Vec<f64, 2>&,
+    Vec<f64, 2>&,
+    Vec<f64, 2>&);
+
+template Interval<f64, 3> interval_union(Interval<f64, 3> const&, Interval<f64, 3> const&);
+
+template Interval<f64, 3> bounding_interval(Span<Vec<f64, 3> const> const&);
+
+template f64 bounding_radius(Span<Vec3<f64> const> const&, Vec3<f64> const&);
+
+template Interval<f64, 3> to_interval(Box<f64, 3> const&);
+
+template Box<f64, 3> to_box(Interval<f64, 3> const&);
+
+} // namespace dr

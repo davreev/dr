@@ -339,3 +339,40 @@ UTEST(mesh_incidence, collect_tet_tris)
         }
     }
 }
+
+/*
+    Compile-time checks
+*/
+
+namespace dr
+{
+
+/*
+    Explicit instantiation of templates to catch compile errors
+*/
+
+template void collect_edge_opposite_vertices(
+    Span<Vec3<i32> const> const&,
+    typename VertexToEdge<i32>::Map const&,
+    Span<i32>);
+
+template void collect_edge_tris(
+    Span<Vec3<i32> const> const&,
+    typename VertexToEdge<i32>::Map const&,
+    Span<i32>);
+
+template void collect_tri_edges(
+    Span<Vec3<i32> const> const&,
+    typename VertexToEdge<i32>::Map const&,
+    Span<Vec3<i32>>);
+
+template void collect_tet_tris(
+    Span<Vec4<i32> const> const&,
+    typename VertexToTri<i32>::Map const&,
+    Span<Vec4<i32>>);
+
+template struct VertexToEdge<i32>;
+template struct VertexToTri<i32>;
+template struct VertexToTet<i32>;
+
+} // namespace dr

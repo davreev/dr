@@ -255,13 +255,13 @@ template void face_vector_areas(
     Span<Vec3<f32> const> const&,
     Span<Vec3<i32> const> const&,
     Span<Vec3<f32>> const&,
-    isize const);
+    isize);
 
 template void face_normals(
     Span<Vec3<f32> const> const&,
     Span<Vec3<i32> const> const&,
     Span<Vec3<f32>> const&,
-    isize const);
+    isize);
 
 template Vec2<f32> integrate_vertex_func(
     Span<Vec3<f32> const> const&,
@@ -295,15 +295,15 @@ template Vec2<f32> interpolate_mean_value_robust(
     Span<Vec2<f32> const> const&,
     Span<Vec3<i32> const> const&,
     Vec3<f32> const&,
-    f32 const,
-    isize const);
+    f32,
+    isize);
 
 template Vec2<f32> interpolate_mean_value_naive(
     Span<Vec3<f32> const> const&,
     Span<Vec2<f32> const> const&,
     Span<Vec3<i32> const> const&,
     Vec3<f32> const&,
-    f32 const,
-    isize const);
+    f32,
+    isize);
 
 } // namespace dr

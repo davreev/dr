@@ -306,7 +306,7 @@ template <typename Derived>
 [[deprecated("Use unpack instead")]]
 auto expand(MatExpr<Derived> const& expr)
 {
-    unpack(expr);
+    return unpack(expr);
 }
 
 } // namespace dr

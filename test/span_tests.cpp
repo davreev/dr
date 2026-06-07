@@ -79,3 +79,24 @@ UTEST(span, ctor)
         ASSERT_EQ(span.size(), 3);
     }
 }
+
+/*
+    Compile-time checks
+*/
+
+namespace dr
+{
+
+/*
+    Explicit instantiation of templates to catch compile errors
+*/
+
+template i32* begin(Span<i32> const&);
+
+template i32* end(Span<i32> const&);
+
+template struct Span<i32>;
+
+template Span<i32>::Span(i32 (&)[6]);
+
+} // namespace dr

@@ -100,7 +100,7 @@ struct SlotMap : AllocatorAware
     }
 
     /// Returns the item associated with the given handle or null if the handle isn't valid
-    T const* operator[](Handle const handle) const { return const_cast<T&>(*this)[handle]; }
+    T const* operator[](Handle const handle) const { return const_cast<SlotMap&>(*this)[handle]; }
 
     /// Returns the handle to the item at the given index if one exists. Otherwise, returns an
     /// invalid handle.

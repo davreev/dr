@@ -19,3 +19,18 @@ UTEST(defer, sanity)
 
     ASSERT_EQ(x, 1);
 }
+
+/*
+    Compile-time checks
+*/
+
+namespace dr
+{
+
+/*
+    Explicit instantiation of templates to catch compile errors
+*/
+
+template Deferred<void (*)()> defer<void (*)()>(void (*&&)());
+
+} // namespace dr

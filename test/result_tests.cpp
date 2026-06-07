@@ -73,4 +73,17 @@ void check_maybe_behavior()
 }
 
 } // namespace
+
+/*
+    Explicit instantiation of templates to catch compile errors
+*/
+
+template struct ErrorResult<i32>;
+
+template struct Result<i32, i32>;
+template Result<i32, i32>::Result(i32&&);
+
+template struct Maybe<i32>;
+template Maybe<i32>::Maybe(i32&&);
+
 } // namespace dr

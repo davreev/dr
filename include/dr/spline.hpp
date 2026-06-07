@@ -681,7 +681,7 @@ constexpr void eval_bezier_triquadratic(
     Value diff[3])
 {
     using B = BernsteinBasis<2>;
-    impl::spline_eval<B, B>(x, u, v, w, val, diff);
+    impl::spline_eval<B, B, B>(x, u, v, w, val, diff);
 }
 
 template <typename Value, typename Real>
@@ -779,7 +779,7 @@ constexpr void eval_bezier_tricubic(
     Value diff[3])
 {
     using B = BernsteinBasis<3>;
-    impl::spline_eval<B, B>(x, u, v, w, val, diff);
+    impl::spline_eval<B, B, B>(x, u, v, w, val, diff);
 }
 
 template <typename Value, typename Real>
