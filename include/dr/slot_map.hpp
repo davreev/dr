@@ -43,7 +43,7 @@ struct SlotMap : AllocatorAware
     {
         if (free_indices_.empty())
         {
-            Index const index{slots_.size()};
+            Index const index = Index(slots_.size());
             constexpr Index version{1};
             slots_.push_back({make_item(std::forward<Args>(args)...), {version, 0}});
             return {index, version};

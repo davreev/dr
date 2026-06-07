@@ -73,7 +73,8 @@ struct SlicedArray : AllocatorAware
     void push_back(Span<T const> const& slice)
     {
         items.insert(items.end(), begin(slice), end(slice));
-        Index const end = slice_ends.empty() ? slice.size() : slice_ends.back() + slice.size();
+        Index const end = Index(
+            slice_ends.empty() ? slice.size() : slice_ends.back() + slice.size());
         slice_ends.push_back(end);
     }
 
@@ -81,7 +82,7 @@ struct SlicedArray : AllocatorAware
     void push_back(Index const size, T const& value = T{})
     {
         items.insert(items.end(), size, value);
-        Index const end = slice_ends.empty() ? size : slice_ends.back() + size;
+        Index const end = Index(slice_ends.empty() ? size : slice_ends.back() + size);
         slice_ends.push_back(end);
     }
 

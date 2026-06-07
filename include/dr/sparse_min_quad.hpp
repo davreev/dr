@@ -90,7 +90,7 @@ struct SparseMinQuadFixed
     static Index make_permutation(Predicate&& is_fixed, Span<Index> const& result)
     {
         Index lo = 0;
-        Index hi = result.size();
+        Index hi = Index(result.size());
 
         for (Index i = 0; i < result.size(); ++i)
         {
