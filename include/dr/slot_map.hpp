@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cassert>
 #include <utility>
 
 #include <dr/basic_types.hpp>
@@ -67,6 +68,7 @@ struct SlotMap : AllocatorAware
     {
         constexpr Index max_version = (Index{1} << version_bits) - Index{1};
 
+        assert(handle.index < Index(slots_.size()));
         if (Slot& slot = slots_[handle.index]; slot.status.version == handle.version)
         {
             // Reset the slot's item
@@ -88,12 +90,14 @@ struct SlotMap : AllocatorAware
     /// Returns true if the handle refers to a valid item
     bool is_valid(Handle const handle)
     {
+        assert(handle.index < Index(slots_.size()));
         return slots_[handle.index].status.version == handle.version;
     }
 
     /// Returns the item associated with the given handle or null if the handle isn't valid
     T* operator[](Handle const handle)
     {
+        assert(handle.index < Index(slots_.size()));
         if (Slot& slot = slots_[handle.index]; slot.status.version == handle.version)
             return &slot.item;
 
@@ -107,6 +111,7 @@ struct SlotMap : AllocatorAware
     /// invalid handle.
     Handle handle_at(Index const index)
     {
+        assert(index < Index(slots_.size()));
         auto const& slot = slots_[index];
         return (slot.status.flags & Flag_Free) //
             ? Handle{index, 0}
