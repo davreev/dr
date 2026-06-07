@@ -446,13 +446,13 @@ template f64 signed_angle(Vec3<f64> const&, Vec3<f64> const&, Vec3<f64> const&);
 
 template f64 angle_in_plane(Vec3<f64> const&, Vec3<f64> const&, Vec3<f64> const&);
 
-template f64 sin_angle(Vec3<f64> const&, Vec3<f64>&);
+template f64 sin_angle(Vec3<f64> const&, Vec3<f64> const&);
 
-template f64 cos_angle(Vec3<f64> const&, Vec3<f64>&);
+template f64 cos_angle(Vec3<f64> const&, Vec3<f64> const&);
 
-template f64 tan_angle(Vec3<f64> const&, Vec3<f64>&);
+template f64 tan_angle(Vec3<f64> const&, Vec3<f64> const&);
 
-template f64 cot_angle(Vec3<f64> const&, Vec3<f64>&);
+template f64 cot_angle(Vec3<f64> const&, Vec3<f64> const&);
 
 template Vec<f64, 2> solve_least_squares(Mat<f64, 3, 2> const&, Vec<f64, 3> const&);
 

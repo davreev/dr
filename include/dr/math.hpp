@@ -391,7 +391,7 @@ Real angle_in_plane(Vec3<Real> const& a, Vec3<Real> const& b, Vec3<Real> const& 
 
 /// Returns the sine of the smallest angle between two vectors
 template <typename Real>
-Real sin_angle(Vec3<Real> const& a, Vec3<Real>& b)
+Real sin_angle(Vec3<Real> const& a, Vec3<Real> const& b)
 {
     static_assert(is_real<Real>);
 
@@ -402,7 +402,7 @@ Real sin_angle(Vec3<Real> const& a, Vec3<Real>& b)
 
 /// Returns the cosine of the smallest angle between two vectors
 template <typename Real>
-Real cos_angle(Vec3<Real> const& a, Vec3<Real>& b)
+Real cos_angle(Vec3<Real> const& a, Vec3<Real> const& b)
 {
     static_assert(is_real<Real>);
 
@@ -413,7 +413,7 @@ Real cos_angle(Vec3<Real> const& a, Vec3<Real>& b)
 
 /// Returns the tangent of the smallest angle between two vectors
 template <typename Real>
-Real tan_angle(Vec3<Real> const& a, Vec3<Real>& b)
+Real tan_angle(Vec3<Real> const& a, Vec3<Real> const& b)
 {
     static_assert(is_real<Real>);
 
@@ -423,7 +423,7 @@ Real tan_angle(Vec3<Real> const& a, Vec3<Real>& b)
 
 /// Returns the cotangent of the smallest angle between two vectors
 template <typename Real>
-Real cot_angle(Vec3<Real> const& a, Vec3<Real>& b)
+Real cot_angle(Vec3<Real> const& a, Vec3<Real> const& b)
 {
     static_assert(is_real<Real>);
 
