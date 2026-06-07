@@ -116,7 +116,7 @@ struct HashGrid : AllocatorAware
     struct Bucket : AllocatorAware
     {
         DynamicArray<Index> values;
-        usize version;
+        usize version{};
 
         Bucket(Allocator const alloc = {}) : values(alloc) {}
 
