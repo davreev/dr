@@ -1,7 +1,7 @@
 #include <utest.h>
 
-#include <dr/basic_types.hpp>
 #include <dr/defer.hpp>
+#include <dr/num_types.hpp>
 
 UTEST(defer, sanity)
 {

@@ -1,6 +1,6 @@
 #include <utest.h>
 
-#include <dr/basic_types.hpp>
+#include <dr/num_types.hpp>
 #include <dr/result.hpp>
 
 /*

@@ -9,7 +9,7 @@
 #include <type_traits>
 
 #include <dr/allocator.hpp>
-#include <dr/basic_types.hpp>
+#include <dr/num_types.hpp>
 #include <dr/span.hpp>
 
 namespace dr

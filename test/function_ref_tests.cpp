@@ -1,7 +1,7 @@
 #include <utest.h>
 
-#include <dr/basic_types.hpp>
 #include <dr/function_ref.hpp>
+#include <dr/num_types.hpp>
 
 UTEST(function_ref, function_ptr)
 {
@@ -22,13 +22,17 @@ UTEST(function_ref, lambda)
 
     // As function ptr
     {
-        FunctionRef<isize(isize)> const square_ref{[](isize const x) { return x * x; }};
+        FunctionRef<isize(isize)> const square_ref{[](isize const x) {
+            return x * x;
+        }};
         ASSERT_EQ(4, square_ref(2));
     }
 
     // As function object
     {
-        auto const square = [](isize const x) { return x * x; };
+        auto const square = [](isize const x) {
+            return x * x;
+        };
         FunctionRef<isize(isize)> const square_ref{&square};
         ASSERT_EQ(square(2), square_ref(2));
     }
@@ -40,7 +44,9 @@ UTEST(function_ref, lambda_closure)
 
     isize const a = 2;
     isize const b = 1;
-    auto const affine = [&](isize const x) { return a * x + b; };
+    auto const affine = [&](isize const x) {
+        return a * x + b;
+    };
 
     FunctionRef<isize(isize)> const affine_ref{&affine};
     ASSERT_EQ(affine(2), affine_ref(2));
@@ -77,7 +83,9 @@ UTEST(function_ref, is_valid)
     }
 
     {
-        FunctionRef<f32(f32)> fn{[](f32 const x) { return x * x; }};
+        FunctionRef<f32(f32)> fn{[](f32 const x) {
+            return x * x;
+        }};
         ASSERT_TRUE(fn.is_valid());
     }
 }

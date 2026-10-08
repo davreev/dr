@@ -1,7 +1,7 @@
 #include <utest.h>
 
 #include <dr/math.hpp>
-#include <dr/math_traits.hpp>
+#include <dr/meta.hpp>
 
 UTEST(math, solve_least_squares)
 {
@@ -281,80 +281,46 @@ UTEST(math, near_equal_scalar)
     }
 }
 
-UTEST(math_traits, is_natural)
-{
-    using namespace dr;
-
-    ASSERT_TRUE(is_natural<unsigned int>);
-    ASSERT_TRUE(is_natural<std::size_t>);
-
-    ASSERT_FALSE(is_natural<float>);
-    ASSERT_FALSE(is_natural<double>);
-
-    ASSERT_FALSE(is_natural<int>);
-    ASSERT_FALSE(is_natural<std::ptrdiff_t>);
-
-    ASSERT_FALSE(is_natural<std::complex<float>>);
-    ASSERT_FALSE(is_natural<std::complex<double>>);
-}
-
-UTEST(math_traits, is_integer)
-{
-    using namespace dr;
-
-    ASSERT_TRUE(is_integer<int>);
-    ASSERT_TRUE(is_integer<std::ptrdiff_t>);
-
-    ASSERT_FALSE(is_integer<float>);
-    ASSERT_FALSE(is_integer<double>);
-
-    ASSERT_FALSE(is_integer<unsigned int>);
-    ASSERT_FALSE(is_integer<std::size_t>);
-
-    ASSERT_FALSE(is_integer<std::complex<float>>);
-    ASSERT_FALSE(is_integer<std::complex<double>>);
-}
-
-UTEST(math_traits, is_real)
-{
-    using namespace dr;
-
-    ASSERT_TRUE(is_real<float>);
-    ASSERT_TRUE(is_real<double>);
-
-    ASSERT_FALSE(is_real<int>);
-    ASSERT_FALSE(is_real<std::ptrdiff_t>);
-
-    ASSERT_FALSE(is_real<unsigned int>);
-    ASSERT_FALSE(is_real<std::size_t>);
-
-    ASSERT_FALSE(is_real<std::complex<float>>);
-    ASSERT_FALSE(is_real<std::complex<double>>);
-}
-
-UTEST(math_traits, is_complex)
-{
-    using namespace dr;
-
-    ASSERT_TRUE(is_complex<std::complex<float>>);
-    ASSERT_TRUE(is_complex<std::complex<double>>);
-
-    ASSERT_FALSE(is_complex<float>);
-    ASSERT_FALSE(is_complex<double>);
-
-    ASSERT_FALSE(is_complex<int>);
-    ASSERT_FALSE(is_complex<std::ptrdiff_t>);
-
-    ASSERT_FALSE(is_complex<unsigned int>);
-    ASSERT_FALSE(is_complex<std::size_t>);
-}
-
 /*
     Compile-time checks
 */
 
 namespace dr
 {
+
+namespace
+{
+
+[[maybe_unused]]
+void check_num_traits()
+{
+    static_assert(is_natural<unsigned int>);
+    static_assert(is_natural<std::size_t>);
+
+    static_assert(is_integer<int>);
+    static_assert(is_integer<std::ptrdiff_t>);
+
+    static_assert(is_real<float>);
+    static_assert(is_real<double>);
+
+    static_assert(is_number<u32> && is_number<i32> && is_number<f64>);
+    static_assert(!is_number<bool> && !is_number<Complex<f64>>);
+    static_assert(!is_signed<u8> && !is_signed<u16> && !is_signed<u32>);
+    static_assert(!is_signed<u64> && !is_signed<usize>);
+    static_assert(is_signed<i32> && is_signed<f64>);
+    static_assert(is_index<u32> && is_index<i32>);
+    static_assert(!is_index<f64> && !is_index<bool>);
+
+    // Trait queries normalize cv/ref qualifiers.
+    static_assert(is_natural<u32 const&>);
+    static_assert(is_integer<i32 volatile&>);
+    static_assert(is_real<f64 const&&>);
+    static_assert(is_number<i32 const&> && is_signed<i32 const&>);
+    static_assert(is_index<u32 volatile&> && !is_signed<u32 volatile&>);
+    static_assert(!is_number<i32*> && !is_number<i32[3]>);
+}
+
+} // namespace
 
 /*
     Explicit instantiation of templates to catch compile errors

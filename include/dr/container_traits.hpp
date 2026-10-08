@@ -4,6 +4,8 @@
 #include <string>
 #include <vector>
 
+#include <dr/meta.hpp>
+
 namespace dr
 {
 namespace impl
@@ -43,6 +45,6 @@ struct IsContiguous<std::array<T, size>>
 
 /// True if T is a container with contiguous memory layout
 template <typename T>
-inline constexpr bool is_contiguous = impl::IsContiguous<std::decay_t<T>>::value;
+inline constexpr bool is_contiguous = impl::IsContiguous<DropCvRef<T>>::value;
 
 } // namespace dr

@@ -20,8 +20,7 @@ void make_cotan_laplacian(
     Span<Vec3<Index> const> const& face_vertices,
     DynamicArray<Triplet<Real, Index>>& result)
 {
-    static_assert(is_real<Real>);
-    static_assert(is_integer<Index> || is_natural<Index>);
+    static_assert(is_index<Index>);
 
     result.clear();
 
@@ -59,8 +58,7 @@ void make_cotan_laplacian(
     SparseMat<Real, Index>& result,
     Allocator alloc = {})
 {
-    static_assert(is_real<Real>);
-    static_assert(is_integer<Index> || is_natural<Index>);
+    static_assert(is_index<Index>);
 
     DynamicArray<Triplet<Real, Index>> coeffs{alloc};
     make_cotan_laplacian(vertex_positions, face_vertices, coeffs);
@@ -75,7 +73,7 @@ void make_incidence_matrix(
     Span<Vec<Index, size> const> const& elements,
     DynamicArray<Triplet<Scalar, Index>>& result)
 {
-    static_assert(is_integer<Index> || is_natural<Index>);
+    static_assert(is_index<Index>);
 
     result.clear();
     result.reserve(elements.size() * size);
@@ -97,7 +95,7 @@ void make_incidence_matrix(
     Index rows = -1,
     Allocator alloc = {})
 {
-    static_assert(is_integer<Index> || is_natural<Index>);
+    static_assert(is_index<Index>);
 
     DynamicArray<Triplet<Scalar, Index>> coeffs{alloc};
     make_incidence_matrix(elements, coeffs);
@@ -116,8 +114,7 @@ void make_vector_area_matrix(
     DynamicArray<Triplet<Real, Index>>& result,
     Index num_vertices = -1)
 {
-    static_assert(is_real<Real>);
-    static_assert(is_integer<Index> || is_natural<Index>);
+    static_assert(is_index<Index>);
 
     result.clear();
 
@@ -142,8 +139,7 @@ void make_vector_area_matrix(
     Index num_vertices = -1,
     Allocator alloc = {})
 {
-    static_assert(is_real<Real>);
-    static_assert(is_integer<Index> || is_natural<Index>);
+    static_assert(is_index<Index>);
 
     if (num_vertices == -1)
         num_vertices = as_mat(boundary_edge_vertices).maxCoeff();
@@ -165,8 +161,7 @@ void eval_gradient(
     Span<Covec3<Real>> const& result,
     isize const num_threads = 1)
 {
-    static_assert(is_real<Real>);
-    static_assert(is_integer<Index> || is_natural<Index>);
+    static_assert(is_index<Index>);
 
     assert(result.size() == face_vertices.size());
     assert(num_threads > 0);
@@ -205,8 +200,7 @@ void eval_jacobian(
     Span<Mat3<Real>> const& result,
     isize const num_threads = 1)
 {
-    static_assert(is_real<Real>);
-    static_assert(is_integer<Index> || is_natural<Index>);
+    static_assert(is_index<Index>);
 
     assert(result.size() == face_vertices.size());
     assert(num_threads > 0);
@@ -244,8 +238,7 @@ void eval_divergence(
     Span<Vec3<Real> const> const& face_vectors,
     Span<Real> const& result)
 {
-    static_assert(is_real<Real>);
-    static_assert(is_integer<Index> || is_natural<Index>);
+    static_assert(is_index<Index>);
 
     assert(result.size() == vertex_positions.size());
     assert(face_vertices.size() == face_vectors.size());
@@ -280,8 +273,7 @@ void eval_laplacian(
     Span<Vec3<Index> const> const& face_vertices,
     Span<Real> const& result)
 {
-    static_assert(is_real<Real>);
-    static_assert(is_integer<Index> || is_natural<Index>);
+    static_assert(is_index<Index>);
 
     assert(result.size() == vertex_positions.size());
     as_vec(result).setZero();
@@ -317,8 +309,7 @@ void eval_laplacian(
     Span<Vec3<Index> const> const& face_vertices,
     Span<Vec<Real, dim>> const& result)
 {
-    static_assert(is_real<Real>);
-    static_assert(is_integer<Index> || is_natural<Index>);
+    static_assert(is_index<Index>);
 
     assert(result.size() == vertex_positions.size());
     as_vec(result).setZero();

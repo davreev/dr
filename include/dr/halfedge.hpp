@@ -2,12 +2,12 @@
 
 #include <cassert>
 
-#include <dr/basic_types.hpp>
 #include <dr/container_utils.hpp>
 #include <dr/dynamic_array.hpp>
 #include <dr/hash_map.hpp>
 #include <dr/math_types.hpp>
 #include <dr/memory.hpp>
+#include <dr/num_types.hpp>
 #include <dr/sliced_array.hpp>
 #include <dr/span.hpp>
 

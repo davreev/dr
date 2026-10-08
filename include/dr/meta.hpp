@@ -1,9 +1,20 @@
 #pragma once
 
-#include <dr/basic_types.hpp>
+#include <type_traits>
+
+#include <dr/num_types.hpp>
 
 namespace dr
 {
+
+template <typename T>
+using DropCv = std::remove_cv_t<T>;
+
+template <typename T>
+using DropRef = std::remove_reference_t<T>;
+
+template <typename T>
+using DropCvRef = DropCv<DropRef<T>>;
 
 template <typename... T>
 struct TypePack;

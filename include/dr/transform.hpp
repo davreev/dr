@@ -1,8 +1,8 @@
 #pragma once
 
-#include <dr/basic_traits.hpp>
 #include <dr/math_ctors.hpp>
 #include <dr/math_types.hpp>
+#include <dr/num_traits.hpp>
 
 namespace dr
 {
@@ -10,8 +10,6 @@ namespace dr
 template <typename Real, int dim>
 struct Affine
 {
-    static_assert(is_real<Real>);
-
     Mat<Real, dim, dim> linear{Mat<Real, dim, dim>::Identity()};
     Vec<Real, dim> translation{};
 
@@ -82,8 +80,6 @@ struct Rotation;
 template <typename Real>
 struct Rotation<Real, 2>
 {
-    static_assert(is_real<Real>);
-
     /// Unit complex number representation of the rotation. This can also be interpreted as the
     /// first standard basis vector after rotation.
     Vec2<Real> c{Vec2<Real>::UnitX()};
@@ -110,8 +106,6 @@ struct Rotation<Real, 2>
 template <typename Real>
 struct Rotation<Real, 3>
 {
-    static_assert(is_real<Real>);
-
     /// Unit quaternion representation of the rotation
     Quat<Real> q{Quat<Real>::Identity()};
 
@@ -143,8 +137,6 @@ using Rotation3 = Rotation<Real, 3>;
 template <typename Real, int dim>
 struct Conformal
 {
-    static_assert(is_real<Real>);
-
     Rotation<Real, dim> rotation{};
     Vec<Real, dim> translation{};
     Real scale{1.0};
@@ -240,8 +232,6 @@ using Conformal3 = Conformal<Real, 3>;
 template <typename Real, int dim>
 struct Rigid
 {
-    static_assert(is_real<Real>);
-
     Rotation<Real, dim> rotation{};
     Vec<Real, dim> translation{};
 

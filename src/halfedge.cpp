@@ -1,8 +1,8 @@
 #include <dr/halfedge.hpp>
 
-#include <dr/basic_traits.hpp>
 #include <dr/linalg_reshape.hpp>
 #include <dr/meta.hpp>
+#include <dr/num_traits.hpp>
 
 namespace dr
 {
@@ -81,7 +81,7 @@ Builder::Error Builder::make_from_face_vertex(
     bool const include_holes)
 {
     static_assert(std::is_invocable_r_v<Span<SrcIndex const>, FaceVertices, SrcIndex>);
-    static_assert(is_integer<SrcIndex> || is_natural<SrcIndex>);
+    static_assert(is_index<SrcIndex>);
 
     v_to_he_.clear();
     Index num_hedges = 0;

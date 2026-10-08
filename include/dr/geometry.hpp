@@ -18,7 +18,6 @@ Real nearest_point_line(
     Vec3<Real> const& line_start,
     Vec3<Real> const& line_delta)
 {
-    static_assert(is_real<Real>);
     return line_delta.dot(point - line_start) / line_delta.squaredNorm();
 }
 
@@ -29,7 +28,6 @@ Real nearest_point_segment(
     Vec3<Real> const& seg_start,
     Vec3<Real> const& seg_delta)
 {
-    static_assert(is_real<Real>);
     return saturate(nearest_point_line(point, seg_start, seg_delta));
 }
 
@@ -40,7 +38,6 @@ Vec3<Real> nearest_point_plane(
     Vec3<Real> const& plane_origin,
     Vec3<Real> const& plane_normal)
 {
-    static_assert(is_real<Real>);
     return point + project((plane_origin - point).eval(), plane_normal);
 }
 
@@ -52,8 +49,6 @@ Vec2<Real> nearest_line_line(
     Vec3<Real> const& b_start,
     Vec3<Real> const& b_delta)
 {
-    static_assert(is_real<Real>);
-
     Vec3<Real> const b = b_start - a_start;
     Vec2<Real> const x = solve_least_squares(mat(a_delta, b_delta), b);
     return std::isnan(x[0]) ? Vec2<Real>{} : vec(x[0], -x[1]);
@@ -67,8 +62,6 @@ Vec2<Real> nearest_segment_line(
     Vec3<Real> const& line_start,
     Vec3<Real> const& line_delta)
 {
-    static_assert(is_real<Real>);
-
     Vec2<Real> t = nearest_line_line(seg_start, seg_delta, line_start, line_delta);
     t[0] = saturate(t[0]);
     t[1] = nearest_point_line((seg_start + seg_delta * t[0]).eval(), line_start, line_delta);
@@ -83,8 +76,6 @@ Vec2<Real> nearest_segment_segment(
     Vec3<Real> const& b_start,
     Vec3<Real> const& b_delta)
 {
-    static_assert(is_real<Real>);
-
     Vec2<Real> t = nearest_line_line(a_start, a_delta, b_start, b_delta);
     t[0] = saturate(t[0]);
     t[1] = saturate(nearest_point_line((a_start + a_delta * t[0]).eval(), b_start, b_delta));
@@ -100,8 +91,6 @@ Maybe<Vec2<Real>> intersect_line_line(
     Vec2<Real> const& b_start,
     Vec2<Real> const& b_delta)
 {
-    static_assert(is_real<Real>);
-
     Vec2<Real> const b = b_start - a_start;
     Vec2<Real> const x = mat(a_delta, b_delta).inverse() * b;
 
@@ -119,7 +108,6 @@ Maybe<Real> intersect_line_plane(
     Vec3<Real> const& plane_origin,
     Vec3<Real> const& plane_normal)
 {
-    static_assert(is_real<Real>);
     Real const d0 = plane_normal.dot(line_delta);
 
     if (abs(d0) > Real{0.0})
@@ -140,8 +128,6 @@ Maybe<Real> intersect_line_disk(
     Vec3<Real> const& disk_normal,
     Real const disk_radius)
 {
-    static_assert(is_real<Real>);
-
     if (auto t = intersect_line_plane(line_start, line_delta, disk_origin, disk_normal))
     {
         Vec3<Real> const p = line_start + line_delta * t.value();
@@ -160,8 +146,6 @@ Maybe<Vec2<Real>> intersect_line_sphere(
     Vec3<Real> const& sphere_origin,
     Real const sphere_radius)
 {
-    static_assert(is_real<Real>);
-
     // Find line parameter at closest point to sphere origin
     Vec3<Real> const to_orig = sphere_origin - line_start;
     Real const len_sqr = line_delta.squaredNorm();
@@ -189,8 +173,6 @@ bool is_in_tri(
     Vec2<Real> const& tri_b,
     Vec2<Real> const& tri_c)
 {
-    static_assert(is_real<Real>);
-
     Vec2<Real> const d0 = tri_a - point;
     Vec2<Real> const d1 = tri_b - point;
     Vec2<Real> const d2 = tri_c - point;
@@ -206,8 +188,6 @@ bool is_in_tri(
     Vec3<Real> const& tri_b,
     Vec3<Real> const& tri_c)
 {
-    static_assert(is_real<Real>);
-
     Vec3<Real> const d0 = tri_a - point;
     Vec3<Real> const d1 = tri_b - point;
     Vec3<Real> const d2 = tri_c - point;
@@ -224,7 +204,6 @@ Maybe<Real> intersect_line_tri(
     Vec3<Real> const& tri_b,
     Vec3<Real> const& tri_c)
 {
-    static_assert(is_real<Real>);
     Vec3<Real> const norm = (tri_b - tri_a).cross(tri_c - tri_a);
 
     if (auto t = intersect_line_plane(line_start, line_delta, tri_a, norm))
@@ -245,8 +224,6 @@ Vec3<Real> to_barycentric(
     Vec2<Real> const& tri_b,
     Vec2<Real> const& tri_c)
 {
-    static_assert(is_real<Real>);
-
     Vec2<Real> const a0 = tri_b - tri_a;
     Vec2<Real> const a1 = tri_c - tri_a;
     Vec2<Real> const b = point - tri_a;
@@ -263,8 +240,6 @@ Vec3<Real> to_barycentric(
     Vec3<Real> const& tri_b,
     Vec3<Real> const& tri_c)
 {
-    static_assert(is_real<Real>);
-
     Vec3<Real> const a0 = tri_b - tri_a;
     Vec3<Real> const a1 = tri_c - tri_a;
     Vec3<Real> const b = point - tri_a;
@@ -282,8 +257,6 @@ Vec4<Real> to_barycentric(
     Vec3<Real> const& tet_c,
     Vec3<Real> const& tet_d)
 {
-    static_assert(is_real<Real>);
-
     Vec3<Real> const a0 = tet_b - tet_a;
     Vec3<Real> const a1 = tet_c - tet_a;
     Vec3<Real> const a2 = tet_d - tet_a;
@@ -381,8 +354,6 @@ Real solid_angle(
 {
     // https://www.cs.utah.edu/~ladislav/jacobson13robust/jacobson13robust.html (paper section 4.1)
 
-    static_assert(is_real<Real>);
-
     Vec3<Real> const a = tri_a - point;
     Vec3<Real> const b = tri_b - point;
     Vec3<Real> const c = tri_c - point;
@@ -401,8 +372,6 @@ template <typename Real>
 Real solid_angle(Span<Vec3<Real> const> const& polygon, Vec3<Real> const& point)
 {
     // Computed as the area of a spherical polygon (https://math.stackexchange.com/a/3643176/809910)
-
-    static_assert(is_real<Real>);
 
     isize const n = polygon.size();
     if (n < 3)
@@ -433,7 +402,6 @@ Real solid_angle(Span<Vec3<Real> const> const& polygon, Vec3<Real> const& point)
 template <typename Real>
 Vec3<Real> vector_area(Vec3<Real> const& a, Vec3<Real> const& b, Vec3<Real> const& c)
 {
-    static_assert(is_real<Real>);
     return (b - a).cross(c - b) * Real{0.5};
 }
 
@@ -446,7 +414,6 @@ Vec3<Real> vector_area(
     Vec3<Real> const& c,
     Vec3<Real> const& d)
 {
-    static_assert(is_real<Real>);
     return (c - a).cross(d - b) * Real{0.5};
 }
 
@@ -455,7 +422,6 @@ Vec3<Real> vector_area(
 template <typename Real>
 Vec3<Real> vector_area(Span<Vec3<Real> const> const& polygon)
 {
-    static_assert(is_real<Real>);
     isize const n = polygon.size();
 
     if (n < 3)
@@ -494,7 +460,6 @@ Vec3<Real> vector_area(Span<Vec3<Real> const> const& polygon)
 template <typename Real>
 Real signed_area(Vec2<Real> const& a, Vec2<Real> const& b, Vec2<Real> const& c)
 {
-    static_assert(is_real<Real>);
     return cross((b - a).eval(), (c - b).eval()) * Real{0.5};
 }
 
@@ -502,7 +467,6 @@ Real signed_area(Vec2<Real> const& a, Vec2<Real> const& b, Vec2<Real> const& c)
 template <typename Real>
 Real signed_area(Vec2<Real> const& a, Vec2<Real> const& b, Vec2<Real> const& c, Vec2<Real> const& d)
 {
-    static_assert(is_real<Real>);
     return cross((c - a).eval(), (d - b).eval()) * Real{0.5};
 }
 
@@ -510,7 +474,6 @@ Real signed_area(Vec2<Real> const& a, Vec2<Real> const& b, Vec2<Real> const& c, 
 template <typename Real>
 Real signed_area(Span<Vec2<Real> const> const& polygon)
 {
-    static_assert(is_real<Real>);
     isize const n = polygon.size();
 
     if (n < 3)
@@ -549,8 +512,6 @@ Real signed_volume(
     Vec3<Real> const& c,
     Vec3<Real> const& d)
 {
-    static_assert(is_real<Real>);
-
     constexpr Real inv6 = Real{1.0} / Real{6.0};
     return inv6 * mat((b - a).eval(), (c - a).eval(), (d - a).eval()).determinant();
 }
@@ -566,8 +527,6 @@ void eval_area_gradient(
     Covec3<Real>& g2)
 {
     // http://www.cs.cmu.edu/~kmcrane/Projects/Other/TriangleMeshDerivativesCheatSheet.pdf
-
-    static_assert(is_real<Real>);
 
     Vec3<Real> const d0 = p1 - p0;
     Vec3<Real> const d1 = p2 - p1;
@@ -589,8 +548,6 @@ Covec3<Real> eval_gradient(
     Real const f1,
     Real const f2)
 {
-    static_assert(is_real<Real>);
-
     // Offset s.t. coord/value at first vertex is zero (no longer contributes to result)
     Vec3<Real> const dp[]{p1 - p0, p2 - p0};
     Real const df[]{f1 - f0, f2 - f0};
@@ -616,8 +573,6 @@ Mat<Real, dim, 3> eval_jacobian(
     Vec<Real, dim> const& f1,
     Vec<Real, dim> const& f2)
 {
-    static_assert(is_real<Real> && dim > 0);
-
     // Offset s.t. coord/value at first vertex is zero (no longer contributes to result)
     Vec3<Real> const dp[]{p1 - p0, p2 - p0};
     Vec<Real, dim> const df[]{f1 - f0, f2 - f0};
@@ -645,8 +600,6 @@ Covec3<Real> eval_gradient(
     Real const f2,
     Real const f3)
 {
-    static_assert(is_real<Real>);
-
     // Offset s.t. coord/value at first vertex is zero (no longer contributes to result)
     Vec3<Real> const dp[]{p1 - p0, p2 - p0, p3 - p0};
     Real const df[]{f1 - f0, f2 - f0, f3 - f0};
@@ -680,8 +633,6 @@ Mat<Real, dim, 3> eval_jacobian(
     Vec<Real, dim> const& f2,
     Vec<Real, dim> const& f3)
 {
-    static_assert(is_real<Real>);
-
     // Offset s.t. coord/value at first vertex is zero (no longer contributes to result)
     Vec3<Real> const dp[]{p1 - p0, p2 - p0, p3 - p0};
     Vec<Real, dim> const df[]{f1 - f0, f2 - f0, f3 - f0};
@@ -713,8 +664,6 @@ void cotan_weights(
     Real& w1,
     Real& w2)
 {
-    static_assert(is_real<Real>);
-
     // NOTE: The cotangent weight of an edge is the ratio of its dual to primal length (aka
     // Hodge star). This can be computed by taking half the cotangent of the angle opposite each
     // edge in the triangle.
@@ -742,8 +691,6 @@ void eval_divergence(
     Real& div1,
     Real& div2)
 {
-    static_assert(is_real<Real>);
-
     // Compute integrated 1-form over each edge
     Vec3<Real> const e[]{p1 - p0, p2 - p1, p0 - p2};
     Real const fe[]{e[0].dot(f), e[1].dot(f), e[2].dot(f)};
@@ -771,8 +718,6 @@ void eval_divergence(
     Vec<Real, n>& div1,
     Vec<Real, n>& div2)
 {
-    static_assert(is_real<Real>);
-
     // Compute integrated 1-form over each edge
     Vec3<Real> const e[]{p1 - p0, p2 - p1, p0 - p2};
     Vec<Real, n> const fe[]{e[0].transpose() * f, e[1].transpose() * f, e[2].transpose() * f};
@@ -885,7 +830,6 @@ Interval<Scalar, dim> to_interval(Box<Scalar, dim> const& box)
 template <typename Real, int dim>
 Box<Real, dim> to_box(Interval<Real, dim> const& interval)
 {
-    static_assert(is_real<Real>);
     Vec<Real, dim> const d = interval.delta() * Real{0.5};
     return {interval.from + d, d};
 }

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <dr/basic_traits.hpp>
+#include <dr/num_traits.hpp>
 
 namespace dr
 {
@@ -64,8 +64,6 @@ constexpr Value spline_mix(
 template <typename Basis, typename Value, typename Real, isize n = Basis::size>
 constexpr Value spline_eval(Value const coeffs[n], Real const t)
 {
-    static_assert(is_real<Real>);
-
     Real b[n]{};
     Basis::eval(t, b);
 
@@ -81,8 +79,6 @@ template <
     isize n_v = BasisV::size>
 constexpr Value spline_eval(Value const coeffs[n_u * n_v], Real const u, Real const v)
 {
-    static_assert(is_real<Real>);
-
     Real b_u[n_u]{};
     BasisU::eval(u, b_u);
 
@@ -107,8 +103,6 @@ constexpr Value spline_eval(
     Real const v,
     Real const w)
 {
-    static_assert(is_real<Real>);
-
     Real b_u[n_u]{};
     BasisU::eval(u, b_u);
 
@@ -135,8 +129,6 @@ constexpr void spline_eval(
     Value val[1],
     Value diff[2])
 {
-    static_assert(is_real<Real>);
-
     using DiffU = typename BasisU::template Diff<1>;
     using DiffV = typename BasisV::template Diff<1>;
 
@@ -176,8 +168,6 @@ constexpr void spline_eval(
     Value val[1],
     Value diff[3])
 {
-    static_assert(is_real<Real>);
-
     using DiffU = typename BasisU::template Diff<1>;
     using DiffV = typename BasisV::template Diff<1>;
     using DiffW = typename BasisW::template Diff<1>;
@@ -221,8 +211,6 @@ struct LinearBasis : SplineBasis<1, 2>
     template <typename Real>
     static constexpr void eval(Real const t, Real result[size])
     {
-        static_assert(is_real<Real>);
-
         result[0] = Real{1.0} - t;
         result[1] = t;
     }
@@ -235,8 +223,6 @@ struct LinearBasis : SplineBasis<1, 2>
         template <typename Real>
         static constexpr void eval(Real const /*t*/, Real result[size])
         {
-            static_assert(is_real<Real>);
-
             if constexpr (order == 1)
             {
                 result[0] = Real{-1.0};
@@ -256,8 +242,6 @@ struct CatmullRomBasis : SplineBasis<3, 4>
     template <typename Real>
     static constexpr void eval(Real const t, Real result[size])
     {
-        static_assert(is_real<Real>);
-
         /*
             Evaluated as product with basis matrix
 
@@ -283,8 +267,6 @@ struct CatmullRomBasis : SplineBasis<3, 4>
         template <typename Real>
         static constexpr void eval(Real const t, Real result[size])
         {
-            static_assert(is_real<Real>);
-
             if constexpr (order == 1)
             {
                 Real const tt = t * t;
@@ -327,8 +309,6 @@ struct BernsteinBasis<2> : SplineBasis<2, 3>
     template <typename Real>
     static constexpr void eval(Real const t, Real result[size])
     {
-        static_assert(is_real<Real>);
-
         /*
             Evaluated as product with basis matrix
 
@@ -351,8 +331,6 @@ struct BernsteinBasis<2> : SplineBasis<2, 3>
         template <typename Real>
         static constexpr void eval(Real const t, Real result[size])
         {
-            static_assert(is_real<Real>);
-
             if constexpr (order == 1)
             {
                 result[0] = Real{2.0} * t - Real{2.0};
@@ -381,8 +359,6 @@ struct BernsteinBasis<3> : SplineBasis<3, 4>
     template <typename Real>
     static constexpr void eval(Real const t, Real result[size])
     {
-        static_assert(is_real<Real>);
-
         /*
             Evaluated as product with basis matrix
 
@@ -408,8 +384,6 @@ struct BernsteinBasis<3> : SplineBasis<3, 4>
         template <typename Real>
         static constexpr void eval(Real const t, Real result[size])
         {
-            static_assert(is_real<Real>);
-
             if constexpr (order == 1)
             {
                 Real const tt = t * t;

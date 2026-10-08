@@ -1,9 +1,9 @@
 #pragma once
 
-#include <dr/basic_traits.hpp>
 #include <dr/dynamic_array.hpp>
 #include <dr/hash_grid.hpp>
 #include <dr/math.hpp>
+#include <dr/num_traits.hpp>
 #include <dr/span.hpp>
 
 namespace dr
@@ -18,8 +18,6 @@ bool gather_points(
     Real const radius_end,
     isize const max_iters = 5)
 {
-    static_assert(is_real<Real>);
-
     // Returns true if converged
     auto const step = [&](Real const radius) -> bool {
         constexpr Real rad_scale{8.0};
@@ -89,8 +87,7 @@ void find_unique_points(
     DynamicArray<Index>& unique_points,
     Span<Index> const& point_to_unique)
 {
-    static_assert(is_real<Real>);
-    static_assert(is_integer<Index> || is_natural<Index>);
+    static_assert(is_index<Index>);
 
     constexpr Real tol_scale{8.0};
     grid.set_cell_size(tolerance * tol_scale);
@@ -137,7 +134,7 @@ Span<Vec<Scalar, dim>> merge_vertices(
     Span<Vec<Scalar, dim>> const& vertex_values,
     Span<Index const> const& unique_vertices)
 {
-    static_assert(is_integer<Index> || is_natural<Index>);
+    static_assert(is_index<Index>);
 
     for (isize i = 0; i < unique_vertices.size(); ++i)
         vertex_values[i] = vertex_values[unique_vertices[i]];
@@ -153,7 +150,7 @@ Span<Vec3<Index>> reindex_faces(
     Span<Index const> const& vertex_new_indices,
     bool const remove_degenerate = true)
 {
-    static_assert(is_integer<Index> || is_natural<Index>);
+    static_assert(is_index<Index>);
     isize num_valid = 0;
 
     for (isize i = 0; i < face_vertices.size(); ++i)

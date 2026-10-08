@@ -6,19 +6,19 @@
 
 #include <cassert>
 
-#include <dr/basic_traits.hpp>
+#include <dr/num_traits.hpp>
 
 namespace dr
 {
 
 /// Returns the number of ones in the binary representation of an unsigned integer
-template <typename Nat>
-constexpr u8 bit_sum(Nat x)
+template <typename Num>
+constexpr u8 bit_sum(Num x)
 {
-    static_assert(is_natural<Nat>);
+    static_assert(is_natural<Num>);
 
     u8 sum{};
-    while(x != 0)
+    while (x != 0)
     {
         x &= x - 1;
         ++sum;
@@ -28,18 +28,18 @@ constexpr u8 bit_sum(Nat x)
 }
 
 /// Returns true if the given value is a power of 2
-template <typename Nat>
-constexpr bool is_pow2(Nat const x)
+template <typename Num>
+constexpr bool is_pow2(Num const x)
 {
-    static_assert(is_natural<Nat>);
+    static_assert(is_natural<Num>);
     return (x != 0) && ((x & (x - 1)) == 0);
 }
 
 /// Returns the nearest power of 2 that is greater than or equal to the given value
-template <typename Nat>
-constexpr Nat next_pow2(Nat x)
+template <typename Num>
+constexpr Num next_pow2(Num x)
 {
-    static_assert(is_natural<Nat>);
+    static_assert(is_natural<Num>);
 
     --x;
     x |= x >> 1;
@@ -59,10 +59,10 @@ constexpr Nat next_pow2(Nat x)
 }
 
 /// Returns the nearest power of 2 that is less than or equal to the given value
-template <typename Nat>
-constexpr Nat prev_pow2(Nat x)
+template <typename Num>
+constexpr Num prev_pow2(Num x)
 {
-    static_assert(is_natural<Nat>);
+    static_assert(is_natural<Num>);
 
     x |= x >> 1;
     x |= x >> 2;
@@ -80,25 +80,21 @@ constexpr Nat prev_pow2(Nat x)
     return x ^ (x >> 1);
 }
 
-template <typename Scalar>
-constexpr void unit_square_corner(u8 const index, Scalar result[2])
+template <typename Num>
+constexpr void unit_square_corner(u8 const index, Num result[2])
 {
-    static_assert(is_real<Scalar> || is_integer<Scalar> || is_natural<Scalar>);
-
     assert(index < 4);
-    result[0] = Scalar(index & 1);
-    result[1] = Scalar((index >> 1) & 1);
+    result[0] = Num(index & 1);
+    result[1] = Num((index >> 1) & 1);
 }
 
-template <typename Scalar>
-constexpr void unit_cube_corner(u8 const index, Scalar result[3])
+template <typename Num>
+constexpr void unit_cube_corner(u8 const index, Num result[3])
 {
-    static_assert(is_real<Scalar> || is_integer<Scalar> || is_natural<Scalar>);
-
     assert(index < 8);
-    result[0] = Scalar(index & 1);
-    result[1] = Scalar((index >> 1) & 1);
-    result[2] = Scalar((index >> 2) & 1);
+    result[0] = Num(index & 1);
+    result[1] = Num((index >> 1) & 1);
+    result[2] = Num((index >> 2) & 1);
 }
 
 } // namespace dr

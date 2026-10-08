@@ -2,7 +2,8 @@
 
 #include <memory_resource>
 
-#include <dr/basic_types.hpp>
+#include <dr/meta.hpp>
+#include <dr/num_types.hpp>
 
 namespace dr
 {
@@ -84,6 +85,6 @@ struct AllocatorAware
 
 /// Returns true if T is allocator-aware
 template <typename T>
-inline constexpr bool is_allocator_aware = std::uses_allocator_v<std::decay_t<T>, Allocator>;
+inline constexpr bool is_allocator_aware = std::uses_allocator_v<DropCvRef<T>, Allocator>;
 
 } // namespace dr

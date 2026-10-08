@@ -1,8 +1,8 @@
 #pragma once
 
-#include <dr/basic_traits.hpp>
 #include <dr/dynamic_array.hpp>
 #include <dr/math_types.hpp>
+#include <dr/num_traits.hpp>
 #include <dr/span.hpp>
 #include <dr/sparse_linalg_types.hpp>
 
@@ -15,7 +15,7 @@ namespace dr
 template <typename Scalar, typename Index>
 void repeat_diagonal_each(DynamicArray<Triplet<Scalar, Index>>& coeffs, Index const count)
 {
-    static_assert(is_integer<Index> || is_natural<Index>);
+    static_assert(is_index<Index>);
 
     usize const num_coeffs = coeffs.size();
 
@@ -39,7 +39,7 @@ void repeat_diagonal_all(
     Index const cols,
     Index const count)
 {
-    static_assert(is_integer<Index> || is_natural<Index>);
+    static_assert(is_index<Index>);
 
     for (Index i = 1; i < count; ++i)
     {
@@ -57,8 +57,7 @@ void repeat_diagonal_all(
 template <typename Real, typename Index>
 void symmetrize_quadratic(DynamicArray<Triplet<Real, Index>>& coeffs)
 {
-    static_assert(is_real<Real>);
-    static_assert(is_integer<Index> || is_natural<Index>);
+    static_assert(is_index<Index>);
 
     usize const num_coeffs = coeffs.size();
 

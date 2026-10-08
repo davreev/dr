@@ -1,7 +1,7 @@
 #pragma once
 
 /*
-    Convenience aliases for commonly used primitive types
+    Convenience aliases for built-in numeric types
 */
 
 #include <cstdint>
@@ -11,7 +11,6 @@ namespace dr
 
 using f32 = float;
 using f64 = double;
-using f128 = long double;
 
 using i8 = std::int8_t;
 using i16 = std::int16_t;

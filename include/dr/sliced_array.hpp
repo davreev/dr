@@ -3,10 +3,10 @@
 #include <cassert>
 #include <initializer_list>
 
-#include <dr/basic_types.hpp>
 #include <dr/container_utils.hpp>
 #include <dr/dynamic_array.hpp>
 #include <dr/memory.hpp>
+#include <dr/num_types.hpp>
 #include <dr/span.hpp>
 
 namespace dr
@@ -18,15 +18,10 @@ struct SlicedArray : AllocatorAware
     DynamicArray<T> items;
     DynamicArray<Index> slice_ends;
 
-    SlicedArray(Allocator const alloc = {}) :
-        items(alloc),
-        slice_ends(alloc)
-    {
-    }
+    SlicedArray(Allocator const alloc = {}) : items(alloc), slice_ends(alloc) {}
 
     SlicedArray(SlicedArray const& other, Allocator const alloc = {}) :
-        items{other.items, alloc},
-        slice_ends{other.slice_ends, alloc}
+        items{other.items, alloc}, slice_ends{other.slice_ends, alloc}
     {
     }
 
@@ -34,8 +29,7 @@ struct SlicedArray : AllocatorAware
         std::initializer_list<T> const items,
         std::initializer_list<Index> const slice_ends,
         Allocator const alloc = {}) :
-        items(items, alloc),
-        slice_ends(slice_ends, alloc)
+        items(items, alloc), slice_ends(slice_ends, alloc)
     {
     }
 
@@ -44,10 +38,7 @@ struct SlicedArray : AllocatorAware
     SlicedArray& operator=(SlicedArray&& other) = default;
 
     /// Returns the allocator used by this container
-    Allocator allocator() const
-    {
-        return items.get_allocator();
-    }
+    Allocator allocator() const { return items.get_allocator(); }
 
     /// Returns the total number of items
     Index num_items() const { return size_as<Index>(items); }

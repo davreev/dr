@@ -6,7 +6,7 @@
 
 #include <Eigen/Dense>
 
-#include <dr/basic_types.hpp>
+#include <dr/num_types.hpp>
 #include <dr/constants.hpp>
 
 namespace dr

@@ -7,7 +7,7 @@
 #include <cassert>
 #include <cmath>
 
-#include <dr/basic_traits.hpp>
+#include <dr/num_traits.hpp>
 #include <dr/math_constants.hpp>
 #include <dr/math_ctors.hpp>
 #include <dr/math_types.hpp>
@@ -198,35 +198,30 @@ constexpr Real ramp(Real const x0, Real const x1, Real const x)
 template <typename Scalar>
 Scalar cross(Vec2<Scalar> const& a, Vec2<Scalar> const& b)
 {
-    static_assert(is_real<Scalar> || is_integer<Scalar>);
-
     // Hodge star of wedge product bw 1-vectors in R2
     // ⋆ (a1 e1 + a2 e2) ^ (b1 e1 + b2 e2) = ⋆ (a1 b2 - a2 b1) e1 ^ e2 = a1 b2 - a2 b1
     return a.x() * b.y() - a.y() * b.x();
 }
 
-/// Returns the cross product with the X axis
+/// Returns the cross product with the x axis
 template <typename Scalar>
 Vec3<Scalar> cross_x(Vec3<Scalar> const& v)
 {
-    static_assert(is_real<Scalar> || is_integer<Scalar>);
-    return Vec3<Scalar>(Scalar{0}, v.z(), -v.y());
+    return {Scalar{0}, v.z(), -v.y()};
 }
 
-/// Returns the cross product with the Y axis
+/// Returns the cross product with the y axis
 template <typename Scalar>
 Vec3<Scalar> cross_y(Vec3<Scalar> const& v)
 {
-    static_assert(is_real<Scalar> || is_integer<Scalar>);
-    return Vec3<Scalar>(-v.z(), Scalar{0}, v.x());
+    return {-v.z(), Scalar{0}, v.x()};
 }
 
-/// Returns the cross product with the Z axis
+/// Returns the cross product with the z axis
 template <typename Scalar>
 Vec3<Scalar> cross_z(Vec3<Scalar> const& v)
 {
-    static_assert(is_real<Scalar> || is_integer<Scalar>);
-    return Vec3<Scalar>(v.y(), -v.x(), Scalar{0});
+    return {v.y(), -v.x(), Scalar{0}};
 }
 
 /// Returns the perpendicular vector rotated a quarter turn counterclockwise
@@ -247,7 +242,8 @@ Vec2<Scalar> perp_cw(Vec2<Scalar> const& v)
 template <typename Real, int dim>
 Vec<Real, dim> project(Vec<Real, dim> const& a, Vec<Real, dim> const& b)
 {
-    static_assert(is_real<Real>);
+    static_assert(dim > 0);
+
     return b * (a.dot(b) / b.squaredNorm());
 }
 
@@ -255,7 +251,7 @@ Vec<Real, dim> project(Vec<Real, dim> const& a, Vec<Real, dim> const& b)
 template <typename Real, int dim>
 Vec<Real, dim> reject(Vec<Real, dim> const& a, Vec<Real, dim> const& b)
 {
-    static_assert(is_real<Real>);
+    static_assert(dim > 0);
     return a - project(a, b);
 }
 
@@ -263,7 +259,7 @@ Vec<Real, dim> reject(Vec<Real, dim> const& a, Vec<Real, dim> const& b)
 template <typename Real, int dim>
 Vec<Real, dim> reflect(Vec<Real, dim> const& a, Vec<Real, dim> const& b)
 {
-    static_assert(is_real<Real>);
+    static_assert(dim > 0);
     return a - Real{2.0} * reject(a, b);
 }
 
@@ -271,7 +267,7 @@ Vec<Real, dim> reflect(Vec<Real, dim> const& a, Vec<Real, dim> const& b)
 template <typename Real, int dim>
 bool near_equal(Vec<Real, dim> const& a, Vec<Real, dim> const& b, Real const abs_tol)
 {
-    static_assert(is_real<Real>);
+    static_assert(dim > 0);
     assert(abs_tol >= Real{0.0});
     return (a - b).cwiseAbs().maxCoeff() <= abs_tol;
 }
@@ -286,7 +282,7 @@ bool near_equal(
 {
     // http://realtimecollisiondetection.net/blog/?p=89
 
-    static_assert(is_real<Real>);
+    static_assert(dim > 0);
     assert(abs_tol >= Real{0.0} && rel_tol >= Real{0.0});
 
     Real const max_abs = max(a.cwiseAbs().maxCoeff(), b.cwiseAbs().maxCoeff());
@@ -297,7 +293,8 @@ bool near_equal(
 template <typename Real, int dim>
 bool near_parallel(Vec<Real, dim> const& a, Vec<Real, dim> const& b, Real const abs_tol)
 {
-    static_assert(is_real<Real>);
+    static_assert(dim > 0);
+
     assert(abs_tol >= Real{0.0});
     return reject(a, b).cwiseAbs().maxCoeff() <= abs_tol;
 }
@@ -312,7 +309,7 @@ bool near_parallel(
 {
     // http://realtimecollisiondetection.net/blog/?p=89
 
-    static_assert(is_real<Real>);
+    static_assert(dim > 0);
     assert(abs_tol >= Real{0.0} && rel_tol >= Real{0.0});
 
     Real const max_abs = max(a.cwiseAbs().maxCoeff(), b.cwiseAbs().maxCoeff());
@@ -323,8 +320,6 @@ bool near_parallel(
 template <typename Real>
 Quat<Real> nlerp(Quat<Real> const& q0, Quat<Real> const& q1, Real const t)
 {
-    static_assert(is_real<Real>);
-
     auto c0 = q0.coeffs();
     auto c1 = q1.coeffs();
 
@@ -360,7 +355,7 @@ Real acos_safe(Real const x)
 template <typename Real, int dim>
 Real angle(Vec<Real, dim> const& a, Vec<Real, dim> const& b)
 {
-    static_assert(is_real<Real>);
+    static_assert(dim > 0);
     return acos_safe(a.dot(b) / std::sqrt(a.squaredNorm() * b.squaredNorm()));
 }
 
@@ -368,7 +363,6 @@ Real angle(Vec<Real, dim> const& a, Vec<Real, dim> const& b)
 template <typename Real>
 Real signed_angle(Vec2<Real> const& a, Vec2<Real> const& b)
 {
-    static_assert(is_real<Real>);
     return std::atan2(cross(a, b), a.dot(b));
 }
 
@@ -376,7 +370,6 @@ Real signed_angle(Vec2<Real> const& a, Vec2<Real> const& b)
 template <typename Real>
 Real signed_angle(Vec3<Real> const& a, Vec3<Real> const& b, Vec3<Real> const& up)
 {
-    static_assert(is_real<Real>);
     Vec3<Real> const c = a.cross(b);
     return std::atan2(c.norm() * sign(c.dot(up)), a.dot(b));
 }
@@ -385,7 +378,6 @@ Real signed_angle(Vec3<Real> const& a, Vec3<Real> const& b, Vec3<Real> const& up
 template <typename Real>
 Real angle_in_plane(Vec3<Real> const& a, Vec3<Real> const& b, Vec3<Real> const& normal)
 {
-    static_assert(is_real<Real>);
     return signed_angle(reject(a, normal), reject(b, normal), normal);
 }
 
@@ -393,8 +385,6 @@ Real angle_in_plane(Vec3<Real> const& a, Vec3<Real> const& b, Vec3<Real> const& 
 template <typename Real>
 Real sin_angle(Vec3<Real> const& a, Vec3<Real> const& b)
 {
-    static_assert(is_real<Real>);
-
     // |cross(a, b)| = |a||b|sin(theta)
     Real const d = a.squaredNorm() * b.squaredNorm();
     return (d > Real{0.0}) ? a.cross(b).norm() / std::sqrt(d) : Real{0.0};
@@ -404,8 +394,6 @@ Real sin_angle(Vec3<Real> const& a, Vec3<Real> const& b)
 template <typename Real>
 Real cos_angle(Vec3<Real> const& a, Vec3<Real> const& b)
 {
-    static_assert(is_real<Real>);
-
     // dot(a, b) = |a||b|cos(theta)
     Real const d = a.squaredNorm() * b.squaredNorm();
     return (d > Real{0.0}) ? a.dot(b) / std::sqrt(d) : Real{0.0};
@@ -415,8 +403,6 @@ Real cos_angle(Vec3<Real> const& a, Vec3<Real> const& b)
 template <typename Real>
 Real tan_angle(Vec3<Real> const& a, Vec3<Real> const& b)
 {
-    static_assert(is_real<Real>);
-
     // |cross(a, b)| / dot(a, b) = |a||b|sin(theta) / |a||b|cos(theta) = tan(theta)
     return a.cross(b).norm() / a.dot(b);
 }
@@ -425,8 +411,6 @@ Real tan_angle(Vec3<Real> const& a, Vec3<Real> const& b)
 template <typename Real>
 Real cot_angle(Vec3<Real> const& a, Vec3<Real> const& b)
 {
-    static_assert(is_real<Real>);
-
     // dot(a, b) / |cross(a, b)| = |a||b|cos(theta) / |a||b|sin(theta) = cot(theta)
     return a.dot(b) / a.cross(b).norm();
 }
@@ -435,7 +419,7 @@ Real cot_angle(Vec3<Real> const& a, Vec3<Real> const& b)
 template <typename Real, int rows, int cols>
 Vec<Real, cols> solve_least_squares(Mat<Real, rows, cols> const& A, Vec<Real, rows> const& b)
 {
-    static_assert(is_real<Real> && rows > cols && cols > 0);
+    static_assert(rows > cols && cols > 0);
     return (A.transpose() * A).inverse() * (A.transpose() * b);
 }
 

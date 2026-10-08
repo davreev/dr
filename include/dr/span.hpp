@@ -2,7 +2,7 @@
 
 #include <cassert>
 
-#include <dr/basic_types.hpp>
+#include <dr/num_types.hpp>
 
 namespace dr
 {

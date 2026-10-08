@@ -4,8 +4,8 @@
     Assorted helper functions for container types
 */
 
-#include <dr/basic_types.hpp>
 #include <dr/container_traits.hpp>
+#include <dr/num_types.hpp>
 #include <dr/span.hpp>
 
 namespace dr
@@ -64,13 +64,13 @@ constexpr Span<typename Container::value_type> as_span(Container& container)
 
 /// Creates a span from another contiguous container type
 template <typename Container, std::enable_if_t<is_contiguous<Container>>* = nullptr>
-constexpr Span<const typename Container::value_type> as_span(Container const& container)
+constexpr Span<typename Container::value_type const> as_span(Container const& container)
 {
     return {container.data(), isize(container.size())};
 }
 
 /// Deleted to avoid creating a span from a temporary
 template <typename Container, std::enable_if_t<is_contiguous<Container>>* = nullptr>
-constexpr Span<const typename Container::value_type> as_span(Container const&& container) = delete;
+constexpr Span<typename Container::value_type const> as_span(Container const&& container) = delete;
 
 } // namespace dr

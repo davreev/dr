@@ -2,13 +2,13 @@
 
 #include <algorithm>
 
-#include <dr/basic_traits.hpp>
 #include <dr/constants.hpp>
 #include <dr/container_utils.hpp>
 #include <dr/hash_map.hpp>
 #include <dr/linalg_reshape.hpp>
 #include <dr/math_types.hpp>
 #include <dr/memory.hpp>
+#include <dr/num_traits.hpp>
 #include <dr/span.hpp>
 
 namespace dr
@@ -24,7 +24,7 @@ struct MeshIncidence
     template <typename Index>
     struct Key<Index, 2>
     {
-        static_assert(is_integer<Index> || is_natural<Index>);
+        static_assert(is_index<Index>);
 
         Vec2<Index> indices;
 
@@ -41,7 +41,7 @@ struct MeshIncidence
     template <typename Index>
     struct Key<Index, 3>
     {
-        static_assert(is_integer<Index> || is_natural<Index>);
+        static_assert(is_index<Index>);
 
         Vec3<Index> indices;
 
@@ -73,7 +73,7 @@ struct MeshIncidence
     template <typename Index>
     struct Key<Index, 4>
     {
-        static_assert(is_integer<Index> || is_natural<Index>);
+        static_assert(is_index<Index>);
 
         Vec4<Index> indices;
 

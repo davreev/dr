@@ -1,11 +1,11 @@
 #pragma once
 
-#include <dr/basic_traits.hpp>
+#include <dr/num_traits.hpp>
 
 namespace dr
 {
 
-template <typename Index, std::enable_if_t<is_integer<Index> || is_natural<Index>>* = nullptr>
+template <typename Index, std::enable_if_t<is_index<Index>>* = nullptr>
 inline constexpr Index invalid_index{~0};
 
 template <typename T>

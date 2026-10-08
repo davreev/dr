@@ -1,8 +1,8 @@
 #include <utest.h>
 
-#include <dr/basic_types.hpp>
 #include <dr/function.hpp>
 #include <dr/memory.hpp>
+#include <dr/num_types.hpp>
 
 UTEST(function, lambda)
 {

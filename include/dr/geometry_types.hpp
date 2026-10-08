@@ -4,7 +4,6 @@
     Fixed-size POD geometry types
 */
 
-#include <dr/basic_traits.hpp>
 #include <dr/math_types.hpp>
 
 namespace dr
@@ -13,7 +12,6 @@ namespace dr
 template <typename Scalar, int dim>
 struct Interval
 {
-    static_assert(is_real<Scalar> || is_integer<Scalar>);
     Vec<Scalar, dim> from{};
     Vec<Scalar, dim> to{};
     Vec<Scalar, dim> min() const { return from.array().min(to.array()); }
@@ -33,7 +31,6 @@ using Interval4 = Interval<Scalar, 4>;
 template <typename Scalar, int dim>
 struct Box
 {
-    static_assert(is_real<Scalar> || is_integer<Scalar>);
     Vec<Scalar, dim> center{};
     Vec<Scalar, dim> extent{};
 };
@@ -50,7 +47,6 @@ using Box4 = Box<Scalar, 4>;
 template <typename Scalar, int dim>
 struct Ball
 {
-    static_assert(is_real<Scalar> || is_integer<Scalar>);
     Vec<Scalar, dim> center{};
     Scalar radius{1};
 };
@@ -67,7 +63,6 @@ using Ball4 = Ball<Scalar, 4>;
 template <typename Scalar, int dim>
 struct Line
 {
-    static_assert(is_real<Scalar> || is_integer<Scalar>);
     Vec<Scalar, dim> start{};
     Vec<Scalar, dim> delta{};
 };
@@ -84,7 +79,6 @@ using Line4 = Line<Scalar, 4>;
 template <typename Scalar, int n, int m>
 struct Simplex
 {
-    static_assert(is_real<Scalar> || is_integer<Scalar>);
     Vec<Scalar, n> vertices[m + 1];
     Vec<Scalar, n>& operator[](int const index) { return vertices[index]; }
     Vec<Scalar, n> const& operator[](int const index) const { return vertices[index]; }
