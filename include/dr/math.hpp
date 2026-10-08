@@ -678,11 +678,18 @@ Real cot_angle(Vec3<Real> const& a, Vec3<Real> const& b)
 }
 
 /// Returns the least-squares solution to an overdetermined linear system
-template <typename Real, int rows, int cols>
-Vec<Real, cols> solve_least_squares(Mat<Real, rows, cols> const& A, Vec<Real, rows> const& b)
+template <typename T, typename U>
+auto solve_least_squares(MatExpr<T> const& A, MatExpr<U> const& b)
 {
-    static_assert(rows > cols && cols > 0);
-    return (A.transpose() * A).inverse() * (A.transpose() * b);
+    static_assert(MatShape<T>::is_static);
+    static_assert(MatShape<U>::is_static);
+
+    static_assert(MatShape<T>::rows > MatShape<T>::cols);
+    static_assert(MatShape<T>::rows == MatShape<U>::rows);
+
+    // Ensures A is only evaluated once
+    MatValue<T> const A_val = A;
+    return ((A_val.transpose() * A_val).inverse() * (A_val.transpose() * b)).eval();
 }
 
 } // namespace dr

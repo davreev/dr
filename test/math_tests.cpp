@@ -43,6 +43,31 @@ UTEST(math, solve_least_squares)
     }
 }
 
+UTEST(math, solve_least_squares_matrix_rhs)
+{
+    using namespace dr;
+
+    Mat<f64, 4, 3> const A = mat(
+        vec(1.0, 0.0, 0.0, 0.0), //
+        vec(0.0, 1.0, 0.0, 0.0),
+        vec(0.0, 0.0, 1.0, 0.0));
+
+    Mat<f64, 4, 2> const b = mat(
+        vec(1.0, 3.0, 5.0, 7.0), //
+        vec(2.0, 4.0, 6.0, 8.0));
+
+    // Both inputs are expressions; the result must own its coefficients and have
+    // one row per unknown, rather than one row per equation.
+    auto const x = solve_least_squares(A * Mat3<f64>::Identity(), b + b);
+    static_assert(std::is_same_v<DropCvRef<decltype(x)>, Mat<f64, 3, 2>>);
+
+    for (int row = 0; row < x.rows(); ++row)
+    {
+        for (int col = 0; col < x.cols(); ++col)
+            ASSERT_NEAR(2.0 * b(row, col), x(row, col), 1.0e-12);
+    }
+}
+
 UTEST(math, signed_angle)
 {
     using namespace dr;
@@ -522,7 +547,7 @@ template f64 tan_angle(Vec3<f64> const&, Vec3<f64> const&);
 
 template f64 cot_angle(Vec3<f64> const&, Vec3<f64> const&);
 
-template Vec<f64, 2> solve_least_squares(Mat<f64, 3, 2> const&, Vec<f64, 3> const&);
+template auto solve_least_squares(MatExpr<Mat<f64, 3, 2>> const&, MatExpr<Vec<f64, 3>> const&);
 
 template Mat<f64, 3, 3> mat<3, f64>(f64);
 
