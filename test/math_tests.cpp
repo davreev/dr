@@ -1,7 +1,7 @@
 #include <utest.h>
 
-#include <dr/math.hpp>
 #include <dr/meta.hpp>
+#include <dr/math.hpp>
 
 UTEST(math, solve_least_squares)
 {
@@ -380,10 +380,6 @@ void check_point_wise_result_types()
     Explicit instantiation of templates to catch compile errors
 */
 
-template f64 deg_to_rad(f64);
-
-template f64 rad_to_deg(f64);
-
 template f64 sign(f64);
 
 template f64 min(f64, f64);
@@ -419,8 +415,6 @@ template f64 hermite_c1(f64);
 template f64 smooth_step(f64);
 
 template f64 smooth_step(f64, f64, f64);
-
-template f64 smooth_pulse(f64, f64, f64);
 
 template f64 ramp(f64, f64, f64);
 

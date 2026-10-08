@@ -38,4 +38,10 @@ inline constexpr Num log10e{0.43429448190325182765112891891660508229439700580366
 template <typename Num, std::enable_if_t<is_real<Num>>* = nullptr>
 inline constexpr Num default_epsilon{std::numeric_limits<Num>::epsilon()};
 
+template <typename Num, std::enable_if_t<is_real<Num>>* = nullptr>
+inline constexpr Num deg_to_rad{pi<Num> / Num{180.0}};
+
+template <typename Num, std::enable_if_t<is_real<Num>>* = nullptr>
+inline constexpr Num rad_to_deg{Num{180.0} / pi<Num>};
+
 } // namespace dr

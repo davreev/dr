@@ -17,20 +17,6 @@
 namespace dr
 {
 
-template <typename Real>
-constexpr Real deg_to_rad(Real const angle)
-{
-    static_assert(is_real<Real>);
-    return angle * (pi<Real> / Real{180.0});
-}
-
-template <typename Real>
-constexpr Real rad_to_deg(Real const angle)
-{
-    static_assert(is_real<Real>);
-    return angle * (Real{180.0} / pi<Real>);
-}
-
 template <typename Num, std::enable_if_t<is_number<Num>>* = nullptr>
 constexpr Num sign(Num const x)
 {
@@ -401,15 +387,6 @@ MatValue<T> smooth_step(MatScalar<T> const x0, MatScalar<T> const x1, MatExpr<T>
 {
     static_assert(MatShape<T>::is_static);
     return hermite_c1(saturate(inv_lerp(x0, x1, x)));
-}
-
-template <typename Real>
-constexpr Real smooth_pulse(Real const center, Real const width, Real const x)
-{
-    // http://www.iquilezles.org/www/articles/functions/functions.htm
-
-    static_assert(is_real<Real>);
-    return hermite_c1(Real{1.0} - saturate(abs(x - center) / width));
 }
 
 template <typename Num, std::enable_if_t<is_number<Num>>* = nullptr>
