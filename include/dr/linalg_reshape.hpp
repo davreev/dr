@@ -4,6 +4,7 @@
 #include <cassert>
 
 #include <dr/container_utils.hpp>
+#include <dr/linalg_traits.hpp>
 #include <dr/linalg_types.hpp>
 #include <dr/memory.hpp>
 
@@ -290,26 +291,21 @@ Span<Covec<Scalar, size> const> as_span(CovecArray<Scalar, size> const& mat)
 template <typename Scalar, int size>
 Span<Covec<Scalar, size> const> as_span(CovecArray<Scalar, size> const&& mat) = delete;
 
-/// Allows decomposition of fixed-size matrix types into their coeffs via structured binding
-template <typename Derived>
-auto unpack(MatExpr<Derived> const& expr)
+/// Returns the coefficients of a fixed-size matrix. Use the result with a structured binding.
+template <typename T>
+[[nodiscard]]
+auto unpack(MatExpr<T> const& mat)
 {
-    using Scalar = typename Derived::Scalar;
+    using Shape = MatShape<T>;
+    using Scalar = MatScalar<T>;
 
-    constexpr usize m = Derived::RowsAtCompileTime;
-    constexpr usize n = Derived::ColsAtCompileTime;
-    static_assert(m != dynamic_size && n != dynamic_size);
+    static_assert(Shape::is_static);
+    constexpr usize m = MatShape<T>::rows;
+    constexpr usize n = MatShape<T>::cols;
 
     std::array<Scalar, m * n> result{};
-    as_mat<m, n>(result.data()) = expr;
+    as_mat<m, n>(result.data()) = mat;
     return result;
-}
-
-template <typename Derived>
-[[deprecated("Use unpack instead")]]
-auto expand(MatExpr<Derived> const& expr)
-{
-    return unpack(expr);
 }
 
 } // namespace dr

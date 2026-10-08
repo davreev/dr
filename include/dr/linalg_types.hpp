@@ -4,10 +4,10 @@
     Convenience aliases for commonly used Eigen types
 */
 
-#include <Eigen/Dense>
+#include <Eigen/Core>
 
-#include <dr/num_types.hpp>
 #include <dr/constants.hpp>
+#include <dr/num_types.hpp>
 
 namespace dr
 {
@@ -42,11 +42,11 @@ using Covec = Mat<Scalar, 1, size, Eigen::RowMajor>;
 template <typename Scalar, int size>
 using CovecArray = Mat<Scalar, dynamic_size, size, Eigen::RowMajor>;
 
-template <typename Derived>
-using MatExpr = Eigen::MatrixBase<Derived>;
+template <typename T>
+using MatExpr = Eigen::MatrixBase<T>;
 
-template <typename MatType, int options = Eigen::Unaligned, typename Stride = Eigen::Stride<0, 0>>
-using MatView = Eigen::Map<MatType, options, Stride>;
+template <typename Mat, int options = Eigen::Unaligned, typename Stride = Eigen::Stride<0, 0>>
+using MatView = Eigen::Map<Mat, options, Stride>;
 
 enum MatHint : u8
 {

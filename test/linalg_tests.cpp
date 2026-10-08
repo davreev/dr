@@ -180,6 +180,72 @@ namespace
 {
 
 [[maybe_unused]]
+void check_mat_shape()
+{
+    // MatShape reports the extents of a matrix type
+    static_assert(MatShape<Mat<f64, 2, 5>>::rows == 2);
+    static_assert(MatShape<Mat<f64, 2, 5>>::cols == 5);
+    static_assert(MatShape<Mat<f64, 2, 5> const&>::rows == 2);
+    static_assert(MatShape<VecArray<f64, 3>>::rows == 3);
+    static_assert(MatShape<VecArray<f64, 3>>::cols == dynamic_size);
+
+    // Zero is a valid extent in Eigen, so it must behave as a size
+    static_assert(MatShape<Mat<f64, 3, 0>>::cols == 0);
+    static_assert(MatShape<Mat<f64, 3, 0>>::is_static);
+
+    // is_static and is_dynamic test both extents. A type with one dynamic extent is dynamic.
+    static_assert(MatShape<VecArray<f64, 0>>::is_dynamic);
+    static_assert(MatShape<CovecArray<f64, 0>>::is_dynamic);
+    static_assert(!MatShape<VecArray<f64, 0>>::is_static);
+
+    // Size is the coefficient count for static shapes, including empty matrices.
+    static_assert(MatShape<Mat<f64, 2, 5>>::size == 10);
+    static_assert(MatShape<Mat<f64, 3, 0>>::size == 0);
+    static_assert(MatShape<VecArray<f64, 0>>::size == dynamic_size);
+    static_assert(MatShape<CovecArray<f64, 0>>::size == dynamic_size);
+    static_assert(MatShape<Mat<f64>>::size == dynamic_size);
+    static_assert(MatShape<Mat<f64>>::is_dynamic);
+    static_assert(!MatShape<Mat<f64>>::is_static);
+    static_assert(MatShape<Mat<f64, 2, 5>>::is_static);
+    static_assert(!MatShape<Mat<f64, 2, 5>>::is_dynamic);
+
+    // Rank distinguishes scalar, vector and matrix shapes, regardless of orientation.
+    static_assert(MatShape<Mat<f64, 1, 1>>::rank == 0);
+    static_assert(MatShape<Vec3<f64>>::rank == 1);
+    static_assert(MatShape<Covec3<f64>>::rank == 1);
+    static_assert(MatShape<Mat<f64, 2, 5>>::rank == 2);
+    static_assert(MatShape<Vec<f64>>::rank == 1);
+    static_assert(MatShape<Covec<f64>>::rank == 1);
+    static_assert(MatShape<Mat<f64>>::rank == 2);
+
+    // Orientation traits accept static and dynamic vectors, but not scalar shapes.
+    static_assert(MatShape<Vec3<f64>>::is_vec);
+    static_assert(!MatShape<Vec3<f64>>::is_covec);
+    static_assert(MatShape<Covec3<f64>>::is_covec);
+    static_assert(!MatShape<Covec3<f64>>::is_vec);
+    static_assert(MatShape<Vec<f64>>::is_vec);
+    static_assert(!MatShape<Vec<f64>>::is_covec);
+    static_assert(MatShape<Covec<f64>>::is_covec);
+    static_assert(!MatShape<Covec<f64>>::is_vec);
+    static_assert(!MatShape<Mat<f64, 1, 1>>::is_vec);
+    static_assert(!MatShape<Mat<f64, 1, 1>>::is_covec);
+    static_assert(!MatShape<Mat<f64, 2, 5>>::is_vec);
+    static_assert(!MatShape<Mat<f64, 2, 5>>::is_covec);
+    static_assert(!MatShape<Mat<f64>>::is_vec);
+    static_assert(!MatShape<Mat<f64>>::is_covec);
+
+    // Views and expressions retain their compile-time shape through cv/ref qualifiers.
+    using View = MatView<Vec3<f64>>;
+    using Expr = decltype(std::declval<Covec3<f64>>() + std::declval<Covec3<f64>>());
+    static_assert(MatShape<View const&>::size == 3);
+    static_assert(MatShape<View const&>::rank == 1);
+    static_assert(MatShape<View const&>::is_vec);
+    static_assert(MatShape<Expr const&>::size == 3);
+    static_assert(MatShape<Expr const&>::rank == 1);
+    static_assert(MatShape<Expr const&>::is_covec);
+}
+
+[[maybe_unused]]
 void check_default_mat_options()
 {
     static_assert(default_mat_options<3, 3>() == Eigen::ColMajor);
