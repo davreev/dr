@@ -1,8 +1,8 @@
 #include <utest.h>
 
-#include <dr/num_types.hpp>
 #include <dr/dynamic_array.hpp>
 #include <dr/linalg_reshape.hpp>
+#include <dr/num_types.hpp>
 #include <dr/sparse_linalg_types.hpp>
 #include <dr/sparse_min_quad.hpp>
 
@@ -166,11 +166,13 @@ template struct SparseMinQuadFixed<f64, i32, SolverType_Iterative>;
 
 template bool SparseMinQuadFixed<f64, i32, SolverType_Direct>::init<bool (*)(i32)>(
     SparseMat<f64, i32> const&,
-    bool (*&&)(i32));
+    bool (*&&)(i32),
+    bool);
 
 template bool SparseMinQuadFixed<f64, i32, SolverType_Iterative>::init<bool (*)(i32)>(
     SparseMat<f64, i32> const&,
-    bool (*&&)(i32));
+    bool (*&&)(i32),
+    bool);
 
 template void SparseMinQuadFixed<f64, i32, SolverType_Direct>::solve<Mat<f64>, Mat<f64>>(
     MatExpr<Mat<f64>> const&,

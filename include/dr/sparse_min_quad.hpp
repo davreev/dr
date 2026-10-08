@@ -7,7 +7,6 @@
 
 #include <dr/linalg_reshape.hpp>
 #include <dr/sparse_linalg_types.hpp>
-#include <dr/traits.hpp>
 
 namespace dr
 {
@@ -16,11 +15,18 @@ namespace dr
 template <typename Scalar, typename Index = i32, SolverType solver_type = SolverType_Direct>
 struct SparseMinQuadFixed
 {
-    using Solver = typename Traits<SparseMinQuadFixed>::Solver;
+    using DirectSolver = Eigen::SimplicialLDLT<SparseMat<Scalar, Index>>;
+    using IterativeSolver = Eigen::ConjugateGradient<
+        SparseMat<Scalar, Index>,
+        Eigen::Lower | Eigen::Upper,
+        Eigen::IncompleteCholesky<Scalar>>;
+
+    using Solver =
+        std::conditional_t<solver_type == SolverType_Direct, DirectSolver, IterativeSolver>;
 
     /// Isolates unknown variables and factorizes/preconditions the linear system
     template <typename Predicate>
-    bool init(SparseMat<Scalar, Index> const& A, Predicate&& is_fixed)
+    bool init(SparseMat<Scalar, Index> const& A, Predicate&& is_fixed, bool reuse_pattern = false)
     {
         static_assert(std::is_invocable_r_v<bool, Predicate, Index>);
         assert(A.rows() == A.cols());
@@ -36,34 +42,39 @@ struct SparseMinQuadFixed
         }
 
         // Factorize/precondition the block of A_ corresponding with unknown variables
-        solver_.compute(A_.topLeftCorner(n_[0], n_[0]));
+        auto A_blk = A_.topLeftCorner(n_[0], n_[0]);
+        if (reuse_pattern)
+            solver_.factorize(A_blk);
+        else
+            solver_.compute(A_blk);
+
         return is_init_ = (solver_.info() == Eigen::Success);
     }
 
     /// Minimizes xᵀAx + bᵀx (i.e. solves Ax = b)
-    template <typename DerivedB, typename DerivedX>
-    void solve(MatExpr<DerivedB> const& b, MatExpr<DerivedX>& x)
+    template <typename T, typename U>
+    void solve(MatExpr<T> const& b, MatExpr<U>& x)
     {
         solve_impl(b, x);
     }
 
     /// Minimizes xᵀAx + bᵀx (i.e. solves Ax = b)
-    template <typename DerivedB, typename DerivedX>
-    void solve(MatExpr<DerivedB> const& b, MatView<DerivedX> x)
+    template <typename T, typename U>
+    void solve(MatExpr<T> const& b, MatView<U> x)
     {
         solve_impl(b, x);
     }
 
     /// Minimizes xᵀAx (i.e. solves Ax = 0)
-    template <typename Derived>
-    void solve(MatExpr<Derived>& x)
+    template <typename T>
+    void solve(MatExpr<T>& x)
     {
         solve_impl(x);
     }
 
     /// Minimizes xᵀAx (i.e. solves Ax = 0)
-    template <typename Derived>
-    void solve(MatView<Derived> x)
+    template <typename T>
+    void solve(MatView<T> x)
     {
         solve_impl(x);
     }
@@ -86,8 +97,8 @@ struct SparseMinQuadFixed
     Index n_[2]{};
     bool is_init_{};
 
-    template <typename Predicate>
-    static Index make_permutation(Predicate&& is_fixed, Span<Index> const& result)
+    template <typename Pred>
+    static Index make_permutation(Pred&& is_fixed, Span<Index> const& result)
     {
         Index lo = 0;
         Index hi = Index(result.size());
@@ -103,8 +114,8 @@ struct SparseMinQuadFixed
         return lo;
     }
 
-    template <typename DerivedB, typename DerivedX>
-    void solve_impl(MatExpr<DerivedB> const& b, MatExpr<DerivedX>& x)
+    template <typename T, typename U>
+    void solve_impl(MatExpr<T> const& b, MatExpr<U>& x)
     {
         assert(is_init_);
         auto const P = perm_.asPermutation();
@@ -119,8 +130,8 @@ struct SparseMinQuadFixed
         x.noalias() = P * x_;
     }
 
-    template <typename Derived>
-    void solve_impl(MatExpr<Derived>& x)
+    template <typename T>
+    void solve_impl(MatExpr<T>& x)
     {
         assert(is_init_);
         auto const P = perm_.asPermutation();
@@ -133,21 +144,6 @@ struct SparseMinQuadFixed
         x_.topRows(n_[0]) = solver_.solve(-b_);
         x.noalias() = P * x_;
     }
-};
-
-template <typename Scalar, typename Index>
-struct Traits<SparseMinQuadFixed<Scalar, Index, SolverType_Direct>>
-{
-    using Solver = Eigen::SimplicialLDLT<SparseMat<Scalar, Index>>;
-};
-
-template <typename Scalar, typename Index>
-struct Traits<SparseMinQuadFixed<Scalar, Index, SolverType_Iterative>>
-{
-    using Solver = Eigen::ConjugateGradient<
-        SparseMat<Scalar, Index>,
-        Eigen::Lower | Eigen::Upper,
-        Eigen::IncompleteCholesky<Scalar>>;
 };
 
 } // namespace dr
