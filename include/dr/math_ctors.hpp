@@ -11,11 +11,9 @@ namespace dr
 {
 
 template <int rows, typename Scalar>
-Mat<Scalar, rows, rows> mat(Scalar const diag)
+Mat<Scalar, rows, rows> mat(Scalar const coeff)
 {
-    Mat<Scalar, rows, rows> m;
-    m.diagonal().array() = diag;
-    return m;
+    return Mat<Scalar, rows, rows>::Constant(coeff);
 }
 
 template <int rows, typename Scalar>
