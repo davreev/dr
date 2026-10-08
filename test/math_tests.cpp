@@ -456,6 +456,10 @@ template Vec<f64, 3> vec(f64, f64, f64);
 
 template Vec<f64, 4> vec(f64, f64, f64, f64);
 
+template auto vec(MatExpr<Vec<f64, 4>> const&);
+
+template auto vec(MatExpr<Covec<f64, 4>> const&);
+
 template Vec<f64, 3> col<3, f64>(f64);
 
 template Vec<f64, 2> col(f64, f64);
@@ -464,7 +468,9 @@ template Vec<f64, 3> col(f64, f64, f64);
 
 template Vec<f64, 4> col(f64, f64, f64, f64);
 
-template auto col(MatExpr<Vec3<f64>> const&);
+template auto col(MatExpr<Vec<f64, 4>> const&);
+
+template auto col(MatExpr<Covec<f64, 4>> const&);
 
 template Covec<f64, 3> covec<3, f64>(f64);
 
@@ -474,6 +480,10 @@ template Covec<f64, 3> covec(f64, f64, f64);
 
 template Covec<f64, 4> covec(f64, f64, f64, f64);
 
+template auto covec(MatExpr<Vec<f64, 4>> const&);
+
+template auto covec(MatExpr<Covec<f64, 4>> const&);
+
 template Covec<f64, 3> row<3, f64>(f64);
 
 template Covec<f64, 2> row(f64, f64);
@@ -482,9 +492,15 @@ template Covec<f64, 3> row(f64, f64, f64);
 
 template Covec<f64, 4> row(f64, f64, f64, f64);
 
-template auto row(MatExpr<Covec<f64, 3>> const&);
+template auto row(MatExpr<Covec<f64, 4>> const&);
+
+template auto row(MatExpr<Vec<f64, 4>> const&);
 
 template Complex<f64> complex(f64, f64);
+
+template auto quat(MatExpr<Vec<f64, 4>> const&);
+
+template auto quat(MatExpr<Covec<f64, 4>> const&);
 
 template Quat<f64> quat(f64, f64, f64, f64);
 

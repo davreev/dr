@@ -4,6 +4,7 @@
     Convenience constructors for fixed-size math types
 */
 
+#include <dr/linalg_traits.hpp>
 #include <dr/math_types.hpp>
 
 namespace dr
@@ -107,6 +108,16 @@ Vec<Scalar, 4> vec(Scalar const x, Scalar const y, Scalar const z, Scalar const 
     return {x, y, z, w};
 }
 
+template <typename T>
+auto vec(MatExpr<T> const& expr)
+{
+    using Shape = MatShape<T>;
+    static_assert(Shape::is_static && Shape::rank == 1);
+
+    using Scalar = MatScalar<T>;
+    return Vec<Scalar, Shape::size>{expr.eval()};
+}
+
 template <int size, typename Scalar>
 Vec<Scalar, size> col(Scalar const coeff)
 {
@@ -131,12 +142,10 @@ Vec<Scalar, 4> col(Scalar const x, Scalar const y, Scalar const z, Scalar const 
     return {x, y, z, w};
 }
 
-template <typename Derived>
-auto col(MatExpr<Derived> const& expr)
+template <typename T>
+auto col(MatExpr<T> const& expr)
 {
-    static_assert(Derived::ColsAtCompileTime == 1);
-    static_assert(Derived::RowsAtCompileTime != dynamic_size);
-    return expr.eval();
+    return vec(expr);
 }
 
 template <int size, typename Scalar>
@@ -163,6 +172,16 @@ Covec<Scalar, 4> covec(Scalar const x, Scalar const y, Scalar const z, Scalar co
     return {x, y, z, w};
 }
 
+template <typename T>
+auto covec(MatExpr<T> const& expr)
+{
+    using Shape = MatShape<T>;
+    static_assert(Shape::is_static && Shape::rank == 1);
+
+    using Scalar = MatScalar<T>;
+    return Covec<Scalar, Shape::size>{expr.eval()};
+}
+
 template <int size, typename Scalar>
 Covec<Scalar, size> row(Scalar const coeff)
 {
@@ -187,12 +206,10 @@ Covec<Scalar, 4> row(Scalar const x, Scalar const y, Scalar const z, Scalar cons
     return {x, y, z, w};
 }
 
-template <typename Derived>
-auto row(MatExpr<Derived> const& expr)
+template <typename T>
+auto row(MatExpr<T> const& expr)
 {
-    static_assert(Derived::RowsAtCompileTime == 1);
-    static_assert(Derived::ColsAtCompileTime != dynamic_size);
-    return expr.eval();
+    return covec(expr);
 }
 
 template <typename Scalar>
@@ -211,6 +228,34 @@ template <typename Scalar>
 Quat<Scalar> quat(Scalar const re, Vec3<Scalar> const& im)
 {
     return {re, im[0], im[1], im[2]};
+}
+
+template <typename T>
+auto quat(MatExpr<T> const& expr)
+{
+    using Shape = MatShape<T>;
+    static_assert(Shape::is_static && Shape::rank == 1 && Shape::size == 4);
+
+    using Scalar = MatScalar<T>;
+    return Quat<Scalar>{vec(expr)};
+}
+
+template <typename Scalar>
+AngleAxis<Scalar> angle_axis(Scalar const angle, Vec3<Scalar> const& axis)
+{
+    return {angle, axis};
+}
+
+template <typename Scalar>
+AngleAxis<Scalar> axis_angle(Vec3<Scalar> const& axis, Scalar const angle)
+{
+    return {angle, axis};
+}
+
+template <typename Scalar>
+Quat<Scalar> quat(AngleAxis<Scalar> const& aa)
+{
+    return Quat<Scalar>{aa};
 }
 
 } // namespace dr
