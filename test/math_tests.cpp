@@ -320,6 +320,35 @@ void check_num_traits()
     static_assert(!is_number<i32*> && !is_number<i32[3]>);
 }
 
+[[maybe_unused]]
+void check_point_wise_result_types()
+{
+    Vec3<f64> const v = Vec3<f64>::Ones();
+    Covec3<f64> const c = Covec3<f64>::Ones();
+    Mat3<f64> const m = Mat3<f64>::Identity();
+    f64 buf[3]{};
+    MatView<Vec3<f64>> const view{buf};
+
+    // Each overload returns the plain matrix type, never an expression
+    static_assert(std::is_same_v<decltype(abs(v)), Vec3<f64>>);
+    static_assert(std::is_same_v<decltype(abs(c)), Covec3<f64>>);
+    static_assert(std::is_same_v<decltype(abs(m)), Mat3<f64>>);
+
+    // A block, a view and an expression all bind to the first parameter
+    static_assert(std::is_same_v<decltype(saturate(m.col(0))), Vec3<f64>>);
+    static_assert(std::is_same_v<decltype(saturate(m.row(0))), Covec3<f64>>);
+    static_assert(std::is_same_v<decltype(saturate(view)), Vec3<f64>>);
+    static_assert(std::is_same_v<decltype(saturate(v - v)), Vec3<f64>>);
+
+    // An expression also binds to the other parameters. Eigen converts it to the plain type.
+    static_assert(std::is_same_v<decltype(clamp(m, m - m, m + m)), Mat3<f64>>);
+    static_assert(std::is_same_v<decltype(lerp(v, v * 2.0, v * 0.5)), Vec3<f64>>);
+
+    // A scalar argument still selects the scalar overload
+    static_assert(std::is_same_v<decltype(saturate(1.0)), f64>);
+    static_assert(std::is_same_v<decltype(min(1.0f, 2.0f)), f32>);
+}
+
 } // namespace
 
 /*
@@ -403,6 +432,79 @@ template f64 sqrt_safe(f64);
 template f64 asin_safe(f64);
 
 template f64 acos_safe(f64);
+
+/*
+    Point-wise matrix overloads
+*/
+
+template Vec3<f64> sign(MatExpr<Vec3<f64>> const&);
+
+template Vec3<f64> min(MatExpr<Vec3<f64>> const&, Vec3<f64> const&);
+
+template Vec3<f64> min(MatExpr<Vec3<f64>> const&, f64);
+
+template Vec3<f64> max(MatExpr<Vec3<f64>> const&, Vec3<f64> const&);
+
+template Vec3<f64> max(MatExpr<Vec3<f64>> const&, f64);
+
+template Vec3<f64> clamp(MatExpr<Vec3<f64>> const&, Vec3<f64> const&, Vec3<f64> const&);
+
+template Vec3<f64> clamp(MatExpr<Vec3<f64>> const&, f64, f64);
+
+template Vec3<f64> saturate(MatExpr<Vec3<f64>> const&);
+
+template Vec3<f64> abs(MatExpr<Vec3<f64>> const&);
+
+template Vec3<f64> mod(MatExpr<Vec3<f64>> const&, Vec3<f64> const&);
+
+template Vec3<f64> mod(MatExpr<Vec3<f64>> const&, f64);
+
+template Vec3<i32> mod(MatExpr<Vec3<i32>> const&, Vec3<i32> const&);
+
+template Vec3<u32> mod(MatExpr<Vec3<u32>> const&, Vec3<u32> const&);
+
+template Vec3<f64> wrap(MatExpr<Vec3<f64>> const&, Vec3<f64> const&, Vec3<f64> const&);
+
+template Vec3<f64> wrap(MatExpr<Vec3<f64>> const&, f64, f64);
+
+template Vec3<f64> fract(MatExpr<Vec3<f64>> const&);
+
+template Vec3<f64> fract(MatExpr<Vec3<f64>> const&, Vec3<f64>&);
+
+template Vec3<f64> lerp(MatExpr<Vec3<f64>> const&, Vec3<f64> const&, Vec3<f64> const&);
+
+template Vec3<f64> lerp(MatExpr<Vec3<f64>> const&, Vec3<f64> const&, f64);
+
+template Vec3<f64> inv_lerp(MatExpr<Vec3<f64>> const&, Vec3<f64> const&, Vec3<f64> const&);
+
+template Vec3<f64> inv_lerp(f64, f64, MatExpr<Vec3<f64>> const&);
+
+template Vec3<f64> remap(
+    MatExpr<Vec3<f64>> const&,
+    Vec3<f64> const&,
+    Vec3<f64> const&,
+    Vec3<f64> const&,
+    Vec3<f64> const&);
+
+template Vec3<f64> remap(MatExpr<Vec3<f64>> const&, f64, f64, f64, f64);
+
+template Vec3<f64> hermite_c1(MatExpr<Vec3<f64>> const&);
+
+template Vec3<f64> smooth_step(MatExpr<Vec3<f64>> const&);
+
+template Vec3<f64> smooth_step(MatExpr<Vec3<f64>> const&, Vec3<f64> const&, Vec3<f64> const&);
+
+template Vec3<f64> smooth_step(f64, f64, MatExpr<Vec3<f64>> const&);
+
+template Vec3<f64> ramp(MatExpr<Vec3<f64>> const&, Vec3<f64> const&, Vec3<f64> const&);
+
+template Vec3<f64> ramp(f64, f64, MatExpr<Vec3<f64>> const&);
+
+template Vec3<f64> sqrt_safe(MatExpr<Vec3<f64>> const&);
+
+template Vec3<f64> asin_safe(MatExpr<Vec3<f64>> const&);
+
+template Vec3<f64> acos_safe(MatExpr<Vec3<f64>> const&);
 
 template f64 angle(Vec<f64, 3> const&, Vec<f64, 3> const&);
 

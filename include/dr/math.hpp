@@ -6,11 +6,13 @@
 
 #include <cassert>
 #include <cmath>
+#include <type_traits>
 
-#include <dr/num_traits.hpp>
+#include <dr/linalg_traits.hpp>
 #include <dr/math_constants.hpp>
 #include <dr/math_ctors.hpp>
 #include <dr/math_types.hpp>
+#include <dr/num_traits.hpp>
 
 namespace dr
 {
@@ -29,153 +31,375 @@ constexpr Real rad_to_deg(Real const angle)
     return angle * (Real{180.0} / pi<Real>);
 }
 
-template <typename Scalar>
-constexpr Scalar sign(Scalar const x)
+template <typename Num, std::enable_if_t<is_number<Num>>* = nullptr>
+constexpr Num sign(Num const x)
 {
-    static_assert(is_real<Scalar> || is_integer<Scalar>);
-    return (x > Scalar{0}) ? Scalar{1} : ((x < Scalar{0}) ? Scalar{-1} : Scalar{0});
+    static_assert(is_signed<Num>);
+    return (x > Num{0}) ? Num{1} : ((x < Num{0}) ? Num{-1} : Num{0});
 }
 
-template <typename Scalar>
-constexpr Scalar min(Scalar const a, Scalar const b)
+template <typename T>
+MatValue<T> sign(MatExpr<T> const& x)
 {
-    static_assert(is_real<Scalar> || is_integer<Scalar>);
+    static_assert(MatShape<T>::is_static);
+    return x.cwiseSign();
+}
+
+template <typename Num, std::enable_if_t<is_number<Num>>* = nullptr>
+constexpr Num min(Num const a, Num const b)
+{
     return (b < a) ? b : a;
 }
 
-template <typename Scalar>
-constexpr Scalar max(Scalar const a, Scalar const b)
+template <typename T>
+MatValue<T> min(MatExpr<T> const& a, MatValue<T> const& b)
 {
-    static_assert(is_real<Scalar> || is_integer<Scalar>);
+    static_assert(MatShape<T>::is_static);
+    return a.cwiseMin(b);
+}
+
+template <typename T>
+MatValue<T> min(MatExpr<T> const& a, MatScalar<T> const b)
+{
+    static_assert(MatShape<T>::is_static);
+    return a.cwiseMin(b);
+}
+
+template <typename Num, std::enable_if_t<is_number<Num>>* = nullptr>
+constexpr Num max(Num const a, Num const b)
+{
     return (b > a) ? b : a;
 }
 
-template <typename Real>
-constexpr Real saturate(Real const x)
+template <typename T>
+MatValue<T> max(MatExpr<T> const& a, MatValue<T> const& b)
 {
-    static_assert(is_real<Real>);
-    return (x < Real{0.0}) ? Real{0.0} : ((x > Real{1.0}) ? Real{1.0} : x);
+    static_assert(MatShape<T>::is_static);
+    return a.cwiseMax(b);
 }
 
-template <typename Scalar>
-constexpr Scalar clamp(Scalar const x, Scalar const min, Scalar const max)
+template <typename T>
+MatValue<T> max(MatExpr<T> const& a, MatScalar<T> const b)
 {
-    static_assert(is_real<Scalar> || is_integer<Scalar>);
+    static_assert(MatShape<T>::is_static);
+    return a.cwiseMax(b);
+}
+
+template <typename Num, std::enable_if_t<is_number<Num>>* = nullptr>
+constexpr Num clamp(Num const x, Num const min, Num const max)
+{
     return (x < min) ? min : ((x > max) ? max : x);
 }
 
-template <typename Scalar>
-constexpr Scalar abs(Scalar const x)
+template <typename T>
+MatValue<T> clamp(MatExpr<T> const& x, MatValue<T> const& min, MatValue<T> const& max)
 {
-    static_assert(is_real<Scalar> || is_integer<Scalar>);
-    return (x < Scalar{0}) ? -x : x;
+    static_assert(MatShape<T>::is_static);
+    return x.cwiseMax(min).cwiseMin(max);
+}
+
+template <typename T>
+MatValue<T> clamp(MatExpr<T> const& x, MatScalar<T> const min, MatScalar<T> const max)
+{
+    static_assert(MatShape<T>::is_static);
+    return x.cwiseMax(min).cwiseMin(max);
+}
+
+template <typename Num, std::enable_if_t<is_number<Num>>* = nullptr>
+constexpr Num saturate(Num const x)
+{
+    static_assert(is_real<Num>);
+    return (x < Num{0.0}) ? Num{0.0} : ((x > Num{1.0}) ? Num{1.0} : x);
+}
+
+template <typename T>
+MatValue<T> saturate(MatExpr<T> const& x)
+{
+    using Scalar = MatScalar<T>;
+    static_assert(MatShape<T>::is_static);
+    return clamp(x, Scalar{0.0}, Scalar{1.0});
+}
+
+template <typename Num, std::enable_if_t<is_number<Num>>* = nullptr>
+constexpr Num abs(Num const x)
+{
+    static_assert(is_signed<Num>);
+    return (x < Num{0}) ? -x : x;
+}
+
+template <typename T>
+MatValue<T> abs(MatExpr<T> const& x)
+{
+    static_assert(MatShape<T>::is_static);
+    return x.cwiseAbs();
 }
 
 /// Returns true if two values are within absolute tolerance of eachother
-template <typename Real>
-constexpr bool near_equal(Real const a, Real const b, Real const abs_tol)
+template <typename Num, std::enable_if_t<is_number<Num>>* = nullptr>
+constexpr bool near_equal(Num const a, Num const b, Num const abs_tol)
 {
-    static_assert(is_real<Real>);
-    assert(abs_tol >= Real{0.0});
+    static_assert(is_real<Num>);
+    assert(abs_tol >= Num{0.0});
     return abs(a - b) <= abs_tol;
 }
 
 /// Returns true if two values are within tolerance of eachother
-template <typename Real>
-constexpr bool near_equal(Real const a, Real const b, Real const abs_tol, Real const rel_tol)
+template <typename Num, std::enable_if_t<is_number<Num>>* = nullptr>
+constexpr bool near_equal(Num const a, Num const b, Num const abs_tol, Num const rel_tol)
 {
     // http://realtimecollisiondetection.net/blog/?p=89
 
-    static_assert(is_real<Real>);
-    assert(abs_tol >= Real{0.0} && rel_tol >= Real{0.0});
+    static_assert(is_real<Num>);
+    assert(abs_tol >= Num{0.0} && rel_tol >= Num{0.0});
 
-    Real const max_abs = max(abs(a), abs(b));
+    Num const max_abs = max(abs(a), abs(b));
     return abs(a - b) <= max(abs_tol, rel_tol * max_abs);
 }
 
-template <typename Scalar>
-Scalar mod(Scalar const x, Scalar const y)
+template <typename Num, std::enable_if_t<is_number<Num>>* = nullptr>
+Num mod(Num const x, Num const y)
 {
-    static_assert(is_real<Scalar> || is_integer<Scalar> || is_natural<Scalar>);
-
-    if constexpr (is_real<Scalar>)
+    if constexpr (is_real<Num>)
     {
         return x - y * std::floor(x / y);
     }
-    else if constexpr (is_integer<Scalar>)
+    else if constexpr (is_integer<Num>)
     {
-        Scalar const rem = x % y;
+        Num const rem = x % y;
         return (rem != 0 && (rem ^ y) < 0) ? rem + y : rem;
     }
-    else if constexpr (is_natural<Scalar>)
+    else if constexpr (is_natural<Num>)
     {
         return x % y;
     }
+    else
+    {
+        static_assert(always_false<Num>);
+    }
 }
 
-template <typename Scalar>
-Scalar wrap(Scalar const x, Scalar const x0, Scalar const x1)
+template <typename T>
+MatValue<T> mod(MatExpr<T> const& x, MatValue<T> const& y)
 {
-    static_assert(is_real<Scalar> || is_integer<Scalar>);
+    using Scalar = MatScalar<T>;
+    static_assert(MatShape<T>::is_static);
+
+    if constexpr (is_index<Scalar>)
+    {
+        return x.binaryExpr(y, [](Scalar const a, Scalar const b) {
+            return mod(a, b);
+        });
+    }
+    else
+    {
+        // Ensures x is only evaluated once
+        MatValue<T> const x_val = x;
+        return x_val.array() - y.array() * (x_val.array() / y.array()).floor();
+    }
+}
+
+template <typename T>
+MatValue<T> mod(MatExpr<T> const& x, MatScalar<T> const y)
+{
+    static_assert(MatShape<T>::is_static);
+    return mod(x, MatValue<T>::Constant(y));
+}
+
+template <typename Num, std::enable_if_t<is_number<Num>>* = nullptr>
+Num wrap(Num const x, Num const x0, Num const x1)
+{
+    static_assert(is_signed<Num>);
     return mod(x - x0, x1 - x0) + x0;
 }
 
-/// Returns the fractional component of a number
-template <typename Real>
-Real fract(Real const x)
+template <typename T>
+MatValue<T> wrap(MatExpr<T> const& x, MatValue<T> const& x0, MatValue<T> const& x1)
 {
-    static_assert(is_real<Real>);
+    static_assert(MatShape<T>::is_static);
+    return mod(x - x0, x1 - x0) + x0;
+}
+
+template <typename T>
+MatValue<T> wrap(MatExpr<T> const& x, MatScalar<T> const x0, MatScalar<T> const x1)
+{
+    using Mat = MatValue<T>;
+    static_assert(MatShape<T>::is_static);
+    return wrap(x, Mat::Constant(x0), Mat::Constant(x1));
+}
+
+/// Returns the fractional component of a number
+template <typename Num, std::enable_if_t<is_number<Num>>* = nullptr>
+Num fract(Num const x)
+{
+    static_assert(is_real<Num>);
     return x - std::floor(x);
 }
 
-/// Returns the fractional and whole components of a number
-template <typename Real>
-Real fract(Real const x, Real& whole)
+/// Returns the fractional component of each coefficient
+template <typename T>
+MatValue<T> fract(MatExpr<T> const& x)
 {
-    static_assert(is_real<Real>);
+    static_assert(MatShape<T>::is_static);
+
+    // Ensures x is only evaluated once
+    MatValue<T> const x_val = x;
+    return x_val.array() - x_val.array().floor();
+}
+
+/// Returns the fractional and whole components of a number
+template <typename Num, std::enable_if_t<is_number<Num>>* = nullptr>
+Num fract(Num const x, Num& whole)
+{
+    static_assert(is_real<Num>);
     whole = std::floor(x);
     return x - whole;
 }
 
-template <typename Real>
-constexpr Real lerp(Real const x0, Real const x1, Real const t)
+/// Returns the fractional and whole components of each coefficient
+template <typename T>
+MatValue<T> fract(MatExpr<T> const& x, MatValue<T>& whole)
 {
-    static_assert(is_real<Real>);
+    static_assert(MatShape<T>::is_static);
+
+    // Ensures x is only evaluated once
+    MatValue<T> const x_val = x;
+    whole = x_val.array().floor();
+    return x_val - whole;
+}
+
+template <typename Num, std::enable_if_t<is_number<Num>>* = nullptr>
+constexpr Num lerp(Num const x0, Num const x1, Num const t)
+{
+    static_assert(is_real<Num>);
     return x0 + (x1 - x0) * t;
 }
 
-template <typename Real>
-constexpr Real inv_lerp(Real const x0, Real const x1, Real const x)
+template <typename T>
+MatValue<T> lerp(MatExpr<T> const& x0, MatValue<T> const& x1, MatValue<T> const& t)
 {
-    static_assert(is_real<Real>);
+    static_assert(MatShape<T>::is_static);
+
+    // Ensures x0 is only evaluated once
+    MatValue<T> const x0_val = x0;
+    return x0_val + (x1 - x0_val).cwiseProduct(t);
+}
+
+template <typename T>
+MatValue<T> lerp(MatExpr<T> const& x0, MatValue<T> const& x1, MatScalar<T> const t)
+{
+    static_assert(MatShape<T>::is_static);
+
+    // Ensures x0 is only evaluated once
+    MatValue<T> const x0_val = x0;
+    return x0_val + (x1 - x0_val) * t;
+}
+
+template <typename Num, std::enable_if_t<is_number<Num>>* = nullptr>
+constexpr Num inv_lerp(Num const x0, Num const x1, Num const x)
+{
+    static_assert(is_real<Num>);
     return (x - x0) / (x1 - x0);
 }
 
-template <typename Real>
-constexpr Real remap(Real const x, Real const x0, Real const x1, Real const y0, Real const y1)
+template <typename T>
+MatValue<T> inv_lerp(MatExpr<T> const& x0, MatValue<T> const& x1, MatValue<T> const& x)
 {
-    static_assert(is_real<Real>);
+    static_assert(MatShape<T>::is_static);
+
+    // Ensures x0 is only evaluated once
+    MatValue<T> const x0_val = x0;
+    return (x - x0_val).cwiseQuotient(x1 - x0_val);
+}
+
+template <typename T>
+MatValue<T> inv_lerp(MatScalar<T> const x0, MatScalar<T> const x1, MatExpr<T> const& x)
+{
+    static_assert(MatShape<T>::is_static);
+    return (x.array() - x0) / (x1 - x0);
+}
+
+template <typename Num, std::enable_if_t<is_number<Num>>* = nullptr>
+constexpr Num remap(Num const x, Num const x0, Num const x1, Num const y0, Num const y1)
+{
+    static_assert(is_real<Num>);
     return lerp(y0, y1, inv_lerp(x0, x1, x));
 }
 
-template <typename Real>
-constexpr Real hermite_c1(Real const x)
+template <typename T>
+MatValue<T> remap(
+    MatExpr<T> const& x,
+    MatValue<T> const& x0,
+    MatValue<T> const& x1,
+    MatValue<T> const& y0,
+    MatValue<T> const& y1)
 {
-    static_assert(is_real<Real>);
-    return x * x * (Real{3.0} - Real{2.0} * x);
+    static_assert(MatShape<T>::is_static);
+    return lerp(y0, y1, inv_lerp(x0, x1, x));
 }
 
-template <typename Real>
-constexpr Real smooth_step(Real const t)
+template <typename T>
+MatValue<T> remap(
+    MatExpr<T> const& x,
+    MatScalar<T> const x0,
+    MatScalar<T> const x1,
+    MatScalar<T> const y0,
+    MatScalar<T> const y1)
 {
-    static_assert(is_real<Real>);
+    static_assert(MatShape<T>::is_static);
+    MatValue<T> const t = inv_lerp(x0, x1, x);
+    return y0 + (y1 - y0) * t.array();
+}
+
+template <typename Num, std::enable_if_t<is_number<Num>>* = nullptr>
+constexpr Num hermite_c1(Num const x)
+{
+    static_assert(is_real<Num>);
+    return x * x * (Num{3.0} - Num{2.0} * x);
+}
+
+template <typename T>
+MatValue<T> hermite_c1(MatExpr<T> const& x)
+{
+    using Scalar = MatScalar<T>;
+    static_assert(MatShape<T>::is_static);
+
+    // Ensures x is only evaluated once
+    MatValue<T> const x_val = x;
+    return x_val.array().square() * (Scalar{3.0} - Scalar{2.0} * x_val.array());
+}
+
+template <typename Num, std::enable_if_t<is_number<Num>>* = nullptr>
+constexpr Num smooth_step(Num const t)
+{
+    static_assert(is_real<Num>);
     return hermite_c1(saturate(t));
 }
 
-template <typename Real>
-constexpr Real smooth_step(Real const x0, Real const x1, Real const x)
+template <typename T>
+MatValue<T> smooth_step(MatExpr<T> const& t)
 {
-    static_assert(is_real<Real>);
+    static_assert(MatShape<T>::is_static);
+    return hermite_c1(saturate(t));
+}
+
+template <typename Num, std::enable_if_t<is_number<Num>>* = nullptr>
+constexpr Num smooth_step(Num const x0, Num const x1, Num const x)
+{
+    static_assert(is_real<Num>);
+    return hermite_c1(saturate(inv_lerp(x0, x1, x)));
+}
+
+template <typename T>
+MatValue<T> smooth_step(MatExpr<T> const& x0, MatValue<T> const& x1, MatValue<T> const& x)
+{
+    static_assert(MatShape<T>::is_static);
+    return hermite_c1(saturate(inv_lerp(x0, x1, x)));
+}
+
+template <typename T>
+MatValue<T> smooth_step(MatScalar<T> const x0, MatScalar<T> const x1, MatExpr<T> const& x)
+{
+    static_assert(MatShape<T>::is_static);
     return hermite_c1(saturate(inv_lerp(x0, x1, x)));
 }
 
@@ -188,11 +412,70 @@ constexpr Real smooth_pulse(Real const center, Real const width, Real const x)
     return hermite_c1(Real{1.0} - saturate(abs(x - center) / width));
 }
 
-template <typename Real>
-constexpr Real ramp(Real const x0, Real const x1, Real const x)
+template <typename Num, std::enable_if_t<is_number<Num>>* = nullptr>
+constexpr Num ramp(Num const x0, Num const x1, Num const x)
 {
-    static_assert(is_real<Real>);
+    static_assert(is_real<Num>);
     return saturate(inv_lerp(x0, x1, x));
+}
+
+template <typename T>
+MatValue<T> ramp(MatExpr<T> const& x0, MatValue<T> const& x1, MatValue<T> const& x)
+{
+    static_assert(MatShape<T>::is_static);
+    return saturate(inv_lerp(x0, x1, x));
+}
+
+template <typename T>
+MatValue<T> ramp(MatScalar<T> const x0, MatScalar<T> const x1, MatExpr<T> const& x)
+{
+    static_assert(MatShape<T>::is_static);
+    return saturate(inv_lerp(x0, x1, x));
+}
+
+template <typename Num, std::enable_if_t<is_number<Num>>* = nullptr>
+Num sqrt_safe(Num const x)
+{
+    static_assert(is_real<Num>);
+    return std::sqrt(max(x, Num{0.0}));
+}
+
+template <typename T>
+MatValue<T> sqrt_safe(MatExpr<T> const& x)
+{
+    using Scalar = MatScalar<T>;
+    static_assert(MatShape<T>::is_static);
+    return x.cwiseMax(Scalar{0.0}).cwiseSqrt();
+}
+
+template <typename Num, std::enable_if_t<is_number<Num>>* = nullptr>
+Num asin_safe(Num const x)
+{
+    static_assert(is_real<Num>);
+    return std::asin(clamp(x, Num{-1.0}, Num{1.0}));
+}
+
+template <typename T>
+MatValue<T> asin_safe(MatExpr<T> const& x)
+{
+    using Scalar = MatScalar<T>;
+    static_assert(MatShape<T>::is_static);
+    return x.cwiseMax(Scalar{-1.0}).cwiseMin(Scalar{1.0}).array().asin();
+}
+
+template <typename Num, std::enable_if_t<is_number<Num>>* = nullptr>
+Num acos_safe(Num const x)
+{
+    static_assert(is_real<Num>);
+    return std::acos(clamp(x, Num{-1.0}, Num{1.0}));
+}
+
+template <typename T>
+MatValue<T> acos_safe(MatExpr<T> const& x)
+{
+    using Scalar = MatScalar<T>;
+    static_assert(MatShape<T>::is_static);
+    return x.cwiseMax(Scalar{-1.0}).cwiseMin(Scalar{1.0}).array().acos();
 }
 
 template <typename Scalar>
@@ -328,27 +611,6 @@ Quat<Real> nlerp(Quat<Real> const& q0, Quat<Real> const& q1, Real const t)
         return Quat<Real>(c0 - (c1 + c0) * t).normalized();
     else
         return Quat<Real>(c0 + (c1 - c0) * t).normalized();
-}
-
-template <typename Real>
-Real sqrt_safe(Real const x)
-{
-    static_assert(is_real<Real>);
-    return std::sqrt(max(x, Real{0.0}));
-}
-
-template <typename Real>
-Real asin_safe(Real const x)
-{
-    static_assert(is_real<Real>);
-    return std::asin(clamp(x, Real{-1.0}, Real{1.0}));
-}
-
-template <typename Real>
-Real acos_safe(Real const x)
-{
-    static_assert(is_real<Real>);
-    return std::acos(clamp(x, Real{-1.0}, Real{1.0}));
 }
 
 /// Returns the smallest angle between two vectors
