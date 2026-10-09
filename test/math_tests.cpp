@@ -1,7 +1,7 @@
 #include <utest.h>
 
-#include <dr/meta.hpp>
 #include <dr/math.hpp>
+#include <dr/meta.hpp>
 
 UTEST(math, solve_least_squares)
 {
@@ -543,6 +543,10 @@ template f64 cot_angle(Vec3<f64> const&, Vec3<f64> const&);
 
 template auto solve_least_squares(MatExpr<Mat<f64, 3, 2>> const&, MatExpr<Vec<f64, 3>> const&);
 
+/*
+    Math constructors
+*/
+
 template Mat<f64, 3, 3> mat<3, f64>(f64);
 
 template Mat<f64, 3, 3> mat<3, f64>(Vec<f64, 3> const&);
@@ -626,5 +630,12 @@ template auto quat(MatExpr<Covec<f64, 4>> const&);
 template Quat<f64> quat(f64, f64, f64, f64);
 
 template Quat<f64> quat(f64, Vec3<f64> const&);
+
+template Quat<f64> quat(AngleAxis<f64> const&);
+
+template AngleAxis<f64> angle_axis(f64, Vec3<f64> const&);
+
+template AngleAxis<f64> axis_angle(Vec3<f64> const&, f64);
+
 
 } // namespace dr

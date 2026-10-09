@@ -44,7 +44,7 @@ template <typename Scalar>
 using Quat = Eigen::Quaternion<Scalar>;
 
 template <typename Scalar>
-using AngleAxis = typename Quat<Scalar>::AngleAxisType;
+using AngleAxis = Eigen::AngleAxis<Scalar>;
 
 template <typename Scalar>
 using Complex = std::complex<Scalar>;

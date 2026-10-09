@@ -239,6 +239,12 @@ auto quat(MatExpr<T> const& expr)
 }
 
 template <typename Scalar>
+Quat<Scalar> quat(AngleAxis<Scalar> const& aa)
+{
+    return Quat<Scalar>{aa};
+}
+
+template <typename Scalar>
 AngleAxis<Scalar> angle_axis(Scalar const angle, Vec3<Scalar> const& axis)
 {
     return {angle, axis};
@@ -248,12 +254,6 @@ template <typename Scalar>
 AngleAxis<Scalar> axis_angle(Vec3<Scalar> const& axis, Scalar const angle)
 {
     return {angle, axis};
-}
-
-template <typename Scalar>
-Quat<Scalar> quat(AngleAxis<Scalar> const& aa)
-{
-    return Quat<Scalar>{aa};
 }
 
 } // namespace dr
