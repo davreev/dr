@@ -388,8 +388,8 @@ Real solid_angle(Span<Vec3<Real> const> const& polygon, Vec3<Real> const& point)
     {
         Vec3<Real> const p2 = to_sphere(polygon[mod(i + 2, n)]);
         sum += signed_angle(
-            reject((p1 - p0).eval(), p1).eval(),
-            reject((p2 - p1).eval(), p1).eval(),
+            reject((p1 - p0).eval(), p1),
+            reject((p2 - p1).eval(), p1),
             p1);
         p0 = p1;
         p1 = p2;

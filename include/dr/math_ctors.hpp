@@ -113,7 +113,7 @@ auto vec(MatExpr<T> const& expr)
     static_assert(Shape::is_static && Shape::rank == 1);
 
     using Scalar = MatScalar<T>;
-    return Vec<Scalar, Shape::size>{expr.eval()};
+    return Vec<Scalar, Shape::size>{expr};
 }
 
 template <int size, typename Scalar>
@@ -177,7 +177,7 @@ auto covec(MatExpr<T> const& expr)
     static_assert(Shape::is_static && Shape::rank == 1);
 
     using Scalar = MatScalar<T>;
-    return Covec<Scalar, Shape::size>{expr.eval()};
+    return Covec<Scalar, Shape::size>{expr};
 }
 
 template <int size, typename Scalar>
