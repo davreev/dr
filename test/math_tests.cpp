@@ -627,6 +627,8 @@ template auto quat(MatExpr<Vec<f64, 4>> const&);
 
 template auto quat(MatExpr<Covec<f64, 4>> const&);
 
+template auto quat(MatExpr<Mat3<f64>> const&);
+
 template Quat<f64> quat(f64, f64, f64, f64);
 
 template Quat<f64> quat(f64, Vec3<f64> const&);

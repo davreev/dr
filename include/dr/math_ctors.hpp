@@ -232,10 +232,21 @@ template <typename T>
 auto quat(MatExpr<T> const& expr)
 {
     using Shape = MatShape<T>;
-    static_assert(Shape::is_static && Shape::rank == 1 && Shape::size == 4);
+    static_assert(Shape::is_static);
 
     using Scalar = MatScalar<T>;
-    return Quat<Scalar>{vec(expr)};
+    if constexpr (Shape::rank == 1 && Shape::size == 4)
+    {
+        return Quat<Scalar>{vec(expr)};
+    }
+    else if constexpr (Shape::rows == 3 && Shape::cols == 3)
+    {
+        return Quat<Scalar>{expr};
+    }
+    else
+    {
+        static_assert(always_false<T>);
+    }
 }
 
 template <typename Scalar>
