@@ -18,6 +18,8 @@ bool gather_points(
     Real const radius_end,
     isize const max_iters = 5)
 {
+    static_assert(NumTraits<Real>::is_real);
+
     // Returns true if converged
     auto const step = [&](Real const radius) -> bool {
         constexpr Real rad_scale{8.0};
@@ -87,7 +89,8 @@ void find_unique_points(
     DynamicArray<Index>& unique_points,
     Span<Index> const& point_to_unique)
 {
-    static_assert(is_index<Index>);
+    static_assert(NumTraits<Real>::is_real);
+    static_assert(NumTraits<Index>::is_index);
 
     constexpr Real tol_scale{8.0};
     grid.set_cell_size(tolerance * tol_scale);
@@ -134,7 +137,7 @@ Span<Vec<Scalar, dim>> merge_vertices(
     Span<Vec<Scalar, dim>> const& vertex_values,
     Span<Index const> const& unique_vertices)
 {
-    static_assert(is_index<Index>);
+    static_assert(NumTraits<Index>::is_index);
 
     for (isize i = 0; i < unique_vertices.size(); ++i)
         vertex_values[i] = vertex_values[unique_vertices[i]];
@@ -150,7 +153,7 @@ Span<Vec3<Index>> reindex_faces(
     Span<Index const> const& vertex_new_indices,
     bool const remove_degenerate = true)
 {
-    static_assert(is_index<Index>);
+    static_assert(NumTraits<Index>::is_index);
     isize num_valid = 0;
 
     for (isize i = 0; i < face_vertices.size(); ++i)

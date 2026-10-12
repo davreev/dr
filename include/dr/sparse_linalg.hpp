@@ -15,7 +15,7 @@ namespace dr
 template <typename Scalar, typename Index>
 void repeat_diagonal_each(DynamicArray<Triplet<Scalar, Index>>& coeffs, Index const count)
 {
-    static_assert(is_index<Index>);
+    static_assert(NumTraits<Index>::is_index);
 
     usize const num_coeffs = coeffs.size();
 
@@ -39,7 +39,7 @@ void repeat_diagonal_all(
     Index const cols,
     Index const count)
 {
-    static_assert(is_index<Index>);
+    static_assert(NumTraits<Index>::is_index);
 
     for (Index i = 1; i < count; ++i)
     {
@@ -57,7 +57,8 @@ void repeat_diagonal_all(
 template <typename Real, typename Index>
 void symmetrize_quadratic(DynamicArray<Triplet<Real, Index>>& coeffs)
 {
-    static_assert(is_index<Index>);
+    static_assert(NumTraits<Real>::is_real);
+    static_assert(NumTraits<Index>::is_index);
 
     usize const num_coeffs = coeffs.size();
 

@@ -7,6 +7,7 @@
 #include <dr/geometry_types.hpp>
 #include <dr/hash_map.hpp>
 #include <dr/math_types.hpp>
+#include <dr/num_traits.hpp>
 #include <dr/memory.hpp>
 
 namespace dr
@@ -15,6 +16,8 @@ namespace dr
 template <typename Real, int dim>
 struct HashGrid : AllocatorAware
 {
+    static_assert(NumTraits<Real>::is_real);
+
     using Index = i32;
 
     HashGrid(Allocator const alloc = {}) : buckets_(alloc) {}

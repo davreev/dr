@@ -81,7 +81,7 @@ Builder::Error Builder::make_from_face_vertex(
     bool const include_holes)
 {
     static_assert(std::is_invocable_r_v<Span<SrcIndex const>, FaceVertices, SrcIndex>);
-    static_assert(is_index<SrcIndex>);
+    static_assert(NumTraits<SrcIndex>::is_index);
 
     v_to_he_.clear();
     Index num_hedges = 0;

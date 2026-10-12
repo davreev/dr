@@ -11,16 +11,17 @@
 #include <dr/linalg_traits.hpp>
 #include <dr/math_constants.hpp>
 #include <dr/math_ctors.hpp>
+#include <dr/math_traits.hpp>
 #include <dr/math_types.hpp>
 #include <dr/num_traits.hpp>
 
 namespace dr
 {
 
-template <typename Num, std::enable_if_t<is_number<Num>>* = nullptr>
+template <typename Num, std::enable_if_t<NumTraits<Num>::is_number>* = nullptr>
 constexpr Num sign(Num const x)
 {
-    static_assert(is_signed<Num>);
+    static_assert(NumTraits<Num>::is_signed);
     return (x > Num{0}) ? Num{1} : ((x < Num{0}) ? Num{-1} : Num{0});
 }
 
@@ -31,9 +32,10 @@ MatValue<T> sign(MatExpr<T> const& x)
     return x.cwiseSign();
 }
 
-template <typename Num, std::enable_if_t<is_number<Num>>* = nullptr>
+template <typename Num, std::enable_if_t<NumTraits<Num>::is_number>* = nullptr>
 constexpr Num min(Num const a, Num const b)
 {
+    static_assert(NumTraits<Num>::is_ordered);
     return (b < a) ? b : a;
 }
 
@@ -51,9 +53,10 @@ MatValue<T> min(MatExpr<T> const& a, MatScalar<T> const b)
     return a.cwiseMin(b);
 }
 
-template <typename Num, std::enable_if_t<is_number<Num>>* = nullptr>
+template <typename Num, std::enable_if_t<NumTraits<Num>::is_number>* = nullptr>
 constexpr Num max(Num const a, Num const b)
 {
+    static_assert(NumTraits<Num>::is_ordered);
     return (b > a) ? b : a;
 }
 
@@ -71,9 +74,10 @@ MatValue<T> max(MatExpr<T> const& a, MatScalar<T> const b)
     return a.cwiseMax(b);
 }
 
-template <typename Num, std::enable_if_t<is_number<Num>>* = nullptr>
+template <typename Num, std::enable_if_t<NumTraits<Num>::is_number>* = nullptr>
 constexpr Num clamp(Num const x, Num const min, Num const max)
 {
+    static_assert(NumTraits<Num>::is_ordered);
     return (x < min) ? min : ((x > max) ? max : x);
 }
 
@@ -91,11 +95,11 @@ MatValue<T> clamp(MatExpr<T> const& x, MatScalar<T> const min, MatScalar<T> cons
     return x.cwiseMax(min).cwiseMin(max);
 }
 
-template <typename Num, std::enable_if_t<is_number<Num>>* = nullptr>
+template <typename Num, std::enable_if_t<NumTraits<Num>::is_number>* = nullptr>
 constexpr Num saturate(Num const x)
 {
-    static_assert(is_real<Num>);
-    return (x < Num{0.0}) ? Num{0.0} : ((x > Num{1.0}) ? Num{1.0} : x);
+    static_assert(NumTraits<Num>::is_real || NumTraits<Num>::is_rational);
+    return (x < Num{0}) ? Num{0} : ((x > Num{1}) ? Num{1} : x);
 }
 
 template <typename T>
@@ -103,13 +107,13 @@ MatValue<T> saturate(MatExpr<T> const& x)
 {
     using Scalar = MatScalar<T>;
     static_assert(MatShape<T>::is_static);
-    return clamp(x, Scalar{0.0}, Scalar{1.0});
+    return clamp(x, Scalar{0}, Scalar{1});
 }
 
-template <typename Num, std::enable_if_t<is_number<Num>>* = nullptr>
+template <typename Num, std::enable_if_t<NumTraits<Num>::is_number>* = nullptr>
 constexpr Num abs(Num const x)
 {
-    static_assert(is_signed<Num>);
+    static_assert(NumTraits<Num>::is_signed && NumTraits<Num>::is_ordered);
     return (x < Num{0}) ? -x : x;
 }
 
@@ -121,40 +125,41 @@ MatValue<T> abs(MatExpr<T> const& x)
 }
 
 /// Returns true if two values are within absolute tolerance of eachother
-template <typename Num, std::enable_if_t<is_number<Num>>* = nullptr>
+template <typename Num, std::enable_if_t<NumTraits<Num>::is_number>* = nullptr>
 constexpr bool near_equal(Num const a, Num const b, Num const abs_tol)
 {
-    static_assert(is_real<Num>);
-    assert(abs_tol >= Num{0.0});
+    static_assert(NumTraits<Num>::is_real);
+    assert(abs_tol >= Num{0});
     return abs(a - b) <= abs_tol;
 }
 
 /// Returns true if two values are within tolerance of eachother
-template <typename Num, std::enable_if_t<is_number<Num>>* = nullptr>
+template <typename Num, std::enable_if_t<NumTraits<Num>::is_number>* = nullptr>
 constexpr bool near_equal(Num const a, Num const b, Num const abs_tol, Num const rel_tol)
 {
     // http://realtimecollisiondetection.net/blog/?p=89
 
-    static_assert(is_real<Num>);
-    assert(abs_tol >= Num{0.0} && rel_tol >= Num{0.0});
+    static_assert(NumTraits<Num>::is_real);
+    assert(abs_tol >= Num{0} && rel_tol >= Num{0});
 
     Num const max_abs = max(abs(a), abs(b));
     return abs(a - b) <= max(abs_tol, rel_tol * max_abs);
 }
 
-template <typename Num, std::enable_if_t<is_number<Num>>* = nullptr>
+template <typename Num, std::enable_if_t<NumTraits<Num>::is_number>* = nullptr>
 Num mod(Num const x, Num const y)
 {
-    if constexpr (is_real<Num>)
+    if constexpr (NumTraits<Num>::is_real)
     {
-        return x - y * std::floor(x / y);
+        using std::floor;
+        return x - y * floor(x / y);
     }
-    else if constexpr (is_integer<Num>)
+    else if constexpr (NumTraits<Num>::is_integer)
     {
         Num const rem = x % y;
-        return (rem != 0 && (rem ^ y) < 0) ? rem + y : rem;
+        return (rem != Num{0} && (rem < Num{0}) != (y < Num{0})) ? rem + y : rem;
     }
-    else if constexpr (is_natural<Num>)
+    else if constexpr (NumTraits<Num>::is_natural)
     {
         return x % y;
     }
@@ -170,17 +175,21 @@ MatValue<T> mod(MatExpr<T> const& x, MatValue<T> const& y)
     using Scalar = MatScalar<T>;
     static_assert(MatShape<T>::is_static);
 
-    if constexpr (is_index<Scalar>)
+    if constexpr (NumTraits<Scalar>::is_integer || NumTraits<Scalar>::is_natural)
     {
         return x.binaryExpr(y, [](Scalar const a, Scalar const b) {
             return mod(a, b);
         });
     }
-    else
+    else if constexpr (NumTraits<Scalar>::is_real)
     {
         // Ensures x is only evaluated once
         MatValue<T> const x_val = x;
         return x_val.array() - y.array() * (x_val.array() / y.array()).floor();
+    }
+    else
+    {
+        static_assert(always_false<Scalar>);
     }
 }
 
@@ -191,10 +200,10 @@ MatValue<T> mod(MatExpr<T> const& x, MatScalar<T> const y)
     return mod(x, MatValue<T>::Constant(y));
 }
 
-template <typename Num, std::enable_if_t<is_number<Num>>* = nullptr>
+template <typename Num, std::enable_if_t<NumTraits<Num>::is_number>* = nullptr>
 Num wrap(Num const x, Num const x0, Num const x1)
 {
-    static_assert(is_signed<Num>);
+    static_assert(NumTraits<Num>::is_signed);
     return mod(x - x0, x1 - x0) + x0;
 }
 
@@ -214,11 +223,12 @@ MatValue<T> wrap(MatExpr<T> const& x, MatScalar<T> const x0, MatScalar<T> const 
 }
 
 /// Returns the fractional component of a number
-template <typename Num, std::enable_if_t<is_number<Num>>* = nullptr>
+template <typename Num, std::enable_if_t<NumTraits<Num>::is_number>* = nullptr>
 Num fract(Num const x)
 {
-    static_assert(is_real<Num>);
-    return x - std::floor(x);
+    static_assert(NumTraits<Num>::is_real);
+    using std::floor;
+    return x - floor(x);
 }
 
 /// Returns the fractional component of each coefficient
@@ -233,11 +243,12 @@ MatValue<T> fract(MatExpr<T> const& x)
 }
 
 /// Returns the fractional and whole components of a number
-template <typename Num, std::enable_if_t<is_number<Num>>* = nullptr>
+template <typename Num, std::enable_if_t<NumTraits<Num>::is_number>* = nullptr>
 Num fract(Num const x, Num& whole)
 {
-    static_assert(is_real<Num>);
-    whole = std::floor(x);
+    static_assert(NumTraits<Num>::is_real);
+    using std::floor;
+    whole = floor(x);
     return x - whole;
 }
 
@@ -253,10 +264,10 @@ MatValue<T> fract(MatExpr<T> const& x, MatValue<T>& whole)
     return x_val - whole;
 }
 
-template <typename Num, std::enable_if_t<is_number<Num>>* = nullptr>
+template <typename Num, std::enable_if_t<NumTraits<Num>::is_number>* = nullptr>
 constexpr Num lerp(Num const x0, Num const x1, Num const t)
 {
-    static_assert(is_real<Num>);
+    static_assert(NumTraits<Num>::is_real);
     return x0 + (x1 - x0) * t;
 }
 
@@ -280,10 +291,10 @@ MatValue<T> lerp(MatExpr<T> const& x0, MatValue<T> const& x1, MatScalar<T> const
     return x0_val + (x1 - x0_val) * t;
 }
 
-template <typename Num, std::enable_if_t<is_number<Num>>* = nullptr>
+template <typename Num, std::enable_if_t<NumTraits<Num>::is_number>* = nullptr>
 constexpr Num inv_lerp(Num const x0, Num const x1, Num const x)
 {
-    static_assert(is_real<Num>);
+    static_assert(NumTraits<Num>::is_real);
     return (x - x0) / (x1 - x0);
 }
 
@@ -304,10 +315,10 @@ MatValue<T> inv_lerp(MatScalar<T> const x0, MatScalar<T> const x1, MatExpr<T> co
     return (x.array() - x0) / (x1 - x0);
 }
 
-template <typename Num, std::enable_if_t<is_number<Num>>* = nullptr>
+template <typename Num, std::enable_if_t<NumTraits<Num>::is_number>* = nullptr>
 constexpr Num remap(Num const x, Num const x0, Num const x1, Num const y0, Num const y1)
 {
-    static_assert(is_real<Num>);
+    static_assert(NumTraits<Num>::is_real);
     return lerp(y0, y1, inv_lerp(x0, x1, x));
 }
 
@@ -336,10 +347,10 @@ MatValue<T> remap(
     return y0 + (y1 - y0) * t.array();
 }
 
-template <typename Num, std::enable_if_t<is_number<Num>>* = nullptr>
+template <typename Num, std::enable_if_t<NumTraits<Num>::is_number>* = nullptr>
 constexpr Num hermite_c1(Num const x)
 {
-    static_assert(is_real<Num>);
+    static_assert(NumTraits<Num>::is_real);
     return x * x * (Num{3.0} - Num{2.0} * x);
 }
 
@@ -354,10 +365,10 @@ MatValue<T> hermite_c1(MatExpr<T> const& x)
     return x_val.array().square() * (Scalar{3.0} - Scalar{2.0} * x_val.array());
 }
 
-template <typename Num, std::enable_if_t<is_number<Num>>* = nullptr>
+template <typename Num, std::enable_if_t<NumTraits<Num>::is_number>* = nullptr>
 constexpr Num smooth_step(Num const t)
 {
-    static_assert(is_real<Num>);
+    static_assert(NumTraits<Num>::is_real);
     return hermite_c1(saturate(t));
 }
 
@@ -368,10 +379,10 @@ MatValue<T> smooth_step(MatExpr<T> const& t)
     return hermite_c1(saturate(t));
 }
 
-template <typename Num, std::enable_if_t<is_number<Num>>* = nullptr>
+template <typename Num, std::enable_if_t<NumTraits<Num>::is_number>* = nullptr>
 constexpr Num smooth_step(Num const x0, Num const x1, Num const x)
 {
-    static_assert(is_real<Num>);
+    static_assert(NumTraits<Num>::is_real);
     return hermite_c1(saturate(inv_lerp(x0, x1, x)));
 }
 
@@ -389,10 +400,10 @@ MatValue<T> smooth_step(MatScalar<T> const x0, MatScalar<T> const x1, MatExpr<T>
     return hermite_c1(saturate(inv_lerp(x0, x1, x)));
 }
 
-template <typename Num, std::enable_if_t<is_number<Num>>* = nullptr>
+template <typename Num, std::enable_if_t<NumTraits<Num>::is_number>* = nullptr>
 constexpr Num ramp(Num const x0, Num const x1, Num const x)
 {
-    static_assert(is_real<Num>);
+    static_assert(NumTraits<Num>::is_real);
     return saturate(inv_lerp(x0, x1, x));
 }
 
@@ -410,11 +421,12 @@ MatValue<T> ramp(MatScalar<T> const x0, MatScalar<T> const x1, MatExpr<T> const&
     return saturate(inv_lerp(x0, x1, x));
 }
 
-template <typename Num, std::enable_if_t<is_number<Num>>* = nullptr>
+template <typename Num, std::enable_if_t<NumTraits<Num>::is_number>* = nullptr>
 Num sqrt_safe(Num const x)
 {
-    static_assert(is_real<Num>);
-    return std::sqrt(max(x, Num{0.0}));
+    static_assert(NumTraits<Num>::is_real);
+    using std::sqrt;
+    return sqrt(max(x, Num{0}));
 }
 
 template <typename T>
@@ -422,14 +434,15 @@ MatValue<T> sqrt_safe(MatExpr<T> const& x)
 {
     using Scalar = MatScalar<T>;
     static_assert(MatShape<T>::is_static);
-    return x.cwiseMax(Scalar{0.0}).cwiseSqrt();
+    return x.cwiseMax(Scalar{0}).cwiseSqrt();
 }
 
-template <typename Num, std::enable_if_t<is_number<Num>>* = nullptr>
+template <typename Num, std::enable_if_t<NumTraits<Num>::is_number>* = nullptr>
 Num asin_safe(Num const x)
 {
-    static_assert(is_real<Num>);
-    return std::asin(clamp(x, Num{-1.0}, Num{1.0}));
+    static_assert(NumTraits<Num>::is_real);
+    using std::asin;
+    return asin(clamp(x, Num{-1}, Num{1}));
 }
 
 template <typename T>
@@ -437,14 +450,15 @@ MatValue<T> asin_safe(MatExpr<T> const& x)
 {
     using Scalar = MatScalar<T>;
     static_assert(MatShape<T>::is_static);
-    return x.cwiseMax(Scalar{-1.0}).cwiseMin(Scalar{1.0}).array().asin();
+    return x.cwiseMax(Scalar{-1}).cwiseMin(Scalar{1}).array().asin();
 }
 
-template <typename Num, std::enable_if_t<is_number<Num>>* = nullptr>
+template <typename Num, std::enable_if_t<NumTraits<Num>::is_number>* = nullptr>
 Num acos_safe(Num const x)
 {
-    static_assert(is_real<Num>);
-    return std::acos(clamp(x, Num{-1.0}, Num{1.0}));
+    static_assert(NumTraits<Num>::is_real);
+    using std::acos;
+    return acos(clamp(x, Num{-1}, Num{1}));
 }
 
 template <typename T>
@@ -452,7 +466,7 @@ MatValue<T> acos_safe(MatExpr<T> const& x)
 {
     using Scalar = MatScalar<T>;
     static_assert(MatShape<T>::is_static);
-    return x.cwiseMax(Scalar{-1.0}).cwiseMin(Scalar{1.0}).array().acos();
+    return x.cwiseMax(Scalar{-1}).cwiseMin(Scalar{1}).array().acos();
 }
 
 template <typename Scalar>
@@ -502,8 +516,8 @@ Vec2<Scalar> perp_cw(Vec2<Scalar> const& v)
 template <typename Real, int dim>
 Vec<Real, dim> project(Vec<Real, dim> const& a, Vec<Real, dim> const& b)
 {
+    static_assert(NumTraits<Real>::is_real);
     static_assert(dim > 0);
-
     return b * (a.dot(b) / b.squaredNorm());
 }
 
@@ -511,6 +525,7 @@ Vec<Real, dim> project(Vec<Real, dim> const& a, Vec<Real, dim> const& b)
 template <typename Real, int dim>
 Vec<Real, dim> reject(Vec<Real, dim> const& a, Vec<Real, dim> const& b)
 {
+    static_assert(NumTraits<Real>::is_real);
     static_assert(dim > 0);
     return a - project(a, b);
 }
@@ -519,6 +534,7 @@ Vec<Real, dim> reject(Vec<Real, dim> const& a, Vec<Real, dim> const& b)
 template <typename Real, int dim>
 Vec<Real, dim> reflect(Vec<Real, dim> const& a, Vec<Real, dim> const& b)
 {
+    static_assert(NumTraits<Real>::is_real);
     static_assert(dim > 0);
     return a - Real{2.0} * reject(a, b);
 }
@@ -527,8 +543,9 @@ Vec<Real, dim> reflect(Vec<Real, dim> const& a, Vec<Real, dim> const& b)
 template <typename Real, int dim>
 bool near_equal(Vec<Real, dim> const& a, Vec<Real, dim> const& b, Real const abs_tol)
 {
+    static_assert(NumTraits<Real>::is_real);
     static_assert(dim > 0);
-    assert(abs_tol >= Real{0.0});
+    assert(abs_tol >= Real{0});
     return (a - b).cwiseAbs().maxCoeff() <= abs_tol;
 }
 
@@ -542,8 +559,9 @@ bool near_equal(
 {
     // http://realtimecollisiondetection.net/blog/?p=89
 
+    static_assert(NumTraits<Real>::is_real);
     static_assert(dim > 0);
-    assert(abs_tol >= Real{0.0} && rel_tol >= Real{0.0});
+    assert(abs_tol >= Real{0} && rel_tol >= Real{0});
 
     Real const max_abs = max(a.cwiseAbs().maxCoeff(), b.cwiseAbs().maxCoeff());
     return (a - b).cwiseAbs().maxCoeff() <= max(abs_tol, rel_tol * max_abs);
@@ -553,9 +571,10 @@ bool near_equal(
 template <typename Real, int dim>
 bool near_parallel(Vec<Real, dim> const& a, Vec<Real, dim> const& b, Real const abs_tol)
 {
+    static_assert(NumTraits<Real>::is_real);
     static_assert(dim > 0);
 
-    assert(abs_tol >= Real{0.0});
+    assert(abs_tol >= Real{0});
     return reject(a, b).cwiseAbs().maxCoeff() <= abs_tol;
 }
 
@@ -567,10 +586,12 @@ bool near_parallel(
     Real const abs_tol,
     Real const rel_tol)
 {
+    static_assert(NumTraits<Real>::is_real);
+
     // http://realtimecollisiondetection.net/blog/?p=89
 
     static_assert(dim > 0);
-    assert(abs_tol >= Real{0.0} && rel_tol >= Real{0.0});
+    assert(abs_tol >= Real{0} && rel_tol >= Real{0});
 
     Real const max_abs = max(a.cwiseAbs().maxCoeff(), b.cwiseAbs().maxCoeff());
     return reject(a, b).cwiseAbs().maxCoeff() <= max(abs_tol, rel_tol * max_abs);
@@ -580,11 +601,13 @@ bool near_parallel(
 template <typename Real>
 Quat<Real> nlerp(Quat<Real> const& q0, Quat<Real> const& q1, Real const t)
 {
+    static_assert(NumTraits<Real>::is_real);
+
     auto c0 = q0.coeffs();
     auto c1 = q1.coeffs();
 
     // Ensure the shortest path is taken bw the two rotations
-    if (c0.dot(c1) < Real{0.0})
+    if (c0.dot(c1) < Real{0})
         return Quat<Real>(c0 - (c1 + c0) * t).normalized();
     else
         return Quat<Real>(c0 + (c1 - c0) * t).normalized();
@@ -594,29 +617,40 @@ Quat<Real> nlerp(Quat<Real> const& q0, Quat<Real> const& q1, Real const t)
 template <typename Real, int dim>
 Real angle(Vec<Real, dim> const& a, Vec<Real, dim> const& b)
 {
+    static_assert(NumTraits<Real>::is_real);
     static_assert(dim > 0);
-    return acos_safe(a.dot(b) / std::sqrt(a.squaredNorm() * b.squaredNorm()));
+
+    using std::sqrt;
+    return acos_safe(a.dot(b) / sqrt(a.squaredNorm() * b.squaredNorm()));
 }
 
 /// Returns the signed angle between two vectors
 template <typename Real>
 Real signed_angle(Vec2<Real> const& a, Vec2<Real> const& b)
 {
-    return std::atan2(cross(a, b), a.dot(b));
+    static_assert(NumTraits<Real>::is_real);
+
+    using std::atan2;
+    return atan2(cross(a, b), a.dot(b));
 }
 
 /// Returns the signed angle between two vectors relative to a third "up" vector
 template <typename Real>
 Real signed_angle(Vec3<Real> const& a, Vec3<Real> const& b, Vec3<Real> const& up)
 {
+    static_assert(NumTraits<Real>::is_real);
+
     Vec3<Real> const c = a.cross(b);
-    return std::atan2(c.norm() * sign(c.dot(up)), a.dot(b));
+
+    using std::atan2;
+    return atan2(c.norm() * sign(c.dot(up)), a.dot(b));
 }
 
 /// Returns the signed angle between two vectors in a plane
 template <typename Real>
 Real angle_in_plane(Vec3<Real> const& a, Vec3<Real> const& b, Vec3<Real> const& normal)
 {
+    static_assert(NumTraits<Real>::is_real);
     return signed_angle(reject(a, normal), reject(b, normal), normal);
 }
 
@@ -624,24 +658,34 @@ Real angle_in_plane(Vec3<Real> const& a, Vec3<Real> const& b, Vec3<Real> const& 
 template <typename Real>
 Real sin_angle(Vec3<Real> const& a, Vec3<Real> const& b)
 {
+    static_assert(NumTraits<Real>::is_real);
+
     // |cross(a, b)| = |a||b|sin(theta)
     Real const d = a.squaredNorm() * b.squaredNorm();
-    return (d > Real{0.0}) ? a.cross(b).norm() / std::sqrt(d) : Real{0.0};
+
+    using std::sqrt;
+    return (d > Real{0}) ? a.cross(b).norm() / sqrt(d) : Real{0};
 }
 
 /// Returns the cosine of the smallest angle between two vectors
 template <typename Real>
 Real cos_angle(Vec3<Real> const& a, Vec3<Real> const& b)
 {
+    static_assert(NumTraits<Real>::is_real);
+
     // dot(a, b) = |a||b|cos(theta)
     Real const d = a.squaredNorm() * b.squaredNorm();
-    return (d > Real{0.0}) ? a.dot(b) / std::sqrt(d) : Real{0.0};
+
+    using std::sqrt;
+    return (d > Real{0}) ? a.dot(b) / sqrt(d) : Real{0};
 }
 
 /// Returns the tangent of the smallest angle between two vectors
 template <typename Real>
 Real tan_angle(Vec3<Real> const& a, Vec3<Real> const& b)
 {
+    static_assert(NumTraits<Real>::is_real);
+
     // |cross(a, b)| / dot(a, b) = |a||b|sin(theta) / |a||b|cos(theta) = tan(theta)
     return a.cross(b).norm() / a.dot(b);
 }
@@ -650,6 +694,8 @@ Real tan_angle(Vec3<Real> const& a, Vec3<Real> const& b)
 template <typename Real>
 Real cot_angle(Vec3<Real> const& a, Vec3<Real> const& b)
 {
+    static_assert(NumTraits<Real>::is_real);
+
     // dot(a, b) / |cross(a, b)| = |a||b|cos(theta) / |a||b|sin(theta) = cot(theta)
     return a.dot(b) / a.cross(b).norm();
 }

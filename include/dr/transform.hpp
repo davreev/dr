@@ -10,6 +10,8 @@ namespace dr
 template <typename Real, int dim>
 struct Affine
 {
+    static_assert(NumTraits<Real>::is_real);
+
     Mat<Real, dim, dim> linear{Mat<Real, dim, dim>::Identity()};
     Vec<Real, dim> translation{};
 
@@ -80,6 +82,8 @@ struct Rotation;
 template <typename Real>
 struct Rotation<Real, 2>
 {
+    static_assert(NumTraits<Real>::is_real);
+
     /// Unit complex number representation of the rotation. This can also be interpreted as the
     /// first standard basis vector after rotation.
     Vec2<Real> c{Vec2<Real>::UnitX()};
@@ -106,6 +110,8 @@ struct Rotation<Real, 2>
 template <typename Real>
 struct Rotation<Real, 3>
 {
+    static_assert(NumTraits<Real>::is_real);
+
     /// Unit quaternion representation of the rotation
     Quat<Real> q{Quat<Real>::Identity()};
 
@@ -137,6 +143,8 @@ using Rotation3 = Rotation<Real, 3>;
 template <typename Real, int dim>
 struct Conformal
 {
+    static_assert(NumTraits<Real>::is_real);
+
     Rotation<Real, dim> rotation{};
     Vec<Real, dim> translation{};
     Real scale{1.0};
@@ -232,6 +240,8 @@ using Conformal3 = Conformal<Real, 3>;
 template <typename Real, int dim>
 struct Rigid
 {
+    static_assert(NumTraits<Real>::is_real);
+
     Rotation<Real, dim> rotation{};
     Vec<Real, dim> translation{};
 

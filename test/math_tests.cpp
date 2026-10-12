@@ -306,6 +306,97 @@ UTEST(math, near_equal_scalar)
     }
 }
 
+namespace dr
+{
+namespace test
+{
+
+template <typename T>
+struct Number
+{
+    T value{};
+
+    constexpr Number() = default;
+    explicit constexpr Number(T const x) : value{x} {}
+
+    friend constexpr Number operator+(Number a, Number b) { return Number{a.value + b.value}; }
+    friend constexpr Number operator-(Number a, Number b) { return Number{a.value - b.value}; }
+    friend constexpr Number operator*(Number a, Number b) { return Number{a.value * b.value}; }
+    friend constexpr Number operator/(Number a, Number b) { return Number{a.value / b.value}; }
+    friend constexpr Number operator%(Number a, Number b) { return Number{a.value % b.value}; }
+    friend constexpr Number operator-(Number a) { return Number{-a.value}; }
+    friend constexpr bool operator<(Number a, Number b) { return a.value < b.value; }
+    friend constexpr bool operator>(Number a, Number b) { return a.value > b.value; }
+    friend constexpr bool operator!=(Number a, Number b) { return a.value != b.value; }
+};
+
+using Real = Number<double>;
+
+struct
+{
+    int floor{};
+    int sqrt{};
+    int asin{};
+    int acos{};
+} op_count;
+
+Real floor(Real x)
+{
+    ++op_count.floor;
+    return Real{std::floor(x.value)};
+}
+
+Real sqrt(Real x)
+{
+    ++op_count.sqrt;
+    return Real{std::sqrt(x.value)};
+}
+
+Real asin(Real x)
+{
+    ++op_count.asin;
+    return Real{std::asin(x.value)};
+}
+
+Real acos(Real x)
+{
+    ++op_count.acos;
+    return Real{std::acos(x.value)};
+}
+
+} // namespace test
+
+template <>
+struct CustomNumTraits<test::Real> : DefaultNumTraits<test::Real>
+{
+    static constexpr bool is_real{true};
+};
+
+} // namespace dr
+
+UTEST(math, custom_real_adl)
+{
+    using namespace dr;
+    using test::Real;
+
+    constexpr f64 eps = 1e-12;
+
+    ASSERT_NEAR(dr::mod(Real{-1.25}, Real{1.0}).value, 0.75, eps);
+    ASSERT_NEAR(dr::fract(Real{-1.25}).value, 0.75, eps);
+    Real whole;
+    ASSERT_NEAR(dr::fract(Real{-1.25}, whole).value, 0.75, eps);
+    ASSERT_EQ(whole.value, -2.0);
+    ASSERT_EQ(dr::sqrt_safe(Real{-4.0}).value, 0.0);
+    ASSERT_NEAR(dr::asin_safe(Real{2.0}).value, std::asin(1.0), eps);
+    ASSERT_EQ(dr::acos_safe(Real{2.0}).value, 0.0);
+
+    auto const& op_count = dr::test::op_count;
+    ASSERT_EQ(op_count.floor, 3);
+    ASSERT_EQ(op_count.sqrt, 1);
+    ASSERT_EQ(op_count.asin, 1);
+    ASSERT_EQ(op_count.acos, 1);
+}
+
 /*
     Compile-time checks
 */
@@ -316,33 +407,62 @@ namespace dr
 namespace
 {
 
+template <typename... Natural, typename... Integer, typename... Real, typename... Complex>
+void check_num_traits(
+    TypePack<Natural...>,
+    TypePack<Integer...>,
+    TypePack<Real...>,
+    TypePack<Complex...>)
+{
+    static_assert((NumTraits<Natural>::is_natural && ...));
+    static_assert((NumTraits<Integer>::is_integer && ...));
+    static_assert((NumTraits<Real>::is_real && ...));
+    static_assert((NumTraits<Complex>::is_complex && ...));
+
+    static_assert((!NumTraits<Natural>::is_signed && ...));
+    static_assert((NumTraits<Integer>::is_signed && ...));
+    static_assert((NumTraits<Real>::is_signed && ...));
+    static_assert((!NumTraits<Complex>::is_ordered && ...));
+
+    static_assert((NumTraits<Natural>::is_index && ...));
+    static_assert((NumTraits<Integer>::is_index && ...));
+    static_assert((!NumTraits<Real>::is_index && ...));
+    static_assert((!NumTraits<Complex>::is_index && ...));
+
+    static_assert(
+        (NumTraits<Natural>::is_number && ...) && (NumTraits<Integer>::is_number && ...)
+        && (NumTraits<Real>::is_number && ...) && (NumTraits<Complex>::is_number && ...));
+}
+
 [[maybe_unused]]
 void check_num_traits()
 {
-    static_assert(is_natural<unsigned int>);
-    static_assert(is_natural<std::size_t>);
+    check_num_traits(
+        TypePack<u8, u16, u32, u64, usize, unsigned int, std::size_t>{},
+        TypePack<i8, i16, i32, i64, isize, int, std::ptrdiff_t>{},
+        TypePack<f32, f64, float, double>{},
+        TypePack<Complex<float>, Complex<double>>{});
 
-    static_assert(is_integer<int>);
-    static_assert(is_integer<std::ptrdiff_t>);
-
-    static_assert(is_real<float>);
-    static_assert(is_real<double>);
-
-    static_assert(is_number<u32> && is_number<i32> && is_number<f64>);
-    static_assert(!is_number<bool> && !is_number<Complex<f64>>);
-    static_assert(!is_signed<u8> && !is_signed<u16> && !is_signed<u32>);
-    static_assert(!is_signed<u64> && !is_signed<usize>);
-    static_assert(is_signed<i32> && is_signed<f64>);
-    static_assert(is_index<u32> && is_index<i32>);
-    static_assert(!is_index<f64> && !is_index<bool>);
+    static_assert(
+        !NumTraits<void>::is_number && !NumTraits<bool>::is_number && !NumTraits<i32*>::is_number
+        && !NumTraits<i32[3]>::is_number);
 
     // Trait queries normalize cv/ref qualifiers.
-    static_assert(is_natural<u32 const&>);
-    static_assert(is_integer<i32 volatile&>);
-    static_assert(is_real<f64 const&&>);
-    static_assert(is_number<i32 const&> && is_signed<i32 const&>);
-    static_assert(is_index<u32 volatile&> && !is_signed<u32 volatile&>);
-    static_assert(!is_number<i32*> && !is_number<i32[3]>);
+    static_assert(NumTraits<u32 const&>::is_natural);
+    static_assert(NumTraits<i32 volatile&>::is_integer);
+    static_assert(NumTraits<f64 const&&>::is_real);
+    static_assert(NumTraits<i32 const&>::is_number && NumTraits<i32 const&>::is_signed);
+    static_assert(NumTraits<u32 volatile&>::is_index && !NumTraits<u32 volatile&>::is_signed);
+}
+
+[[maybe_unused]]
+void check_custom_num_traits()
+{
+    using Traits = NumTraits<test::Real>;
+    static_assert(Traits::is_number && Traits::is_real && Traits::is_signed && Traits::is_ordered);
+    static_assert(
+        !Traits::is_builtin && !Traits::is_index && !Traits::is_natural && !Traits::is_integer
+        && !Traits::is_rational && !Traits::is_complex);
 }
 
 [[maybe_unused]]
@@ -638,6 +758,5 @@ template Quat<f64> quat(AngleAxis<f64> const&);
 template AngleAxis<f64> angle_axis(f64, Vec3<f64> const&);
 
 template AngleAxis<f64> axis_angle(Vec3<f64> const&, f64);
-
 
 } // namespace dr

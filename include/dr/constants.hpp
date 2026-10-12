@@ -5,7 +5,7 @@
 namespace dr
 {
 
-template <typename Index, std::enable_if_t<is_index<Index>>* = nullptr>
+template <typename Index, std::enable_if_t<NumTraits<Index>::is_index>* = nullptr>
 inline constexpr Index invalid_index{~0};
 
 template <typename T>

@@ -8,6 +8,7 @@
 #include <dr/linalg_reshape.hpp>
 #include <dr/linalg_types.hpp>
 #include <dr/math.hpp>
+#include <dr/num_traits.hpp>
 #include <dr/span.hpp>
 
 namespace dr
@@ -20,6 +21,9 @@ void vertex_vector_areas(
     Span<Vec3<Index> const> const& face_vertices,
     Span<Vec3<Real>> const& result)
 {
+    static_assert(NumTraits<Real>::is_real);
+    static_assert(NumTraits<Index>::is_index);
+
     assert(result.size() == vertex_positions.size());
     std::fill(begin(result), end(result), Vec3<Real>::Zero());
 
@@ -48,6 +52,9 @@ void vertex_normals_area_weighted(
     Span<Vec3<Index> const> const& face_vertices,
     Span<Vec3<Real>> const& result)
 {
+    static_assert(NumTraits<Real>::is_real);
+    static_assert(NumTraits<Index>::is_index);
+
     assert(result.size() == vertex_positions.size());
     vertex_vector_areas(vertex_positions, face_vertices, result);
     as_mat(result).colwise().normalize();
@@ -60,6 +67,9 @@ void vertex_areas_barycentric(
     Span<Vec3<Index> const> const& face_vertices,
     Span<Real> const& result)
 {
+    static_assert(NumTraits<Real>::is_real);
+    static_assert(NumTraits<Index>::is_index);
+
     assert(result.size() == vertex_positions.size());
     std::fill(begin(result), end(result), Real{0.0});
 
@@ -85,6 +95,7 @@ void vertex_areas_barycentric(
 template <typename Scalar, typename Index>
 void vertex_degrees(Span<Vec3<Index> const> const& face_vertices, Span<Scalar> const& result)
 {
+    static_assert(NumTraits<Index>::is_index);
     std::fill(begin(result), end(result), Scalar{0});
 
     for (isize f = 0; f < face_vertices.size(); ++f)
@@ -104,6 +115,9 @@ void face_vector_areas(
     Span<Vec3<Real>> const& result,
     isize const num_threads = 1)
 {
+    static_assert(NumTraits<Real>::is_real);
+    static_assert(NumTraits<Index>::is_index);
+
     assert(result.size() == face_vertices.size());
 
     auto const loop_body = [&](isize const f) {
@@ -135,6 +149,9 @@ void face_normals(
     Span<Vec3<Real>> const& result,
     isize const num_threads = 1)
 {
+    static_assert(NumTraits<Real>::is_real);
+    static_assert(NumTraits<Index>::is_index);
+
     assert(result.size() == face_vertices.size());
     face_vector_areas(vertex_positions, face_vertices, result, num_threads);
     as_mat(result).colwise().normalize();
@@ -148,6 +165,9 @@ Value integrate_vertex_func(
     Span<Vec4<Index> const> const& cell_vertices,
     Real& volume)
 {
+    static_assert(NumTraits<Real>::is_real);
+    static_assert(NumTraits<Index>::is_index);
+
     Value result{};
     volume = Real{0.0};
 
@@ -188,6 +208,9 @@ Value integrate_vertex_func(
     Span<Vec3<Index> const> const& face_vertices,
     Real& area)
 {
+    static_assert(NumTraits<Real>::is_real);
+    static_assert(NumTraits<Index>::is_index);
+
     Value result{};
     area = Real{0.0};
 
@@ -227,6 +250,9 @@ Value integrate_vertex_func(
     Span<Vec2<Index> const> const& edge_vertices,
     Real& length)
 {
+    static_assert(NumTraits<Real>::is_real);
+    static_assert(NumTraits<Index>::is_index);
+
     Value result{};
     length = Real{0.0};
 
@@ -254,6 +280,9 @@ Vec3<Real> area_centroid(
     Span<Vec3<Real> const> const& vertex_positions,
     Span<Vec3<Index> const> const& face_vertices)
 {
+    static_assert(NumTraits<Real>::is_real);
+    static_assert(NumTraits<Index>::is_index);
+
     Real area{};
     Vec3<Real> const sum = integrate_vertex_func(
         vertex_positions,
@@ -270,6 +299,9 @@ Vec3<Real> length_centroid(
     Span<Vec3<Real> const> const& vertex_positions,
     Span<Vec2<Index> const> const& edge_vertices)
 {
+    static_assert(NumTraits<Real>::is_real);
+    static_assert(NumTraits<Index>::is_index);
+
     Real length{};
     Vec3<Real> const sum = integrate_vertex_func(
         vertex_positions,
@@ -287,6 +319,9 @@ Real winding_number(
     Span<Vec3<Index> const> const& face_vertices,
     Vec3<Real> const& point)
 {
+    static_assert(NumTraits<Real>::is_real);
+    static_assert(NumTraits<Index>::is_index);
+
     Real sum{0.0};
 
     for (auto const& f_v : face_vertices)
@@ -307,6 +342,8 @@ namespace impl
 template <typename Real, typename Value, typename EvalFace>
 Value interpolate_mean_value(EvalFace&& eval_face, isize const num_faces, isize const num_threads)
 {
+    static_assert(NumTraits<Real>::is_real);
+
     Value sum{};
     Real weight_sum{};
 
@@ -373,6 +410,9 @@ Value interpolate_mean_value_robust(
     Real const tolerance = default_epsilon<Real>,
     isize const num_threads = 1)
 {
+    static_assert(NumTraits<Real>::is_real);
+    static_assert(NumTraits<Index>::is_index);
+
     // https://www.cse.wustl.edu/~taoju/research/meanvalue.pdf (section 3.3)
 
     assert(vertex_positions.size() == vertex_values.size());
@@ -421,9 +461,10 @@ Value interpolate_mean_value_robust(
         Real const t1 = acos_safe(u2.dot(u0));
         Real const t2 = acos_safe(u0.dot(u1));
 
-        Real const sin_t0 = std::sin(t0);
-        Real const sin_t1 = std::sin(t1);
-        Real const sin_t2 = std::sin(t2);
+        using std::sin;
+        Real const sin_t0 = sin(t0);
+        Real const sin_t1 = sin(t1);
+        Real const sin_t2 = sin(t2);
 
         Real h = Real{0.5} * (t0 + t1 + t2);
         h = clamp(h, Real{0.0}, pi<Real>);
@@ -444,12 +485,12 @@ Value interpolate_mean_value_robust(
             return true;
         }
 
-        Real const two_sin_h = Real{2.0} * std::sin(h);
+        Real const two_sin_h = Real{2.0} * sin(h);
 
         // Cosine of the dihedral angles between planar faces of spherical pyramid
-        Real const cos_p0 = (two_sin_h * std::sin(h - t0)) / (sin_t1 * sin_t2) - Real{1.0};
-        Real const cos_p1 = (two_sin_h * std::sin(h - t1)) / (sin_t2 * sin_t0) - Real{1.0};
-        Real const cos_p2 = (two_sin_h * std::sin(h - t2)) / (sin_t0 * sin_t1) - Real{1.0};
+        Real const cos_p0 = (two_sin_h * sin(h - t0)) / (sin_t1 * sin_t2) - Real{1.0};
+        Real const cos_p1 = (two_sin_h * sin(h - t1)) / (sin_t2 * sin_t0) - Real{1.0};
+        Real const cos_p2 = (two_sin_h * sin(h - t2)) / (sin_t0 * sin_t1) - Real{1.0};
 
         // Sine of the dihedral angles between planar faces of spherical pyramid
         Real const sin_p0 = sqrt_safe(Real{1.0} - cos_p0 * cos_p0);
@@ -490,6 +531,9 @@ Value interpolate_mean_value_naive(
     Real const tolerance = default_epsilon<Real>,
     isize const num_threads = 1)
 {
+    static_assert(NumTraits<Real>::is_real);
+    static_assert(NumTraits<Index>::is_index);
+
     // https://www.cse.wustl.edu/~taoju/research/meanvalue.pdf (section 3.2)
 
     assert(vertex_positions.size() == vertex_values.size());

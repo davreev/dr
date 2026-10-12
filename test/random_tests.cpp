@@ -68,14 +68,12 @@ namespace dr
     Explicit instantiation of templates to catch compile errors
 */
 
-template struct Random<std::default_random_engine>;
-template struct Random<std::default_random_engine>::Generator<f64>;
-template struct Random<std::default_random_engine>::Generator<i32>;
+template struct Random<>;
+template struct Random<>::Generator<f64>;
+template struct Random<>::Generator<i32>;
 
-template Random<std::default_random_engine>::Generator<f64>
-Random<std::default_random_engine>::generator<f64>(f64 const, f64 const);
+template Random<>::Generator<f64> Random<>::generator<f64>(f64 const, f64 const);
 
-template Random<std::default_random_engine>::Generator<i32>
-Random<std::default_random_engine>::generator<i32>(i32 const, i32 const);
+template Random<>::Generator<i32> Random<>::generator<i32>(i32 const, i32 const);
 
 } // namespace dr

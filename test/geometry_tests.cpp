@@ -1387,6 +1387,27 @@ UTEST(geometry, tri_centers)
     }
 }
 
+UTEST(geometry, is_in_tri_integer)
+{
+    using namespace dr;
+
+    {
+        Vec2<i32> const a{0, 0}, b{4, 0}, c{0, 4};
+        ASSERT_TRUE(is_in_tri(Vec2<i32>{1, 1}, a, b, c));
+        ASSERT_TRUE(is_in_tri(Vec2<i32>{2, 2}, a, b, c));
+        ASSERT_FALSE(is_in_tri(Vec2<i32>{3, 3}, a, b, c));
+        ASSERT_TRUE(is_in_tri(Vec2<i32>{1, 1}, c, b, a));
+    }
+
+    {
+        Vec3<i32> const a{0, 0, 0}, b{4, 0, 0}, c{0, 4, 0};
+        ASSERT_TRUE(is_in_tri(Vec3<i32>{1, 1, 0}, a, b, c));
+        ASSERT_TRUE(is_in_tri(Vec3<i32>{2, 2, 0}, a, b, c));
+        ASSERT_FALSE(is_in_tri(Vec3<i32>{3, 3, 0}, a, b, c));
+        ASSERT_TRUE(is_in_tri(Vec3<i32>{1, 1, 0}, c, b, a));
+    }
+}
+
 /*
     Compile-time checks
 */
@@ -1557,13 +1578,7 @@ template Mat<f64, 2, 3> eval_jacobian(
     Vec<f64, 2> const&,
     Vec<f64, 2> const&);
 
-template void cotan_weights(
-    Vec3<f64> const&,
-    Vec3<f64> const&,
-    Vec3<f64> const&,
-    f64&,
-    f64&,
-    f64&);
+template void cotan_weights(Vec3<f64> const&, Vec3<f64> const&, Vec3<f64> const&, f64&, f64&, f64&);
 
 template void eval_divergence(
     Vec3<f64> const&,

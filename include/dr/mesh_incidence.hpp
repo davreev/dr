@@ -24,7 +24,7 @@ struct MeshIncidence
     template <typename Index>
     struct Key<Index, 2>
     {
-        static_assert(is_index<Index>);
+        static_assert(NumTraits<Index>::is_index);
 
         Vec2<Index> indices;
 
@@ -41,7 +41,7 @@ struct MeshIncidence
     template <typename Index>
     struct Key<Index, 3>
     {
-        static_assert(is_index<Index>);
+        static_assert(NumTraits<Index>::is_index);
 
         Vec3<Index> indices;
 
@@ -73,7 +73,7 @@ struct MeshIncidence
     template <typename Index>
     struct Key<Index, 4>
     {
-        static_assert(is_index<Index>);
+        static_assert(NumTraits<Index>::is_index);
 
         Vec4<Index> indices;
 

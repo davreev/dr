@@ -15,7 +15,7 @@ namespace dr
 template <typename Num>
 constexpr u8 bit_sum(Num x)
 {
-    static_assert(is_natural<Num>);
+    static_assert(NumTraits<Num>::is_natural && NumTraits<Num>::is_builtin);
 
     u8 sum{};
     while (x != 0)
@@ -31,7 +31,7 @@ constexpr u8 bit_sum(Num x)
 template <typename Num>
 constexpr bool is_pow2(Num const x)
 {
-    static_assert(is_natural<Num>);
+    static_assert(NumTraits<Num>::is_natural && NumTraits<Num>::is_builtin);
     return (x != 0) && ((x & (x - 1)) == 0);
 }
 
@@ -39,7 +39,7 @@ constexpr bool is_pow2(Num const x)
 template <typename Num>
 constexpr Num next_pow2(Num x)
 {
-    static_assert(is_natural<Num>);
+    static_assert(NumTraits<Num>::is_natural && NumTraits<Num>::is_builtin);
 
     --x;
     x |= x >> 1;
@@ -62,7 +62,7 @@ constexpr Num next_pow2(Num x)
 template <typename Num>
 constexpr Num prev_pow2(Num x)
 {
-    static_assert(is_natural<Num>);
+    static_assert(NumTraits<Num>::is_natural && NumTraits<Num>::is_builtin);
 
     x |= x >> 1;
     x |= x >> 2;
