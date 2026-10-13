@@ -1,2 +1,10 @@
-Checks: '-*,clang-analyzer-*,performance-*'
+Checks: >
+  -*,
+  clang-analyzer-*,
+  performance-*,
+  bugprone-integer-division,
+  bugprone-use-after-move,
+  bugprone-sizeof-expression,
+  bugprone-suspicious-semicolon,
+  bugprone-unused-raii
 FormatStyle: file
