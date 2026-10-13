@@ -13,7 +13,7 @@ namespace dr
 namespace impl
 {
 
-template <typename T = isize>
+template <typename T>
 struct Size
 {
     // NOTE: This is implemented as a function object to avoid ADL insanity
@@ -36,7 +36,7 @@ struct Size
 
 } // namespace impl
 
-inline constexpr impl::Size size{};
+inline constexpr impl::Size<isize> size{};
 
 template <typename T>
 inline constexpr impl::Size<T> size_as{};
@@ -59,14 +59,14 @@ constexpr Span<T> as_span(T (&array)[n])
 template <typename Container, std::enable_if_t<is_contiguous<Container>>* = nullptr>
 constexpr Span<typename Container::value_type> as_span(Container& container)
 {
-    return {container.data(), isize(container.size())};
+    return {container.data(), size(container)};
 }
 
 /// Creates a span from another contiguous container type
 template <typename Container, std::enable_if_t<is_contiguous<Container>>* = nullptr>
 constexpr Span<typename Container::value_type const> as_span(Container const& container)
 {
-    return {container.data(), isize(container.size())};
+    return {container.data(), size(container)};
 }
 
 /// Deleted to avoid creating a span from a temporary
