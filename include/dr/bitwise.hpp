@@ -41,6 +41,9 @@ constexpr Num next_pow2(Num x)
 {
     static_assert(NumTraits<Num>::is_natural && NumTraits<Num>::is_builtin);
 
+    if (x == 0)
+        return Num{1};
+
     --x;
     x |= x >> 1;
     x |= x >> 2;
