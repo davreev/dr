@@ -2,83 +2,51 @@
 
 #include <dr/bitwise.hpp>
 
-UTEST(bitwise, bit_sum)
-{
-    using namespace dr;
-
-    struct TestCase
-    {
-        u8 value;
-        u8 expect;
-    };
-
-    TestCase test_cases[]{
-        {0b00000001, 1u},
-        {0b10000000, 1u},
-        {0b00001111, 4u},
-        {0b11110000, 4u},
-        {0b01010101, 4u},
-        {0b11111111, 8u},
-    };
-
-    for (auto& [value, expect] : test_cases)
-    {
-        ASSERT_EQ(expect, bit_sum(value));
-    }
-}
-
-UTEST(bitwise, is_pow2)
-{
-    using namespace dr;
-
-    ASSERT_FALSE(is_pow2(0u));
-    ASSERT_TRUE(is_pow2(1u));
-    ASSERT_TRUE(is_pow2(2u));
-
-    for (u8 i = 2; i < 63; ++i)
-    {
-        u64 const x = u64{1} << i;
-        ASSERT_TRUE(is_pow2(x));
-        ASSERT_FALSE(is_pow2(x - 1));
-        ASSERT_FALSE(is_pow2(x + 1));
-    }
-}
-
-UTEST(bitwise, next_pow2)
-{
-    using namespace dr;
-
-    ASSERT_EQ(0u, next_pow2(0u));
-
-    for (u8 i = 0; i < 63; ++i)
-    {
-        u64 const x = u64{1} << i;
-        ASSERT_EQ(x, next_pow2(x));
-        ASSERT_EQ(x << 1, next_pow2(x + 1));
-    }
-}
-
-UTEST(bitwise, prev_pow2)
-{
-    using namespace dr;
-
-    ASSERT_EQ(0u, prev_pow2(0u));
-
-    for (u8 i = 0; i < 63; ++i)
-    {
-        u64 const x = u64{1} << i;
-        ASSERT_EQ(x, prev_pow2(x));
-        ASSERT_EQ(x >> 1, prev_pow2(x - 1));
-    }
-}
-
-
 /*
     Compile-time checks
 */
 
 namespace dr
 {
+
+static_assert(bit_sum(0b00000001u) == 1u);
+static_assert(bit_sum(0b10000000u) == 1u);
+static_assert(bit_sum(0b00001000u) == 1u);
+static_assert(bit_sum(0b11110000u) == 4u);
+static_assert(bit_sum(0b00001111u) == 4u);
+static_assert(bit_sum(0b01010101u) == 4u);
+static_assert(bit_sum(0b11111111u) == 8u);
+
+static_assert(!is_pow2(0u));
+static_assert(is_pow2(1u));
+static_assert(is_pow2(2u));
+static_assert(!is_pow2(3u));
+static_assert(!is_pow2(7u));
+static_assert(is_pow2(8u));
+static_assert(!is_pow2(9u));
+static_assert(!is_pow2(65535u));
+static_assert(is_pow2(65536u));
+static_assert(!is_pow2(65537u));
+
+static_assert(next_pow2(0u) == 1);
+static_assert(next_pow2(1u) == 1);
+static_assert(next_pow2(2u) == 2);
+static_assert(next_pow2(3u) == 4);
+static_assert(next_pow2(4u) == 4);
+static_assert(next_pow2(5u) == 8);
+
+static_assert(prev_pow2(0u) == 0);
+static_assert(prev_pow2(1u) == 1);
+static_assert(prev_pow2(2u) == 2);
+static_assert(prev_pow2(3u) == 2);
+static_assert(prev_pow2(4u) == 4);
+static_assert(prev_pow2(5u) == 4);
+
+static_assert(aligned_size(0, 4) == 0);
+static_assert(aligned_size(1, 4) == 4);
+static_assert(aligned_size(4, 4) == 4);
+static_assert(aligned_size(5, 4) == 8);
+static_assert(aligned_size(9, 4) == 12);
 
 /*
     Explicit instantiation of templates to catch compile errors

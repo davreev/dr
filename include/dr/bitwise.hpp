@@ -83,6 +83,11 @@ constexpr Num prev_pow2(Num x)
     return x ^ (x >> 1);
 }
 
+constexpr usize aligned_size(usize const size, usize const align)
+{
+    return (size + (align - 1)) & ~(align - 1);
+}
+
 template <typename Num>
 constexpr void unit_square_corner(u8 const index, Num result[2])
 {
