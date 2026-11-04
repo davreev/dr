@@ -48,7 +48,6 @@ target_include_directories(
 
 include("deps/eigen")
 include("deps/fmt")
-include("deps/openmp")
 include("deps/unordered-dense")
 
 target_link_libraries(
@@ -56,7 +55,6 @@ target_link_libraries(
     PUBLIC
         Eigen3::Eigen
         fmt::fmt
-        $<TARGET_NAME_IF_EXISTS:OpenMP::OpenMP_CXX>
         unordered_dense::unordered_dense
 )
 
@@ -79,6 +77,12 @@ target_compile_definitions(
     PUBLIC
         EIGEN_INITIALIZE_MATRICES_BY_ZERO
 )
+
+option(DR_OPENMP "Enable OpenMP" ON)
+if(DR_OPENMP)
+    target_compile_options(dr PUBLIC -fopenmp)
+    target_link_options(dr PUBLIC -fopenmp)
+endif()
 
 #
 # Optional targets

@@ -16,26 +16,33 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Install LLVM OpenMP runtime
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libomp-dev
+
       - name: Build (gcc)
         run: >
-          cmake -B ${{github.workspace}}/build 
+          cmake -B ${{github.workspace}}/build-gcc
           -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} 
           -DCMAKE_CXX_COMPILER=g++ 
           -DCMAKE_C_COMPILER=gcc 
           -DDR_TEST=ON && 
-          cmake --build ${{github.workspace}}/build
+          cmake --build ${{github.workspace}}/build-gcc
 
       - name: Build (clang)
         run: >
-          cmake -B ${{github.workspace}}/build 
+          cmake -B ${{github.workspace}}/build-clang
           -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} 
           -DCMAKE_CXX_COMPILER=clang++ 
           -DCMAKE_C_COMPILER=clang 
           -DDR_TEST=ON && 
-          cmake --build ${{github.workspace}}/build
+          cmake --build ${{github.workspace}}/build-clang
 
       - name: Test
-        run: ${{github.workspace}}/build/test/dr-test
+        run: |
+          ${{github.workspace}}/build-gcc/test/dr-test
+          ${{github.workspace}}/build-clang/test/dr-test
 
   test-windows:
     runs-on: windows-latest
