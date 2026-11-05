@@ -11,7 +11,7 @@ namespace dr
 template <typename Error>
 struct ErrorResult
 {
-    static_assert(std::is_integral_v<Error> || std::is_enum_v<Error>);
+    static_assert(std::is_trivially_copyable_v<Error>);
 
     Error error{};
 };
@@ -23,7 +23,7 @@ ErrorResult(Error&&) -> ErrorResult<Error>;
 template <typename Value, typename Error, Error no_error = Error{}>
 struct Result
 {
-    static_assert(std::is_integral_v<Error> || std::is_enum_v<Error>);
+    static_assert(std::is_trivially_copyable_v<Error>);
 
     template <typename Value_, std::enable_if_t<std::is_convertible_v<Value_, Value>>* = nullptr>
     constexpr Result(Value_&& value) : value_{std::forward<Value_>(value)}, error_{no_error}
