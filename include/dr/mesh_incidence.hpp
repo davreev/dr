@@ -1,14 +1,17 @@
 #pragma once
 
 #include <algorithm>
+#include <cassert>
 
 #include <dr/constants.hpp>
 #include <dr/container_utils.hpp>
+#include <dr/hash.hpp>
 #include <dr/hash_map.hpp>
 #include <dr/linalg_reshape.hpp>
 #include <dr/math_types.hpp>
 #include <dr/memory.hpp>
 #include <dr/num_traits.hpp>
+#include <dr/num_types.hpp>
 #include <dr/span.hpp>
 
 namespace dr

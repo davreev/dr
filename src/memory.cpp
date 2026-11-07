@@ -1,5 +1,8 @@
 #include <dr/memory.hpp>
 
+#include <cassert>
+#include <cstddef>
+
 namespace dr
 {
 

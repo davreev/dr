@@ -3,6 +3,7 @@
 #include <algorithm>
 
 #include <dr/math.hpp>
+#include <dr/num_types.hpp>
 #include <dr/span.hpp>
 
 namespace dr

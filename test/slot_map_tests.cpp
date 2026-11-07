@@ -1,10 +1,14 @@
-#include <memory_resource>
-#include <string>
-
 #include <utest.h>
 
+#include <cassert>
+#include <memory_resource>
+#include <string>
+#include <utility>
+
 #include <dr/defer.hpp>
+#include <dr/dynamic_array.hpp>
 #include <dr/memory.hpp>
+#include <dr/num_types.hpp>
 #include <dr/slot_map.hpp>
 
 UTEST(slot_map, insert_remove)

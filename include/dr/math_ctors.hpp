@@ -4,7 +4,9 @@
     Convenience constructors for fixed-size math types
 */
 
+#include <dr/constants.hpp>
 #include <dr/linalg_traits.hpp>
+#include <dr/linalg_types.hpp>
 #include <dr/math_types.hpp>
 
 namespace dr

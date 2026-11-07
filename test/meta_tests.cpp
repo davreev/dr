@@ -1,6 +1,7 @@
 #include <type_traits>
 
 #include <dr/meta.hpp>
+#include <dr/num_types.hpp>
 
 /*
     Compile-time checks

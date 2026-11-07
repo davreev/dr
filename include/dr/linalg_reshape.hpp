@@ -3,10 +3,11 @@
 #include <array>
 #include <cassert>
 
-#include <dr/container_utils.hpp>
 #include <dr/linalg_traits.hpp>
 #include <dr/linalg_types.hpp>
 #include <dr/memory.hpp>
+#include <dr/num_types.hpp>
+#include <dr/span.hpp>
 
 namespace dr
 {

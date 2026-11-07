@@ -4,7 +4,7 @@
     Fixed-size POD geometry types
 */
 
-#include <dr/math_types.hpp>
+#include <dr/linalg_types.hpp>
 
 namespace dr
 {

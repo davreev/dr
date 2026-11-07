@@ -1,5 +1,7 @@
 #include <dr/mesh_primitives.hpp>
 
+#include <dr/num_types.hpp>
+
 namespace dr
 {
 

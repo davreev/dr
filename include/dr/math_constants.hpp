@@ -1,6 +1,7 @@
 #pragma once
 
 #include <limits>
+#include <type_traits>
 
 #include <dr/num_traits.hpp>
 

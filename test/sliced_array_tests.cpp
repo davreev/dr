@@ -1,8 +1,15 @@
 #include <utest.h>
 
+#include <algorithm>
+#include <memory_resource>
+#include <utility>
+
+#include <dr/container_utils.hpp>
 #include <dr/defer.hpp>
 #include <dr/memory.hpp>
+#include <dr/num_types.hpp>
 #include <dr/sliced_array.hpp>
+#include <dr/span.hpp>
 
 UTEST(sliced_array, push_pop_back)
 {

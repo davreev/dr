@@ -1,8 +1,16 @@
 #include <dr/halfedge.hpp>
 
+#include <cassert>
+#include <type_traits>
+
+#include <dr/container_utils.hpp>
 #include <dr/linalg_reshape.hpp>
+#include <dr/linalg_types.hpp>
 #include <dr/meta.hpp>
 #include <dr/num_traits.hpp>
+#include <dr/num_types.hpp>
+#include <dr/sliced_array.hpp>
+#include <dr/span.hpp>
 
 namespace dr
 {

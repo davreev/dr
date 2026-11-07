@@ -1,5 +1,6 @@
 #include <utest.h>
 
+#include <dr/num_types.hpp>
 #include <dr/random.hpp>
 
 namespace dr

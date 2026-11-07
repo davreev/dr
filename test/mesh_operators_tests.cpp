@@ -1,4 +1,11 @@
+#include <dr/allocator.hpp>
+#include <dr/dynamic_array.hpp>
+#include <dr/linalg_types.hpp>
+#include <dr/math_types.hpp>
 #include <dr/mesh_operators.hpp>
+#include <dr/num_types.hpp>
+#include <dr/span.hpp>
+#include <dr/sparse_linalg_types.hpp>
 
 /*
     Compile-time checks

@@ -1,5 +1,7 @@
 #include <utest.h>
 
+#include <dr/math_types.hpp>
+#include <dr/num_types.hpp>
 #include <dr/triangulate.hpp>
 
 UTEST(mesh, fan_triangulator)

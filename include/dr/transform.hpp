@@ -1,5 +1,6 @@
 #pragma once
 
+#include <dr/linalg_types.hpp>
 #include <dr/math_ctors.hpp>
 #include <dr/math_types.hpp>
 #include <dr/num_traits.hpp>

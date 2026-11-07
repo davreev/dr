@@ -1,5 +1,7 @@
 #include <utest.h>
 
+#include <utility>
+
 #include <dr/function.hpp>
 #include <dr/memory.hpp>
 #include <dr/num_types.hpp>

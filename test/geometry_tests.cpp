@@ -1,9 +1,21 @@
 #include <utest.h>
 
+#include <cmath>
+
+#include <dr/container_utils.hpp>
 #include <dr/dynamic_array.hpp>
 #include <dr/geometry.hpp>
+#include <dr/geometry_types.hpp>
+#include <dr/linalg_reshape.hpp>
+#include <dr/linalg_types.hpp>
+#include <dr/math.hpp>
+#include <dr/math_constants.hpp>
+#include <dr/math_ctors.hpp>
+#include <dr/math_types.hpp>
+#include <dr/num_types.hpp>
 #include <dr/random.hpp>
 #include <dr/result.hpp>
+#include <dr/span.hpp>
 
 UTEST(geometry, eval_gradient_tri)
 {

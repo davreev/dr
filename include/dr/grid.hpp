@@ -1,6 +1,7 @@
 #pragma once
 
-#include <dr/math_types.hpp>
+#include <dr/linalg_types.hpp>
+#include <dr/num_types.hpp>
 
 namespace dr
 {

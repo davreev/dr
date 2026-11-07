@@ -8,9 +8,9 @@
 #include <cmath>
 #include <type_traits>
 
+#include <dr/constants.hpp>
 #include <dr/linalg_traits.hpp>
-#include <dr/math_constants.hpp>
-#include <dr/math_ctors.hpp>
+#include <dr/linalg_types.hpp>
 #include <dr/math_traits.hpp>
 #include <dr/math_types.hpp>
 #include <dr/num_traits.hpp>

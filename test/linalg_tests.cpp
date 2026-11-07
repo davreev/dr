@@ -1,9 +1,17 @@
 #include <utest.h>
 
+#include <utility>
+
+#include <dr/constants.hpp>
+#include <dr/container_utils.hpp>
 #include <dr/linalg_reshape.hpp>
+#include <dr/linalg_traits.hpp>
 #include <dr/linalg_types.hpp>
 #include <dr/math_ctors.hpp>
 #include <dr/math_types.hpp>
+#include <dr/memory.hpp>
+#include <dr/num_types.hpp>
+#include <dr/span.hpp>
 
 UTEST(linalg_reshape, alignment)
 {
