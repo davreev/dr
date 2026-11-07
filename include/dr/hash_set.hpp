@@ -1,5 +1,9 @@
 #pragma once
 
+#include <functional>
+
+#include <ankerl/unordered_dense.h>
+
 #include <dr/hash.hpp>
 
 namespace dr

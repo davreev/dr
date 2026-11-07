@@ -1,6 +1,10 @@
 #pragma once
 
+#include <cstddef>
+#include <memory>
 #include <memory_resource>
+#include <type_traits>
+#include <utility>
 
 #include <dr/meta.hpp>
 #include <dr/num_types.hpp>

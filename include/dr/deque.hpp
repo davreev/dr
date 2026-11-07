@@ -1,7 +1,7 @@
 #pragma once
 
-#include <memory_resource>
 #include <deque>
+#include <memory_resource>
 
 namespace dr
 {

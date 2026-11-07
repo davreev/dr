@@ -1,7 +1,10 @@
 #include <utest.h>
 
 #include <dr/grid.hpp>
+#include <dr/linalg_types.hpp>
 #include <dr/math_ctors.hpp>
+#include <dr/math_types.hpp>
+#include <dr/num_types.hpp>
 
 UTEST(grid, grid_to_index)
 {

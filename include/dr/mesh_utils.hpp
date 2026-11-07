@@ -1,9 +1,11 @@
 #pragma once
 
 #include <dr/bitwise.hpp>
+#include <dr/container_utils.hpp>
 #include <dr/dynamic_array.hpp>
 #include <dr/linalg_reshape.hpp>
-#include <dr/math.hpp>
+#include <dr/linalg_types.hpp>
+#include <dr/num_types.hpp>
 #include <dr/span.hpp>
 
 namespace dr

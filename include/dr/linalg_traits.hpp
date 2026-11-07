@@ -1,5 +1,8 @@
 #pragma once
 
+#include <type_traits>
+
+#include <dr/constants.hpp>
 #include <dr/linalg_types.hpp>
 #include <dr/meta.hpp>
 

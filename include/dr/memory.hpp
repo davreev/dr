@@ -4,9 +4,12 @@
     Assorted helper functions and types related to memory management
 */
 
+#include <cassert>
+#include <cstddef>
 #include <memory>
 #include <memory_resource>
 #include <type_traits>
+#include <utility>
 
 #include <dr/allocator.hpp>
 #include <dr/num_types.hpp>

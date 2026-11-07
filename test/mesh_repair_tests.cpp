@@ -1,7 +1,13 @@
 #include <utest.h>
 
+#include <dr/container_utils.hpp>
 #include <dr/dynamic_array.hpp>
+#include <dr/hash_grid.hpp>
+#include <dr/linalg_types.hpp>
+#include <dr/math_types.hpp>
 #include <dr/mesh_repair.hpp>
+#include <dr/num_types.hpp>
+#include <dr/span.hpp>
 
 #include "test_utils.hpp"
 

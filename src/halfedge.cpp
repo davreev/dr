@@ -1,5 +1,7 @@
 #include <dr/halfedge.hpp>
 
+#include <type_traits>
+
 #include <dr/linalg_reshape.hpp>
 #include <dr/meta.hpp>
 #include <dr/num_traits.hpp>

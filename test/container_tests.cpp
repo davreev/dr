@@ -1,11 +1,16 @@
 #include <utest.h>
 
 #include <algorithm>
+#include <array>
+#include <string>
 #include <unordered_map>
 #include <unordered_set>
+#include <vector>
 
 #include <dr/container_traits.hpp>
 #include <dr/container_utils.hpp>
+#include <dr/num_types.hpp>
+#include <dr/span.hpp>
 
 UTEST(container_utils, carray_to_span)
 {

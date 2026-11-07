@@ -2,8 +2,11 @@
 
 #include <dr/dynamic_array.hpp>
 #include <dr/hash_grid.hpp>
+#include <dr/linalg_types.hpp>
 #include <dr/math.hpp>
+#include <dr/math_types.hpp>
 #include <dr/num_traits.hpp>
+#include <dr/num_types.hpp>
 #include <dr/span.hpp>
 
 namespace dr

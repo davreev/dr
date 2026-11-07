@@ -1,6 +1,9 @@
 #pragma once
 
+#include <type_traits>
+
 #include <dr/num_traits.hpp>
+#include <dr/num_types.hpp>
 
 namespace dr
 {

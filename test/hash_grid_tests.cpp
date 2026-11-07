@@ -1,13 +1,17 @@
 #include <utest.h>
 
 #include <algorithm>
+#include <memory_resource>
+#include <utility>
 
+#include <dr/container_utils.hpp>
 #include <dr/defer.hpp>
 #include <dr/dynamic_array.hpp>
 #include <dr/geometry_types.hpp>
 #include <dr/hash_grid.hpp>
 #include <dr/math_types.hpp>
 #include <dr/memory.hpp>
+#include <dr/num_types.hpp>
 
 #include "test_utils.hpp"
 

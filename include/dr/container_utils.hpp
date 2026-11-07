@@ -4,6 +4,8 @@
     Assorted helper functions for container types
 */
 
+#include <type_traits>
+
 #include <dr/container_traits.hpp>
 #include <dr/num_types.hpp>
 #include <dr/span.hpp>

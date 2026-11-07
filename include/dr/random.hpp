@@ -1,9 +1,11 @@
 #pragma once
 
 #include <random>
+#include <type_traits>
 
 #include <dr/meta.hpp>
 #include <dr/num_traits.hpp>
+#include <dr/num_types.hpp>
 
 namespace dr
 {

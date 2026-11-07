@@ -1,9 +1,8 @@
 #pragma once
 
 #include <dr/dynamic_array.hpp>
-#include <dr/math_types.hpp>
 #include <dr/num_traits.hpp>
-#include <dr/span.hpp>
+#include <dr/num_types.hpp>
 #include <dr/sparse_linalg_types.hpp>
 
 namespace dr

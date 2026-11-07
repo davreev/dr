@@ -3,9 +3,9 @@
 #include <cassert>
 #include <initializer_list>
 
+#include <dr/allocator.hpp>
 #include <dr/container_utils.hpp>
 #include <dr/dynamic_array.hpp>
-#include <dr/memory.hpp>
 #include <dr/num_types.hpp>
 #include <dr/span.hpp>
 

@@ -1,6 +1,7 @@
 #include <utest.h>
 
 #include <dr/container_utils.hpp>
+#include <dr/num_types.hpp>
 #include <dr/span.hpp>
 
 UTEST(span, is_valid)

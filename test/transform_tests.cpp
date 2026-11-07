@@ -3,6 +3,8 @@
 #include <dr/linalg_reshape.hpp>
 #include <dr/math.hpp>
 #include <dr/math_ctors.hpp>
+#include <dr/math_types.hpp>
+#include <dr/num_types.hpp>
 #include <dr/transform.hpp>
 
 #include "test_utils.hpp"

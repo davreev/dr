@@ -1,7 +1,9 @@
 #include <utest.h>
 
+#include <dr/container_utils.hpp>
 #include <dr/dynamic_array.hpp>
 #include <dr/linalg_reshape.hpp>
+#include <dr/linalg_types.hpp>
 #include <dr/num_types.hpp>
 #include <dr/sparse_linalg_types.hpp>
 #include <dr/sparse_min_quad.hpp>

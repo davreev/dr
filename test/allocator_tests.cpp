@@ -1,9 +1,12 @@
 #include <utest.h>
 
+#include <memory_resource>
+
 #include <dr/allocator.hpp>
 #include <dr/container_utils.hpp>
 #include <dr/dynamic_array.hpp>
 #include <dr/memory.hpp>
+#include <dr/num_types.hpp>
 
 UTEST(allocator, new_propagation)
 {

@@ -1,7 +1,17 @@
 #include <utest.h>
 
+#include <cmath>
+#include <cstddef>
+#include <type_traits>
+
+#include <dr/linalg_types.hpp>
 #include <dr/math.hpp>
+#include <dr/math_constants.hpp>
+#include <dr/math_ctors.hpp>
+#include <dr/math_types.hpp>
 #include <dr/meta.hpp>
+#include <dr/num_traits.hpp>
+#include <dr/num_types.hpp>
 
 UTEST(math, solve_least_squares)
 {

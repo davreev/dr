@@ -1,6 +1,7 @@
 #include <utest.h>
 
 #include <dr/bitwise.hpp>
+#include <dr/num_types.hpp>
 
 /*
     Compile-time checks

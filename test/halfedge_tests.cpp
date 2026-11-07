@@ -1,9 +1,17 @@
 #include <utest.h>
 
+#include <memory_resource>
+#include <utility>
+
+#include <dr/container_utils.hpp>
 #include <dr/defer.hpp>
 #include <dr/halfedge.hpp>
+#include <dr/linalg_reshape.hpp>
+#include <dr/math_types.hpp>
 #include <dr/memory.hpp>
 #include <dr/mesh_primitives.hpp>
+#include <dr/num_types.hpp>
+#include <dr/sliced_array.hpp>
 
 UTEST(halfedge, allocator_propagation)
 {

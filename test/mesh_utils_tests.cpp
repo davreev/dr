@@ -1,8 +1,15 @@
 #include <utest.h>
 
+#include <dr/container_utils.hpp>
+#include <dr/dynamic_array.hpp>
+#include <dr/linalg_reshape.hpp>
+#include <dr/linalg_types.hpp>
+#include <dr/math_types.hpp>
+#include <dr/memory.hpp>
 #include <dr/mesh_primitives.hpp>
 #include <dr/mesh_utils.hpp>
-#include <dr/memory.hpp>
+#include <dr/num_types.hpp>
+#include <dr/span.hpp>
 
 UTEST(mesh, append)
 {

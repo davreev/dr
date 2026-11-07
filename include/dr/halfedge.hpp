@@ -2,9 +2,12 @@
 
 #include <cassert>
 
+#include <dr/allocator.hpp>
 #include <dr/container_utils.hpp>
 #include <dr/dynamic_array.hpp>
+#include <dr/hash.hpp>
 #include <dr/hash_map.hpp>
+#include <dr/linalg_types.hpp>
 #include <dr/math_types.hpp>
 #include <dr/memory.hpp>
 #include <dr/num_types.hpp>

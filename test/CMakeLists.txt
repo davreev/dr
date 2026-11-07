@@ -44,7 +44,7 @@ target_link_libraries(
 target_compile_options(
     dr-test
     PRIVATE 
-        -Wall -Wextra -Wpedantic #-Werror
+        -Wall -Wextra -Wpedantic -Werror
 )
 
 # Allow std::fopen on Windows builds
