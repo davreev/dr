@@ -11,11 +11,14 @@ namespace dr
 namespace impl
 {
 
-template <typename T>
+template <typename T, typename Enable = void>
 struct MatTraits
 {
-    static_assert(std::is_base_of_v<MatExpr<T>, T>);
+};
 
+template <typename T>
+struct MatTraits<T, std::enable_if_t<std::is_base_of_v<MatExpr<T>, T>>>
+{
     using Scalar = typename T::Scalar;
     using Value = typename T::PlainObject;
 
