@@ -85,12 +85,14 @@ struct Rotation<Real, 2>
 {
     static_assert(NumTraits<Real>::is_real);
 
-    /// Unit complex number representation of the rotation. This can also be interpreted as the
-    /// first standard basis vector after rotation.
+    /// Unit complex number representation of the rotation (aka 2D rotor)
     Vec2<Real> c{Vec2<Real>::UnitX()};
 
+    Rotation() = default;
+    Rotation(Vec2<Real> const& c) : c{c} {}
+
     /// Returns the inverse of this transformation
-    Rotation<Real, 2> inverse() const { return {vec(c[0], -c[1])}; }
+    Rotation<Real, 2> inverse() const { return vec(c[0], -c[1]); }
 
     /// Returns the matrix representation of this transformation
     Mat2<Real> to_matrix() const { return mat(c, vec(-c[1], c[0])); }
@@ -102,7 +104,7 @@ struct Rotation<Real, 2>
     Vec2<Real> operator*(Vec2<Real> const& u) const { return apply(u); }
 
     /// Applies this transformation to another transformation
-    Rotation<Real, 2> apply(Rotation<Real, 2> const& other) const { return {apply(other.c)}; }
+    Rotation<Real, 2> apply(Rotation<Real, 2> const& other) const { return apply(other.c); }
 
     /// Applies this transformation to another transformation
     Rotation<Real, 2> operator*(Rotation<Real, 2> const& other) const { return apply(other); }
@@ -113,11 +115,14 @@ struct Rotation<Real, 3>
 {
     static_assert(NumTraits<Real>::is_real);
 
-    /// Unit quaternion representation of the rotation
+    /// Unit quaternion representation of the rotation (aka 3D rotor)
     Quat<Real> q{Quat<Real>::Identity()};
 
+    Rotation() = default;
+    Rotation(Quat<Real> const& q) : q{q} {}
+
     /// Returns the inverse of this transformation
-    Rotation<Real, 3> inverse() const { return {q.conjugate()}; }
+    Rotation<Real, 3> inverse() const { return q.conjugate(); }
 
     /// Returns the matrix representation of this transformation
     Mat3<Real> to_matrix() const { return q.toRotationMatrix(); }
@@ -129,7 +134,7 @@ struct Rotation<Real, 3>
     Vec3<Real> operator*(Vec3<Real> const& u) const { return apply(u); }
 
     /// Applies this transformation to another transformation
-    Rotation<Real, 3> apply(Rotation<Real, 3> const& other) const { return {q * other.q}; }
+    Rotation<Real, 3> apply(Rotation<Real, 3> const& other) const { return q * other.q; }
 
     /// Applies this transformation to another transformation
     Rotation<Real, 3> operator*(Rotation<Real, 3> const& other) const { return apply(other); }

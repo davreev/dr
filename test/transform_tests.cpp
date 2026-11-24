@@ -18,7 +18,7 @@ UTEST(rigid3, apply_forward_inverse)
     for (isize i = 0; i < 32; ++i)
     {
         auto const a = Vec3<f64>::Random().eval();
-        Rigid3<f64> const xform{{Quat<f64>::UnitRandom()}, Vec3<f64>::Random()};
+        Rigid3<f64> const xform{Quat<f64>::UnitRandom(), Vec3<f64>::Random()};
 
         Vec3<f64> const b = xform.apply_inverse(xform.apply(a));
         ASSERT_TRUE(near_equal(a, b, eps));
@@ -40,7 +40,7 @@ UTEST(rigid2, apply_forward_inverse)
         auto const a = Vec2<f64>::Random().eval();
 
         Rigid2<f64> const xform{
-            {Vec2<f64>::Random().normalized()},
+            Vec2<f64>::Random().normalized(),
             Vec2<f64>::Random(),
         };
 
@@ -65,7 +65,7 @@ UTEST(conformal3, apply_forward_inverse)
 
         auto const rand = 2.0 * Vec4<f64>::Random();
         Conformal3<f64> const xform{
-            {Quat<f64>::UnitRandom()},
+            Quat<f64>::UnitRandom(),
             rand.head<3>(),
             rand[3],
         };
@@ -91,7 +91,7 @@ UTEST(conformal2, apply_forward_inverse)
 
         auto const rand = 2.0 * Vec3<f64>::Random();
         Conformal2<f64> const xform{
-            {Vec2<f64>::Random().normalized()},
+            Vec2<f64>::Random().normalized(),
             rand.head<2>(),
             rand[2],
         };
@@ -155,7 +155,7 @@ UTEST(rigid3, apply_inverse_self)
 
     for (i8 i = 0; i < 16; ++i)
     {
-        Rigid3<f64> const a{{Quat<f64>::UnitRandom()}, Vec3<f64>::Random()};
+        Rigid3<f64> const a{Quat<f64>::UnitRandom(), Vec3<f64>::Random()};
         Rigid3<f64> const b = a.apply_inverse(a);
 
         ASSERT_TRUE(near_equal(b.rotation.q.coeffs(), identity.rotation.q.coeffs(), eps));
@@ -173,7 +173,7 @@ UTEST(rigid2, apply_inverse_self)
 
     for (i8 i = 0; i < 16; ++i)
     {
-        Rigid2<f64> const a{{Vec2<f64>::Random().normalized()}, Vec2<f64>::Random()};
+        Rigid2<f64> const a{Vec2<f64>::Random().normalized(), Vec2<f64>::Random()};
         Rigid2<f64> const b = a.apply_inverse(a);
 
         ASSERT_TRUE(near_equal(b.rotation.c, identity.rotation.c, eps));
@@ -194,7 +194,7 @@ UTEST(conformal3, apply_inverse_self)
         auto const rand = 2.0 * Vec4<f64>::Random();
 
         Conformal3<f64> const a{
-            {Quat<f64>::UnitRandom()},
+            Quat<f64>::UnitRandom(),
             rand.head<3>(),
             rand[3],
         };
@@ -220,7 +220,7 @@ UTEST(conformal2, apply_inverse_self)
         auto const rand = 2.0 * Vec3<f64>::Random();
 
         Conformal2<f64> const a{
-            {Vec2<f64>::Random().normalized()},
+            Vec2<f64>::Random().normalized(),
             rand.head<2>(),
             rand[2],
         };
