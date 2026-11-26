@@ -16,13 +16,26 @@ struct Affine
     Mat<Real, dim, dim> linear{Mat<Real, dim, dim>::Identity()};
     Vec<Real, dim> translation{};
 
+    Affine() = default;
+    Affine(Vec<Real, dim> const& translation, Mat<Real, dim, dim> const& linear) :
+        linear{linear}, translation{translation}
+    {
+    }
+
+    /// Constructs an affine transform from its homogeneous matrix
+    Affine(Mat<Real, dim + 1, dim + 1> const& matrix) :
+        linear{matrix.template topLeftCorner<dim, dim>()},
+        translation{matrix.template topRightCorner<dim, 1>()}
+    {
+    }
+
     /// Returns the inverse of this transformation
     Affine<Real, dim> inverse() const
     {
         Mat<Real, dim, dim> const l_inv = linear.inverse();
         return {
-            l_inv,
             l_inv * -translation,
+            l_inv,
         };
     }
 
@@ -62,8 +75,8 @@ struct Affine
     {
         // Ta La Tb Lb
         return {
-            linear * other.linear,
             translation + linear * other.translation,
+            linear * other.linear,
         };
     }
 
@@ -155,14 +168,20 @@ struct Conformal
     Vec<Real, dim> translation{};
     Real scale{1.0};
 
+    Conformal() = default;
+    Conformal(Vec<Real, dim> const& translation, Rotation<Real, dim> const& rotation, Real scale) :
+        rotation{rotation}, translation{translation}, scale{scale}
+    {
+    }
+
     /// Returns the inverse of this transformation
     Conformal<Real, dim> inverse() const
     {
         Rotation<Real, dim> const r_inv = rotation.inverse();
         Real const s_inv = Real{1.0} / scale;
         return {
-            r_inv,
             s_inv * (r_inv * -translation),
+            r_inv,
             s_inv,
         };
     }
@@ -203,8 +222,8 @@ struct Conformal
     {
         // Ta Ra Sa Tb Rb Sb
         return {
-            rotation * other.rotation,
             translation + rotation * (scale * other.translation),
+            rotation * other.rotation,
             scale * other.scale,
         };
     }
@@ -227,14 +246,14 @@ struct Conformal
         Rotation<Real, dim> const r_inv = rotation.inverse();
         Real const s_inv = Real{1.0} / scale;
         return {
-            r_inv * other.rotation,
             s_inv * (r_inv * (other.translation - translation)),
+            r_inv * other.rotation,
             s_inv * other.scale,
         };
     }
 
     /// Implicit conversion to Affine
-    operator Affine<Real, dim>() const { return {scale * rotation.to_matrix(), translation}; };
+    operator Affine<Real, dim>() const { return {translation, scale * rotation.to_matrix()}; };
 };
 
 template <typename Real>
@@ -251,11 +270,17 @@ struct Rigid
     Rotation<Real, dim> rotation{};
     Vec<Real, dim> translation{};
 
+    Rigid() = default;
+    Rigid(Vec<Real, dim> const& translation, Rotation<Real, dim> const& rotation) :
+        rotation{rotation}, translation{translation}
+    {
+    }
+
     /// Returns the inverse of this transformation
     Rigid<Real, dim> inverse() const
     {
         Rotation<Real, dim> const r_inv = rotation.inverse();
-        return {r_inv, r_inv * -translation};
+        return {r_inv * -translation, r_inv};
     }
 
     /// Returns the matrix representation of this transformation
@@ -294,8 +319,8 @@ struct Rigid
     {
         // Ta Ra Tb Rb
         return {
-            rotation * other.rotation,
             translation + rotation * other.translation,
+            rotation * other.rotation,
         };
     }
 
@@ -315,16 +340,16 @@ struct Rigid
         // Ra⁻¹ Ta⁻¹ Tb Rb
         Rotation<Real, dim> const r_inv = rotation.inverse();
         return {
-            r_inv * other.rotation,
             r_inv * (other.translation - translation),
+            r_inv * other.rotation,
         };
     }
 
     /// Implicit conversion to Conformal
-    operator Conformal<Real, dim>() const { return {rotation, translation}; };
+    operator Conformal<Real, dim>() const { return {translation, rotation, Real{1.0}}; };
 
     /// Implicit conversion to Affine
-    operator Affine<Real, dim>() const { return {rotation.to_matrix(), translation}; };
+    operator Affine<Real, dim>() const { return {translation, rotation.to_matrix()}; };
 };
 
 template <typename Real>
