@@ -39,27 +39,6 @@ struct Affine
         };
     }
 
-    /// Returns the matrix representation of this transformation
-    Mat<Real, dim + 1, dim + 1> to_matrix() const
-    {
-        // T L
-        Mat<Real, dim + 1, dim + 1> m{};
-        m.template topLeftCorner<dim, dim>() = linear;
-        m.template rightCols<1>() = translation.homogeneous();
-        return m;
-    }
-
-    /// Returns the matrix representation of this transformation's inverse
-    Mat<Real, dim + 1, dim + 1> inverse_to_matrix() const
-    {
-        // L⁻¹ T⁻¹
-        Mat<Real, dim, dim> const l_inv = linear.inverse();
-        Mat<Real, dim + 1, dim + 1> m{};
-        m.template topLeftCorner<dim, dim>() = l_inv;
-        m.template rightCols<1>() = (l_inv * -translation).homogeneous();
-        return m;
-    }
-
     /// Applies this transformation to the given vector
     Vec<Real, dim> apply(Vec<Real, dim> const& u) const
     {
@@ -82,6 +61,19 @@ struct Affine
 
     /// Applies this transformation to another transformation
     Affine<Real, dim> operator*(Affine<Real, dim> const& other) const { return apply(other); }
+
+    /// Returns the matrix representation of this transformation
+    Mat<Real, dim + 1, dim + 1> to_matrix() const
+    {
+        // T L
+        Mat<Real, dim + 1, dim + 1> m{};
+        m.template topLeftCorner<dim, dim>() = linear;
+        m.template rightCols<1>() = translation.homogeneous();
+        return m;
+    }
+
+    /// Implicit conversion to a homogeneous matrix
+    operator Mat<Real, dim + 1, dim + 1>() const { return to_matrix(); }
 };
 
 template <typename Real>
@@ -107,9 +99,6 @@ struct Rotation<Real, 2>
     /// Returns the inverse of this transformation
     Rotation<Real, 2> inverse() const { return vec(c[0], -c[1]); }
 
-    /// Returns the matrix representation of this transformation
-    Mat2<Real> to_matrix() const { return mat(c, vec(-c[1], c[0])); }
-
     /// Applies this transformation to the given vector
     Vec2<Real> apply(Vec2<Real> const& u) const { return to_matrix() * u; }
 
@@ -121,6 +110,12 @@ struct Rotation<Real, 2>
 
     /// Applies this transformation to another transformation
     Rotation<Real, 2> operator*(Rotation<Real, 2> const& other) const { return apply(other); }
+
+    /// Returns the matrix representation of this transformation
+    Mat2<Real> to_matrix() const { return mat(c, vec(-c[1], c[0])); }
+
+    /// Implicit conversion to a rotation matrix
+    operator Mat2<Real>() const { return to_matrix(); }
 };
 
 template <typename Real>
@@ -137,9 +132,6 @@ struct Rotation<Real, 3>
     /// Returns the inverse of this transformation
     Rotation<Real, 3> inverse() const { return q.conjugate(); }
 
-    /// Returns the matrix representation of this transformation
-    Mat3<Real> to_matrix() const { return q.toRotationMatrix(); }
-
     /// Applies this transformation to the given vector
     Vec3<Real> apply(Vec3<Real> const& u) const { return q * u; }
 
@@ -151,6 +143,12 @@ struct Rotation<Real, 3>
 
     /// Applies this transformation to another transformation
     Rotation<Real, 3> operator*(Rotation<Real, 3> const& other) const { return apply(other); }
+
+    /// Returns the matrix representation of this transformation
+    Mat3<Real> to_matrix() const { return q.toRotationMatrix(); }
+
+    /// Implicit conversion to a rotation matrix
+    operator Mat3<Real>() const { return to_matrix(); }
 };
 
 template <typename Real>
@@ -184,27 +182,6 @@ struct Conformal
             r_inv,
             s_inv,
         };
-    }
-
-    /// Returns the matrix representation of this transformation
-    Mat<Real, dim + 1, dim + 1> to_matrix() const
-    {
-        // T R S
-        Mat<Real, dim + 1, dim + 1> m{};
-        m.template topLeftCorner<dim, dim>() = scale * rotation.to_matrix();
-        m.template rightCols<1>() = translation.homogeneous();
-        return m;
-    }
-
-    /// Returns the matrix representation of this transformation's inverse
-    Mat<Real, dim + 1, dim + 1> inverse_to_matrix() const
-    {
-        // S⁻¹ R⁻¹ T⁻¹
-        Mat<Real, dim, dim> const l_inv = rotation.inverse().to_matrix() / scale;
-        Mat<Real, dim + 1, dim + 1> m{};
-        m.template topLeftCorner<dim, dim>() = l_inv;
-        m.template rightCols<1>() = (l_inv * -translation).homogeneous();
-        return m;
     }
 
     /// Applies this transformation to the given vector
@@ -252,8 +229,17 @@ struct Conformal
         };
     }
 
+    /// Returns the equivalent affine transformation
+    Affine<Real, dim> to_affine() const { return {translation, scale * rotation.to_matrix()}; }
+
     /// Implicit conversion to Affine
-    operator Affine<Real, dim>() const { return {translation, scale * rotation.to_matrix()}; };
+    operator Affine<Real, dim>() const { return to_affine(); }
+
+    /// Returns the matrix representation of this transformation
+    Mat<Real, dim + 1, dim + 1> to_matrix() const { return to_affine(); }
+
+    /// Implicit conversion to a homogeneous matrix
+    operator Mat<Real, dim + 1, dim + 1>() const { return to_matrix(); }
 };
 
 template <typename Real>
@@ -281,27 +267,6 @@ struct Rigid
     {
         Rotation<Real, dim> const r_inv = rotation.inverse();
         return {r_inv * -translation, r_inv};
-    }
-
-    /// Returns the matrix representation of this transformation
-    Mat<Real, dim + 1, dim + 1> to_matrix() const
-    {
-        // T R
-        Mat<Real, dim + 1, dim + 1> m{};
-        m.template topLeftCorner<dim, dim>() = rotation.to_matrix();
-        m.template rightCols<1>() = translation.homogeneous();
-        return m;
-    }
-
-    /// Returns the matrix representation of this transformation's inverse
-    Mat<Real, dim + 1, dim + 1> inverse_to_matrix() const
-    {
-        // R⁻¹ T⁻¹
-        Mat<Real, dim, dim> const r_inv = rotation.inverse().to_matrix();
-        Mat<Real, dim + 1, dim + 1> m{};
-        m.template topLeftCorner<dim, dim>() = r_inv;
-        m.template rightCols<1>() = (r_inv * -translation).homogeneous();
-        return m;
     }
 
     /// Applies this transformation to the given vector
@@ -345,11 +310,23 @@ struct Rigid
         };
     }
 
+    /// Returns the equivalent conformal transformation
+    Conformal<Real, dim> to_conformal() const { return {translation, rotation, Real{1.0}}; }
+
     /// Implicit conversion to Conformal
-    operator Conformal<Real, dim>() const { return {translation, rotation, Real{1.0}}; };
+    operator Conformal<Real, dim>() const { return to_conformal(); }
+
+    /// Returns the equivalent affine transformation
+    Affine<Real, dim> to_affine() const { return {translation, rotation}; }
 
     /// Implicit conversion to Affine
-    operator Affine<Real, dim>() const { return {translation, rotation.to_matrix()}; };
+    operator Affine<Real, dim>() const { return to_affine(); }
+
+    /// Returns the matrix representation of this transformation
+    Mat<Real, dim + 1, dim + 1> to_matrix() const { return to_affine(); }
+
+    /// Implicit conversion to a homogeneous matrix
+    operator Mat<Real, dim + 1, dim + 1>() const { return to_matrix(); }
 };
 
 template <typename Real>

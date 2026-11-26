@@ -23,8 +23,9 @@ UTEST(rigid3, apply_forward_inverse)
         Vec3<f64> const b = xform.apply_inverse(xform.apply(a));
         ASSERT_TRUE(near_equal(a, b, eps));
 
-        Vec3<f64> const c = (xform.inverse_to_matrix() * (xform.to_matrix() * a.homogeneous()))
-                                .head<3>();
+        Mat4<f64> const mat = xform;
+        Mat4<f64> const inv_mat = xform.inverse();
+        Vec3<f64> const c = (inv_mat * (mat * a.homogeneous())).head<3>();
         ASSERT_TRUE(near_equal(a, c, eps));
     }
 }
@@ -47,8 +48,9 @@ UTEST(rigid2, apply_forward_inverse)
         Vec2<f64> const b = xform.apply_inverse(xform.apply(a));
         ASSERT_TRUE(near_equal(a, b, eps));
 
-        Vec2<f64> const c = (xform.inverse_to_matrix() * (xform.to_matrix() * a.homogeneous()))
-                                .head<2>();
+        Mat3<f64> const mat = xform;
+        Mat3<f64> const inv_mat = xform.inverse();
+        Vec2<f64> const c = (inv_mat * (mat * a.homogeneous())).head<2>();
         ASSERT_TRUE(near_equal(a, c, eps));
     }
 }
@@ -73,8 +75,9 @@ UTEST(conformal3, apply_forward_inverse)
         Vec3<f64> const b = xform.apply_inverse(xform.apply(a));
         ASSERT_TRUE(near_equal(a, b, eps));
 
-        Vec3<f64> const c = (xform.inverse_to_matrix() * (xform.to_matrix() * a.homogeneous()))
-                                .head<3>();
+        Mat4<f64> const mat = xform;
+        Mat4<f64> const inv_mat = xform.inverse();
+        Vec3<f64> const c = (inv_mat * (mat * a.homogeneous())).head<3>();
         ASSERT_TRUE(near_equal(a, c, eps));
     }
 }
@@ -99,8 +102,9 @@ UTEST(conformal2, apply_forward_inverse)
         Vec2<f64> const b = xform.apply_inverse(xform.apply(a));
         ASSERT_TRUE(near_equal(a, b, eps));
 
-        Vec2<f64> const c = (xform.inverse_to_matrix() * (xform.to_matrix() * a.homogeneous()))
-                                .head<2>();
+        Mat3<f64> const mat = xform;
+        Mat3<f64> const inv_mat = xform.inverse();
+        Vec2<f64> const c = (inv_mat * (mat * a.homogeneous())).head<2>();
         ASSERT_TRUE(near_equal(a, c, eps));
     }
 }
@@ -119,12 +123,13 @@ UTEST(affine3, apply_forward_inverse)
         Vec3<f64> const b = xform.inverse().apply(xform.apply(a));
         ASSERT_TRUE(near_equal(a, b, eps));
 
-        Vec3<f64> const c = (xform.inverse_to_matrix() * (xform.to_matrix() * a.homogeneous()))
-                                .head<3>();
+        Mat4<f64> const mat = xform;
+        Mat4<f64> const inv_mat = xform.inverse();
+        Vec3<f64> const c = (inv_mat * (mat * a.homogeneous())).head<3>();
         ASSERT_TRUE(near_equal(a, c, eps));
 
-        Affine3<f64> const from_matrix = xform.to_matrix();
-        ASSERT_TRUE(from_matrix.to_matrix() == xform.to_matrix());
+        Affine3<f64> const from_mat = mat;
+        ASSERT_TRUE(from_mat.to_matrix() == xform.to_matrix());
     }
 }
 
@@ -142,12 +147,13 @@ UTEST(affine2, apply_forward_inverse)
         Vec2<f64> const b = xform.inverse().apply(xform.apply(a));
         ASSERT_TRUE(near_equal(a, b, eps));
 
-        Vec2<f64> const c = (xform.inverse_to_matrix() * (xform.to_matrix() * a.homogeneous()))
-                                .head<2>();
+        Mat3<f64> const mat = xform;
+        Mat3<f64> const inv_mat = xform.inverse();
+        Vec2<f64> const c = (inv_mat * (mat * a.homogeneous())).head<2>();
         ASSERT_TRUE(near_equal(a, c, eps));
 
-        Affine2<f64> const from_matrix = xform.to_matrix();
-        ASSERT_TRUE(from_matrix.to_matrix() == xform.to_matrix());
+        Affine2<f64> const from_mat = mat;
+        ASSERT_TRUE(from_mat.to_matrix() == xform.to_matrix());
     }
 }
 
